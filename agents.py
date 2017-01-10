@@ -72,7 +72,7 @@ A Character is a type of Agent.
 '''
 class Character( Agent ):
 	
-	# fields: name, totalHP, HP, rects for displaying HP bar
+	# fields: name, totalHP, HP, showHP, rects for displaying HP bar
 	
 	# creates a new Character at the given position with the given image and name
 	def __init__( self, pos, img, name, hp = 700 ):
@@ -81,6 +81,7 @@ class Character( Agent ):
 		self.name = name
 		self.totalHP = hp
 		self.hp = hp
+		self.showHP = False
 		
 		# rects for drawing health bar
 		self.hpbarWidth = 70
@@ -89,7 +90,7 @@ class Character( Agent ):
 		self.hpbarFG = pygame.Rect( ( pos[0] + 1, pos[1] + self.rect.height + 1 ),
 			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
 	
-	# change the position of the Enemy to the given coordinates
+	# change the position of the Character to the given coordinates
 	def setPosition( self, newx, newy ):
 		Agent.setPosition( self, newx, newy ) # call parent class method
 		
@@ -98,7 +99,7 @@ class Character( Agent ):
 		self.hpbarFG.topleft = newx + 1, newy + self.rect.height + 1
 		
 	
-	# change the position of the Enemy by the given amounts in the x and y directions
+	# change the position of the Character by the given amounts in the x and y directions
 	def move( self, dx, dy ):
 		Agent.move( self, dx, dy ) # call parent class method
 		
@@ -106,78 +107,14 @@ class Character( Agent ):
 		self.hpbarBG = self.hpbarBG.move( dx, dy )
 		self.hpbarFG = self.hpbarFG.move( dx, dy )
 	
-	# reduces the Enemy's HP by the given amount
+	# reduces the Character's HP by the given amount
 	def takeDamage( self, amt ):
 		self.hp -= amt
 		
 		if self.hp < 0: # if the damage would make the HP negative, just make it 0
 			self.hp = 0
 	
-	# attacks the given PlayableCharacter target and does the given amount of damage
-	def attack( self, target, dmg ):
-		target.takeDamage( dmg )
-	
-	# 
-	#def die( self ):
-	'''I'm not quite sure what this does'''
-		
-
-'''
-This class represents an Enemy that can attack players and take damage.
-An Enemy is a type of Character.
-'''
-class Enemy( Agent ):
-	
-	# fields: stats
-	
-	# creates a new Enemy at the given position with the given image, name,
-	# and starting amount of HP
-	# all stats are given a default value of 700
-	def __init__( self, pos, img, name, hp = 700 ):
-		Agent.__init__( self, pos, img ) # call parent constructor
-		
-		self.name = name
-		
-		# initialize stats
-		self.totalHP = hp
-		self.hp = hp
-		self.atk = 700
-		self.dfn = 700
-		self.spd = 700
-		self.acc = 700
-		
-		# rects for drawing health bar
-		self.hpbarWidth = 70
-		self.hpbarHeight = 10
-		self.hpbarBG = pygame.Rect( ( pos[0], pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
-		self.hpbarFG = pygame.Rect( ( pos[0] + 1, pos[1] + self.rect.height + 1 ),
-			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
-	
-	# change the position of the Enemy to the given coordinates
-	def setPosition( self, newx, newy ):
-		Agent.setPosition( self, newx, newy ) # call parent class method
-		
-		# adjust position of health bar
-		self.hpbarBG.topleft = newx, newy + self.rect.height
-		self.hpbarFG.topleft = newx + 1, newy + self.rect.height + 1
-		
-	
-	# change the position of the Enemy by the given amounts in the x and y directions
-	def move( self, dx, dy ):
-		Agent.move( self, dx, dy ) # call parent class method
-		
-		# adjust position of health bar
-		self.hpbarBG = self.hpbarBG.move( dx, dy )
-		self.hpbarFG = self.hpbarFG.move( dx, dy )
-	
-	# reduces the Enemy's HP by the given amount
-	def takeDamage( self, amt ):
-		self.hp -= amt
-		
-		if self.hp < 0: # if the damage would make the HP negative, just make it 0
-			self.hp = 0
-	
-	# attacks the given PlayableCharacter target and does the given amount of damage
+	# attacks the given Character target and does the given amount of damage
 	def attack( self, target, dmg ):
 		target.takeDamage( dmg )
 	
@@ -189,20 +126,48 @@ class Enemy( Agent ):
 	def draw( self, screen ):
 		screen.blit( self.image, self.rect )
 		
-		# draw health bar background (in black)
-		pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
+		# if HP bar should be displayed
+		if self.showHP:
+			# draw health bar background (in black)
+			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
 		
-		# draw health bar foreground based on current HP left (if there is any)
-		if self.hp != 0:
-			fraction = float( self.hp ) / self.totalHP
-			newWidth = int( ( self.hpbarWidth - 2 ) * self.hp / self.totalHP )
-			self.hpbarFG.width = newWidth
-			#pygame.draw.rect( screen, green, self.hpbarFG )
+			# draw health bar foreground based on current HP left (if there is any)
+			if self.hp != 0:
+				fraction = float( self.hp ) / self.totalHP
+				newWidth = int( ( self.hpbarWidth - 2 ) * self.hp / self.totalHP )
+				self.hpbarFG.width = newWidth
+				#pygame.draw.rect( screen, green, self.hpbarFG )
 			
-			if fraction > 0.3:
-				pygame.draw.rect( screen, green, self.hpbarFG )
-			else:
-				pygame.draw.rect( screen, red, self.hpbarFG )
+				if fraction > 0.3:
+					pygame.draw.rect( screen, green, self.hpbarFG )
+				else:
+					pygame.draw.rect( screen, red, self.hpbarFG )
+	
+	# returns a string reporting the name and current HP of the Character
+	def toString( self ):
+		s = 'a Character named ' + self.name + ' with ' + str( self.hp ) + ' HP'
+		return s
+
+'''
+This class represents an Enemy that can attack players and take damage.
+An Enemy is a type of Character.
+'''
+class Enemy( Character ):
+	
+	# fields: stats
+	
+	# creates a new Enemy at the given position with the given image, name,
+	# and starting amount of HP
+	# all stats are given a default value of 700
+	def __init__( self, pos, img, name, hp = 700 ):
+		Character.__init__( self, pos, img, name ) # call parent constructor
+		self.showHP = True # Enemies only appear in battle, so always show HP
+		
+		# initialize stats
+		self.atk = 700
+		self.dfn = 700
+		self.spd = 700
+		self.acc = 700
 	
 	# returns a string reporting the name and current HP of the Enemy
 	def toString( self ):
@@ -214,7 +179,7 @@ This class represents a character that the player can control throughout the gam
 Each character has stats, and can move around in exploring mode and attack in battle mode.
 A PlayableCharacter is a type of Character.
 '''
-class PlayableCharacter( Agent ):
+class PlayableCharacter( Character ):
 	
 	# fields: stats, growth rates, sprite images & status portrait, attacks
 	
@@ -223,14 +188,9 @@ class PlayableCharacter( Agent ):
 	# all images besides status portrait should be the same size
 	# all stats and growth rates are given a default value
 	def __init__( self, pos, imglist, name ):
-		Agent.__init__( self, pos, imglist[0] ) # call parent constructor
-		
-		self.name = name
-		self.level = 1
+		Character.__init__( self, pos, imglist[0], name ) # call parent constructor
 		
 		# initialize stats
-		self.totalHP = 700
-		self.hp = 700
 		self.atk = 700
 		self.dfn = 700
 		self.spd = 700
@@ -249,9 +209,11 @@ class PlayableCharacter( Agent ):
 		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
 		
 		# variables for current player state
-		self.inBattle = False # determines whether the player health bar is shown
+		self.level = 1
 		self.orientation = front
 		self.movement = [ 0, 0 ] # direction, distance left to go
+		
+		self.step = 10 # how far the character moves in one time-step, if it is currently moving
 		
 		# sprite images
 		self.imgFront = imglist[0]
@@ -259,29 +221,58 @@ class PlayableCharacter( Agent ):
 		self.imgLeft = imglist[2]
 		self.imgRight = imglist[3]
 		self.imgStatus = imglist[4]
-		
-		# rects for drawing health bar
-		self.hpbarWidth = 70
-		self.hpbarHeight = 10
-		self.hpbarBG = pygame.Rect( ( pos[0], pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
-		self.hpbarFG = pygame.Rect( ( pos[0] + 1, pos[1] + self.rect.height + 1 ),
-			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
 	
-	# change the position of the Enemy to the given coordinates
-	def setPosition( self, newx, newy ):
-		Agent.setPosition( self, newx, newy ) # call parent class method
-		
-		# adjust position of health bar
-		self.hpbarBG.topleft = newx, newy + self.rect.height
-		self.hpbarFG.topleft = newx + 1, newy + self.rect.height + 1
+	# send the character towards the left, updating orientation
+	# tile size should be a multiple of the player step size
+	def goLeft( self, tileSize ):
+		self.movement[0] = left
+		self.movement[1] = tileSize
+		self.orientation = left
 	
-	# change the position of the Enemy by the given amounts in the x and y directions
-	def move( self, dx, dy ):
-		Agent.move( self, dx, dy ) # call parent class method
-		
-		# adjust position of health bar
-		self.hpbarBG = self.hpbarBG.move( dx, dy )
-		self.hpbarFG = self.hpbarFG.move( dx, dy )		
+	# send the character towards the right
+	# tile size should be a multiple of the player step size
+	def goRight( self, tileSize ):
+		self.movement[0] = right
+		self.movement[1] = tileSize
+		self.orientation = right
+	
+	# send the character towards the front
+	# tile size should be a multiple of the player step size
+	def goForward( self, tileSize ):
+		self.movement[0] = front
+		self.movement[1] = tileSize
+		self.orientation = front
+	
+	# send the character towards the back
+	# tile size should be a multiple of the player step size
+	def goBackward( self, tileSize ):
+		self.movement[0] = back
+		self.movement[1] = tileSize
+		self.orientation = back
+	
+	# updates the character's position to move along its current trajectory
+	def update( self ):
+		# if the character has a movement to finish
+		if self.movement[1] > 0:
+			
+			dx = 0
+			dy = 0
+			
+			if self.movement[0] == front:
+				dy = self.step
+			elif self.movement[0] == back:
+				dy = - self.step
+			elif self.movement[0] == left:
+				dx = - self.step
+			elif self.movement[0] == right:
+				dx = self.step
+			
+			self.move( dx, dy )
+			
+			self.movement[1] -= self.step
+	
+# 		else:
+# 			self.movement[1] = 0
 	
 	# setter for total HP
 	def setTotalHP( self, h ):
@@ -369,31 +360,17 @@ class PlayableCharacter( Agent ):
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view
 	def enterBattle( self ):
-		self.inBattle = True
+		self.showHP = True
 		self.orientation = left
 		
-		self.hp = self.totalHP
+		self.hp = self.totalHP # reset to full HP
+		self.movement = [ 0, 0 ] # clear out stored movement
 		
 		'''FILL IN CODE HERE FOR CHOOSING AVAILABLE ATTACKS AFTER CODING DEBUGGINGMETHODS'''
 	
-	# reduces the character's HP by the given amount
-	def takeDamage( self, amt ):
-		self.hp -= amt
-		
-		if self.hp < 0: # if the damage would make the HP negative, just make it 0
-			self.hp = 0
-	
-	# attacks the given Enemy and does the given amount of damage
-	def attack( self, target, dmg ):
-		target.takeDamage( dmg )
-	
-	# die
-	# def die()
-	'''I'm not quite sure what this does'''
-	
 	# takes the character out of battle mode
 	def leaveBattle( self ):
-		self.inBattle = False
+		self.showHP = False
 	
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar
@@ -408,18 +385,7 @@ class PlayableCharacter( Agent ):
 		elif self.orientation == right:
 			self.image = self.imgRight
 		
-		screen.blit( self.image, self.rect )
-		
-		# only display health bar if player is in battle
-		if self.inBattle:
-			# draw health bar background (in black)
-			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
-		
-			# draw health bar foreground based on current HP left (if there is any)
-			if self.hp > 0:
-				newWidth = int( ( self.hpbarWidth - 2 ) * self.hp / self.totalHP )
-				self.hpbarFG.width = newWidth
-				pygame.draw.rect( screen, green, self.hpbarFG )
+		Character.draw( self, screen )
 	
 	# returns a string reporting all attacks the character has
 	def listAttacks( self ):
@@ -488,8 +454,8 @@ def main():
 	hunterB = pygame.image.load( "hunterB.png" ).convert_alpha()
 	
 	# section of code to test Agent class
-	'''
 	
+	'''
 	agnes = Agent( pos, wump )
 	print agnes.toString()
 	print 'agnes is at', agnes.getPosition()
@@ -506,11 +472,31 @@ def main():
 	agnes.move( 100, -100 )
 	agnes.draw( screen )
 	pygame.display.update()
+	'''
 	
+	# section of code to test Character class
+	'''
+	edna = Character( pos, wump, 'edna' )
+	print edna.toString()
+	print 'edna is at', edna.getPosition()
+	edna.setPosition( 100, 200 )
+	print 'edna moves to', edna.getPosition()
+	
+	screen.fill( (255, 255, 255) )
+	edna.draw( screen )
+	pygame.display.update()
+	
+	raw_input( 'give damage? type anything\n' )
+	
+	edna.takeDamage( 500 )
+	print 'after an attack, edna is', edna.toString()
+	
+	screen.fill( (255, 255, 255) )
+	edna.draw( screen )
+	pygame.display.update()
 	'''
 	
 	# section of code to test Enemy class
-	
 	'''
 	edna = Enemy( pos, wump, 'edna' )
 	print edna.toString()
@@ -533,12 +519,14 @@ def main():
 	'''
 	
 	# section of code to test PlayableCharacter class
+	
 	edna = Enemy( pos, wump, 'edna' )
 	edna.setPosition( 100, 200 )
 	
 	# make image list
 	imglist = [ hunterF, hunterB, hunterL, hunterR, hunterL ]
 	priya = PlayableCharacter( pos, imglist, 'priya' )
+	'''
 	print priya.toString()
 	print 'initial', priya.reportStats()
 	print 'initial', priya.reportGrowthRates()
@@ -566,20 +554,20 @@ def main():
 	print 'becomes', priya.reportGrowthRates()
 	
 	print '\nmodifying growth rates to step up by 10s'
-	priya.setAllGR( ( 10, 20, 30, 40, 50, 60 ) )
+	priya.setAllGR( ( 10, 20, 30, 40, 50 ) )
 	print 'becomes', priya.reportGrowthRates()
 	
 	priya.levelUp()
 	print '\nafter leveling up,', priya.reportStats()
-	
+	'''
 	# testing graphics for PlayableCharacter
 	
 	priya.setPosition( 400, 200 )
 	
-# 	screen.fill( (255, 255, 255) )
-# 	edna.draw( screen )
-# 	priya.draw( screen )
-# 	pygame.display.update()
+	screen.fill( (255, 255, 255) )
+	edna.draw( screen )
+	priya.draw( screen )
+	pygame.display.update()
 	
 	# # # TEST ADDATTACK AFTER WRITING DEBUGGINGMETHOD
 	
@@ -588,10 +576,21 @@ def main():
 	print 'enter main loop'
 	
 	battleMode = False
+	tileSize = 50
 	
 	while 1:
-		for event in pygame.event.get():
+		for event in pygame.event.get(): # does not account for holding down keys
 			if event.type == pygame.KEYDOWN:
+				if not battleMode:
+					if event.key == pygame.K_UP:
+						priya.goBackward( tileSize )
+					elif event.key == pygame.K_DOWN:
+						priya.goForward( tileSize )
+					elif event.key == pygame.K_LEFT:
+						priya.goLeft( tileSize )
+					elif event.key == pygame.K_RIGHT:
+						priya.goRight( tileSize )
+				
 				if event.key == pygame.K_b:
 					if battleMode:
 						battleMode = False
@@ -602,19 +601,28 @@ def main():
 				elif event.key == pygame.K_a:
 					if battleMode:
 						priya.attack( edna, 50 )
-						print 'attack! edna health', edna.hp
-						print 'fraction', ( float( edna.hp ) / edna.totalHP )
+						#print 'attack! edna health', edna.hp
 				elif event.key == pygame.K_z:
 					if battleMode:
 						edna.attack( priya, 50 )
-						print 'attack! priya health', priya.hp
+						#print 'attack! priya health', priya.hp
 			if event.type == pygame.QUIT:
 				sys.exit()
+		
+		priya.update()
 		
 		screen.fill( (255, 255, 255) )
 		edna.draw( screen )
 		priya.draw( screen )
 		pygame.display.update()
+		
+		
+	
+	
+# 	while 1:
+# 		for event in pygame.event.get():
+# 			if event.type == pygame.QUIT:
+# 				sys.exit()
 
 if __name__ == '__main__':
 	main()
