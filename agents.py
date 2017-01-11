@@ -3,16 +3,19 @@
 # Debug Davis (temporary title)
 
 # agents.py
-# This file defines the Agent class and its child classes.
-# The Agent class extends the pygame Sprite class, so that it can be handled in Groups.
-# The position of an Agent is the upper left corner of its image/rect.
+# This file defines the Thing class and its child classes.
+# The Thing class extends the pygame Sprite class, so that it can be handled in Groups.
+# The position of an Thing is the upper left corner of its image/rect.
 # Playable Characters increase their stats with every level-up.
+
+# to run test code for the classes in this file, call like this:
+# python agents.py
 
 import pygame
 import sys
 
 # some useful variables for the rest of this file
-back, front, left, right = range( 4 )
+back, front, left, right, none = range( 5 )
 green = ( 150, 255, 150 )
 red = ( 255, 150, 150 )
 
@@ -20,12 +23,14 @@ red = ( 255, 150, 150 )
 '''
 This class represents any entity in the game that has a position on the screen,
 including both moving characters and stationary objects.
+A Thing object that is not an instance of a child class represents some physical
+object in the game, such as a table or wall.
 '''
-class Agent( pygame.sprite.Sprite ):
+class Thing( pygame.sprite.Sprite ):
 	
 	# fields: position, image, rect
 	
-	# creates a new Agent at the given position
+	# creates a new Thing at the given position
 	def __init__( self, pos, img ):
 		pygame.sprite.Sprite.__init__( self ) # call parent constructor
 		
@@ -34,12 +39,24 @@ class Agent( pygame.sprite.Sprite ):
 		
 		self.rect = self.image.get_rect()
 		self.rect.topleft = pos[0], pos[1]
+		
+		# fields for detecting collision
+		self.rightEdge = pos[0] + self.rect.width
+		self.bottomEdge = pos[1] + self.rect.height
 	
 	# return a clone of the position list
 	def getPosition( self ):
 		return self.pos[:]
 	
-	# change the position of the Agent to the given coordinates
+	# returns the Rect representing the area of this Thing
+	def getRect( self ):
+		return self.rect
+	
+	# returns a tuple: top edge y, left edge x, bottom edge y, right edge x
+	def getBounds( self ):
+		return ( self.pos[1], self.pos[0], self.bottomEdge, self.rightEdge )
+	
+	# change the position of the Thing to the given coordinates
 	def setPosition( self, newx, newy ):
 		# change position of image/rect
 		self.rect.topleft = newx, newy
@@ -47,36 +64,44 @@ class Agent( pygame.sprite.Sprite ):
 		# change pos field
 		self.pos[0] = newx
 		self.pos[1] = newy
+		
+		# change fields for detecting collision
+		self.rightEdge = newx + self.rect.width
+		self.bottomEdge = newy + self.rect.height
 	
-	# change the position of the Agent by the given amounts in the x and y directions
+	# change the position of the Thing by the given amounts in the x and y directions
 	def move( self, dx, dy ):
 		self.pos[0] += dx
 		self.pos[1] += dy
 		
 		self.rect = self.rect.move( dx, dy )
+		
+		# change fields for detecting collision
+		self.rightEdge += dx
+		self.bottomEdge += dy
 	
-	# draws the Agent at its current position on the given Surface
+	# draws the Thing at its current position on the given Surface
 	def draw( self, screen ):
 		screen.blit( self.image, self.rect )
 	
-	# returns a string reporting the position and dimensions of the Agent
+	# returns a string reporting the position and dimensions of the Thing
 	def toString( self ):
-		s = 'an Agent at (' + str( self.pos[0] ) + ', ' + str( self.pos[1] ) + '), of width ' \
+		s = 'an Thing at (' + str( self.pos[0] ) + ', ' + str( self.pos[1] ) + '), of width ' \
 			+ str( self.rect.width ) + ' and height ' + str( self.rect.height )
 		return s
 
 '''
 This class represents a general Character in the game,
 which can attack another Character and take damage.
-A Character is a type of Agent.
+A Character is a type of Thing.
 '''
-class Character( Agent ):
+class Character( Thing ):
 	
 	# fields: name, totalHP, HP, showHP, rects for displaying HP bar
 	
 	# creates a new Character at the given position with the given image and name
 	def __init__( self, pos, img, name, hp = 700 ):
-		Agent.__init__( self, pos, img ) # call parent constructor
+		Thing.__init__( self, pos, img ) # call parent constructor
 		
 		self.name = name
 		self.totalHP = hp
@@ -92,7 +117,7 @@ class Character( Agent ):
 	
 	# change the position of the Character to the given coordinates
 	def setPosition( self, newx, newy ):
-		Agent.setPosition( self, newx, newy ) # call parent class method
+		Thing.setPosition( self, newx, newy ) # call parent class method
 		
 		# adjust position of health bar
 		self.hpbarBG.topleft = newx, newy + self.rect.height
@@ -101,7 +126,7 @@ class Character( Agent ):
 	
 	# change the position of the Character by the given amounts in the x and y directions
 	def move( self, dx, dy ):
-		Agent.move( self, dx, dy ) # call parent class method
+		Thing.move( self, dx, dy ) # call parent class method
 		
 		# adjust position of health bar
 		self.hpbarBG = self.hpbarBG.move( dx, dy )
@@ -211,9 +236,11 @@ class PlayableCharacter( Character ):
 		# variables for current player state
 		self.level = 1
 		self.orientation = front
-		self.movement = [ 0, 0 ] # direction, distance left to go
 		
+		# variables for player movement
+		self.movement = [ 0, 0 ] # current stored movement to follow: direction, distance left to go
 		self.step = 10 # how far the character moves in one time-step, if it is currently moving
+		self.ghost = self.rect.copy() # represents the position of the character one time-step later
 		
 		# sprite images
 		self.imgFront = imglist[0]
@@ -222,12 +249,23 @@ class PlayableCharacter( Character ):
 		self.imgRight = imglist[3]
 		self.imgStatus = imglist[4]
 	
+	# change the position of the PlayableCharacter to the given coordinates
+	def setPosition( self, newx, newy ):
+		Character.setPosition( self, newx, newy ) # call parent method
+		
+		self.ghost = self.rect.copy()
+	
+	# change the position of the PlayableCharacter by the given amounts in the x and y directions
+	def move( self, dx, dy ):
+		Character.move( self, dx, dy ) # call parent method
+	
 	# send the character towards the left, updating orientation
 	# tile size should be a multiple of the player step size
 	def goLeft( self, tileSize ):
 		self.movement[0] = left
 		self.movement[1] = tileSize
 		self.orientation = left
+		self.ghost = self.ghost.move( -self.step, 0 )
 	
 	# send the character towards the right
 	# tile size should be a multiple of the player step size
@@ -235,6 +273,7 @@ class PlayableCharacter( Character ):
 		self.movement[0] = right
 		self.movement[1] = tileSize
 		self.orientation = right
+		self.ghost = self.ghost.move( self.step, 0 )
 	
 	# send the character towards the front
 	# tile size should be a multiple of the player step size
@@ -242,6 +281,7 @@ class PlayableCharacter( Character ):
 		self.movement[0] = front
 		self.movement[1] = tileSize
 		self.orientation = front
+		self.ghost = self.ghost.move( 0, self.step )
 	
 	# send the character towards the back
 	# tile size should be a multiple of the player step size
@@ -249,8 +289,10 @@ class PlayableCharacter( Character ):
 		self.movement[0] = back
 		self.movement[1] = tileSize
 		self.orientation = back
+		self.ghost = self.ghost.move( 0, -self.step )
 	
 	# updates the character's position to move along its current trajectory
+	# returns whether the character moved
 	def update( self ):
 		# if the character has a movement to finish
 		if self.movement[1] > 0:
@@ -270,9 +312,45 @@ class PlayableCharacter( Character ):
 			self.move( dx, dy )
 			
 			self.movement[1] -= self.step
+			
+			# adjust ghost if there's more movement
+			if self.movement[1] > 0:
+				if self.movement[0] == front:
+					self.ghost = self.rect.move( 0, self.step )
+				elif self.movement[0] == back:
+					self.ghost = self.rect.move( 0, -self.step )
+				elif self.movement[0] == left:
+					self.ghost = self.rect.move( -self.step, 0 )
+				elif self.movement[0] == right:
+					self.ghost = self.rect.move( self.step, 0 )
+			
+			return True
+		else:
+			return False
 	
-# 		else:
-# 			self.movement[1] = 0
+	# determines whether this character is about to collide with the given Thing,
+	# based on the character's movement
+	# if they will collide, the character's movement is halted
+	def collide( self, other ):
+		# if the character is about to move
+		if self.movement[1] > 0:
+			if self.ghost.colliderect( other.getRect() ):
+				if self.movement[0] == front:
+					self.movement[1] = 0
+					self.ghost = self.rect.copy()
+					print 'collided with the top!'
+				elif self.movement[0] == back:
+					self.movement[1] = 0
+					self.ghost = self.rect.copy()
+					print 'collided with the bottom!'
+				elif self.movement[0] == left:
+					self.movement[1] = 0
+					self.ghost = self.rect.copy()
+					print 'collided with the right!'
+				elif self.movement[0] == right:
+					self.movement[1] = 0
+					self.ghost = self.rect.copy()
+					print 'collided with the left!'
 	
 	# setter for total HP
 	def setTotalHP( self, h ):
@@ -385,6 +463,8 @@ class PlayableCharacter( Character ):
 		elif self.orientation == right:
 			self.image = self.imgRight
 		
+		# pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
+		
 		Character.draw( self, screen )
 	
 	# returns a string reporting all attacks the character has
@@ -453,10 +533,10 @@ def main():
 	hunterF = pygame.image.load( "hunterF.png" ).convert_alpha()
 	hunterB = pygame.image.load( "hunterB.png" ).convert_alpha()
 	
-	# section of code to test Agent class
+	# section of code to test Thing class
 	
 	'''
-	agnes = Agent( pos, wump )
+	agnes = Thing( pos, wump )
 	print agnes.toString()
 	print 'agnes is at', agnes.getPosition()
 	agnes.setPosition( 300, 200 )
@@ -520,12 +600,15 @@ def main():
 	
 	# section of code to test PlayableCharacter class
 	
-	edna = Enemy( pos, wump, 'edna' )
+	tempRect = pygame.Surface( ( 200, 200 ) )
+	tempRect.fill( ( 255, 200, 255 ) )
+	edna = Enemy( pos, tempRect, 'edna' )
 	edna.setPosition( 100, 200 )
 	
 	# make image list
 	imglist = [ hunterF, hunterB, hunterL, hunterR, hunterL ]
 	priya = PlayableCharacter( pos, imglist, 'priya' )
+	print 'priya bounds', priya.getBounds()
 	'''
 	print priya.toString()
 	print 'initial', priya.reportStats()
@@ -562,7 +645,11 @@ def main():
 	'''
 	# testing graphics for PlayableCharacter
 	
+	priya.move( 20, 40 )
+	print 'new priya bounds', priya.getBounds()
+	
 	priya.setPosition( 400, 200 )
+	print 'new priya bounds', priya.getBounds()
 	
 	screen.fill( (255, 255, 255) )
 	edna.draw( screen )
@@ -609,6 +696,7 @@ def main():
 			if event.type == pygame.QUIT:
 				sys.exit()
 		
+		priya.collide( edna ) # test for collision with edna
 		priya.update()
 		
 		screen.fill( (255, 255, 255) )
