@@ -115,6 +115,10 @@ class Character( Thing ):
 		self.hpbarFG = pygame.Rect( ( pos[0] + 1, pos[1] + self.rect.height + 1 ),
 			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
 	
+	# returns whether this Character has died, i.e. has 0 HP
+	def isDead( self ):
+		return self.hp == 0
+	
 	# change the position of the Character to the given coordinates
 	def setPosition( self, newx, newy ):
 		Thing.setPosition( self, newx, newy ) # call parent class method
@@ -212,8 +216,11 @@ class PlayableCharacter( Character ):
 	# images should be given in the following order: front, back, left, right, status
 	# all images besides status portrait should be the same size
 	# all stats and growth rates are given a default value
-	def __init__( self, pos, imglist, name ):
+	def __init__( self, pos, battlePos, imglist, name ):
 		Character.__init__( self, pos, imglist[0], name ) # call parent constructor
+		
+		self.battlePos = [ battlePos[0], battlePos[1] ] # separate from the exploring pos, which is self.explorePos
+		self.explorePos = [ pos[0], pos[1] ] # stores last exploring position when character goes into battle mode
 		
 		# initialize stats
 		self.atk = 700
@@ -331,6 +338,7 @@ class PlayableCharacter( Character ):
 	# determines whether this character is about to collide with the given Thing,
 	# based on the character's movement
 	# if they will collide, the character's movement is halted
+	# returns whether a collision was detected
 	def collide( self, other ):
 		# if the character is about to move
 		if self.movement[1] > 0:
@@ -339,18 +347,24 @@ class PlayableCharacter( Character ):
 					self.movement[1] = 0
 					self.ghost = self.rect.copy()
 					# print 'collided with the top!'
+					return True
 				elif self.movement[0] == back:
 					self.movement[1] = 0
 					self.ghost = self.rect.copy()
 					# print 'collided with the bottom!'
+					return True
 				elif self.movement[0] == left:
 					self.movement[1] = 0
 					self.ghost = self.rect.copy()
 					# print 'collided with the right!'
+					return True
 				elif self.movement[0] == right:
 					self.movement[1] = 0
 					self.ghost = self.rect.copy()
 					# print 'collided with the left!'
+					return True
+			else:
+				return False
 	
 	# setter for total HP
 	def setTotalHP( self, h ):
@@ -441,6 +455,10 @@ class PlayableCharacter( Character ):
 		self.showHP = True
 		self.orientation = left
 		
+		# store exploring position, switch to battle position
+		self.explorePos= self.pos[:]
+		self.setPosition( self.battlePos[0], self.battlePos[1] )
+		
 		self.hp = self.totalHP # reset to full HP
 		self.movement = [ 0, 0 ] # clear out stored movement
 		
@@ -449,6 +467,7 @@ class PlayableCharacter( Character ):
 	# takes the character out of battle mode
 	def leaveBattle( self ):
 		self.showHP = False
+		self.setPosition( self.explorePos[0], self.explorePos[1] )
 	
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar

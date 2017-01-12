@@ -35,9 +35,15 @@ class Stage:
 		self.contents.add( thing )
 	
 	# halts the given Character's movement if they are about to collide with anything in this Stage
+	# returns whether a collision was detected
 	def collide( self, chara ):
+		collided = False
+		
 		for thing in self.contents:
-			chara.collide( thing )
+			if chara.collide( thing ):
+				collided = True
+		
+		return collided
 	
 	# draws the Stage and its contents on the given Surface
 	def draw( self, screen ):
@@ -84,6 +90,10 @@ class Game:
 # loadStage( stage ): load first background, initial player position
 # spawnEnemy
 
+# fills screen with the given battle background
+def loadBattleBG( screen, bg ):
+	screen.blit( bg, ( 0, 0 ) )
+
 def test():
 	# ---------copied from tutorial for initializing pyGame, making a screen
 	
@@ -105,30 +115,26 @@ def test():
 	screen = pygame.display.set_mode( screenSize )
 	scale = float( screenSize[0] ) / 4050
 	
-	pygame.display.set_caption( "shooosh:doof" )
+	pygame.display.set_caption( "debugDavis()" )
 	
 	print 'init screen'
 	
 	# ---------
 	
 	# load images
-	wump = pygame.image.load( "wumpus.png" ).convert_alpha() # has to be called after pygame is initialized
 	hunterL = pygame.image.load( "melStandLeft.png" ).convert_alpha()
 	hunterR = pygame.image.load( "melStandRight.png" ).convert_alpha()
 	hunterF = pygame.image.load( "melStandFront.png" ).convert_alpha()
 	hunterB = pygame.image.load( "melStandBack.png" ).convert_alpha()
-	#tableOrig = pygame.image.load( "table.png" ).convert_alpha()
-	#table = pygame.transform.scale( tableOrig, ( 205, 180 ) )
-	#octopusOrig = pygame.image.load( "octopus.png" ).convert_alpha()
-	#octopus = pygame.transform.scale( octopusOrig, ( 151, 180 ) )
+	bug1 = pygame.image.load( "bug1.png" ).convert_alpha()
 	bgOrig = pygame.image.load( "Davis Robotics Lab.png" ).convert_alpha()
-	#bgOrig = pygame.image.load( "orange6.png" ).convert_alpha()
 	bg = pygame.transform.scale( bgOrig, screenSize )
 	
 	# initialize player
 	initpos = ( 300, 400 ) # hopefully the middle of the bottom
+	battlePos = ( 600, 100 )
 	imglist = [ hunterF, hunterB, hunterL, hunterR, hunterL ]
-	priya = agents.PlayableCharacter( initpos, imglist, 'priya' )
+	player = agents.PlayableCharacter( initpos, battlePos, imglist, 'player' )
 	
 	# initialize stage
 	stage = Stage( 1, bg )
@@ -205,70 +211,123 @@ def test():
 	rightCouch = agents.Thing( rCouchPos, rCouch )
 	stage.addThing( rightCouch )
 	
+	battleBG = pygame.Surface( screenSize )
+	battleBG.fill( ( 100, 100, 120 ) )
+	
+	# ----------not for stage, but for the game as a whole
+	
+	# create a font
+	afont = pygame.font.SysFont( "Helvetica", 44, bold=True )
+	
+	# render a surface with some text
+	text = none
+	win = afont.render( "YOU WIN", True, ( 255, 255, 255 ) )
+	lose = afont.render( "YOU LOSE", True, ( 255, 255, 255 ) )
+	
 	# ----------main loop for window
 	
 	print 'enter main loop'
 	
 	stage.draw( screen )
-	priya.draw( screen )
+	player.draw( screen )
 	pygame.display.update()
 	
-	battleMode = False
 	tileSize = 50
+	#enemies = pygame.sprite.RenderUpdates() # subclass of Group that allows for more efficient rendering
+	edna = None
+	
+	battleMode = False
+	moved = False
+	endGame = False
 	
 	refresh = []
 	
 	while 1:
 		
+		if endGame:
+			break
+		
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN: # for initial key presses
 				if not battleMode:
 					if event.key == pygame.K_UP:
-						priya.goBackward( tileSize )
+						player.goBackward( tileSize )
+						moved = True
 					elif event.key == pygame.K_DOWN:
-						priya.goForward( tileSize )
+						player.goForward( tileSize )
+						moved = True
 					elif event.key == pygame.K_LEFT:
-						priya.goLeft( tileSize )
+						player.goLeft( tileSize )
+						moved = True
 					elif event.key == pygame.K_RIGHT:
-						priya.goRight( tileSize )
-				
-# 				if event.key == pygame.K_b:
-# 					if battleMode:
-# 						battleMode = False
-# 						priya.leaveBattle()
-# 					else:
-# 						battleMode = True
-# 						priya.enterBattle()
-# 				elif event.key == pygame.K_a:
-# 					if battleMode:
-# 						priya.attack( edna, 50 )
-# 				elif event.key == pygame.K_z:
-# 					if battleMode:
-# 						edna.attack( priya, 50 )
+						player.goRight( tileSize )
+						moved = True
+					elif event.key == pygame.K_b:
+						battleMode = True
+						loadBattleBG( screen, battleBG )
+						player.enterBattle()
+						#enemies.add( agents.Enemy( ( 400, 400 ), bug1, 'edna' ) )
+						edna = agents.Enemy( ( 100, 200 ), bug1, 'edna' )
+						print 'enter battle'
+				else:
+					if event.key == pygame.K_b:
+						battleMode = False
+						stage.fillBG( screen, refresh )
+						player.leaveBattle()
+						#refresh.append( player.getRect() )
+						#enemies.empty()
+						edna = None
+						print 'leave battle'
+					elif event.key == pygame.K_a:
+						player.attack( edna, 50 )
+						print 'attack edna!'
+						
+						if edna.isDead():
+							print 'you win!'
+							text = win
+							endGame = True
+					elif event.key == pygame.K_z:
+						edna.attack( player, 50 )
+						print 'attack player!'
+						
+						if player.isDead():
+							print 'you lose!'
+							text = lose
+							endGame = True
 			if event.type == pygame.QUIT:
 				sys.exit()
 		
-		# for when the key is held down
 		if not battleMode:
+			# for when the key is held down
 			keysdown = pygame.key.get_pressed()
 			if keysdown[pygame.K_UP]:
-				priya.goBackward( tileSize )
+				player.goBackward( tileSize )
 			if keysdown[pygame.K_DOWN]:
-				priya.goForward( tileSize )
+				player.goForward( tileSize )
 			if keysdown[pygame.K_LEFT]:
-				priya.goLeft( tileSize )
+				player.goLeft( tileSize )
 			if keysdown[pygame.K_RIGHT]:
-				priya.goRight( tileSize )
+				player.goRight( tileSize )
 		
-		stage.collide( priya ) # stop movement if it leads to collision
+			stage.collide( player ) # stop movement if it leads to collision
+				#print 'collided!'
+			
+			tempRect = player.getRect()
+			player.update()
+			if moved: # if player moved, update those parts of the screen
+				#print 'moving player'
+				stage.fillBG( screen, refresh, tempRect )
+				#print 'erasing rect:', tempRect
+				refresh.append( player.getRect() )
 		
-		tempRect = priya.getRect()
-		if priya.update(): # if priya moved, update those parts of the screen
-			stage.fillBG( screen, refresh, tempRect )
-			# print 'erasing rect:', tempRect
-			refresh.append( priya.getRect() )
+		if edna != None:
+			edna.draw( screen )
+			refresh.append( edna.getRect() )
+		player.draw( screen )
 		
-		priya.draw( screen )
+		if endGame:
+			screen.blit( text, ( screenSize[0] / 3, screenSize[1] / 2 ) )
+		
 		pygame.display.update( refresh )
 		
 		# clear out the refresh rects
@@ -277,6 +336,13 @@ def test():
 		# throttle the game speed to 30fps
 		gameClock.tick(30)
 	
+	print 'end game'
+	
+	# after game end, keep screen until user closes window
+	while 2:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				sys.exit()
 	
 if __name__ == '__main__':
 	test()
