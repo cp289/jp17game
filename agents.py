@@ -247,7 +247,11 @@ class PlayableCharacter( Character ):
 		# variables for player movement
 		self.movement = [ 0, 0 ] # current stored movement to follow: direction, distance left to go
 		self.step = 10 # how far the character moves in one time-step, if it is currently moving
-		self.ghost = self.rect.copy() # represents the position of the character one time-step later
+		
+		# variables for ghost (collision-handling)
+		self.ghostSide = self.rect.height / 3 # represents the length of one side of the ghost box
+		self.ghost = pygame.Rect( ( 0, 0 ), ( self.rect.width, self.ghostSide ) ) # represents the position of the character one time-step later
+		self.resetGhost()
 		
 		# sprite images
 		self.imgFront = imglist[0]
@@ -256,11 +260,17 @@ class PlayableCharacter( Character ):
 		self.imgRight = imglist[3]
 		self.imgStatus = imglist[4]
 	
+	# puts the ghost directly on top of the character's current position
+	def resetGhost( self ):
+		newx = self.pos[0]
+		newy = self.pos[1] + 2 * self.ghostSide
+		self.ghost.topleft = newx, newy
+	
 	# change the position of the PlayableCharacter to the given coordinates
 	def setPosition( self, newx, newy ):
 		Character.setPosition( self, newx, newy ) # call parent method
 		
-		self.ghost = self.rect.copy()
+		self.resetGhost()
 	
 	# change the position of the PlayableCharacter by the given amounts in the x and y directions
 	def move( self, dx, dy ):
@@ -322,14 +332,15 @@ class PlayableCharacter( Character ):
 			
 			# adjust ghost if there's more movement
 			if self.movement[1] > 0:
+				self.resetGhost()
 				if self.movement[0] == front:
-					self.ghost = self.rect.move( 0, self.step )
+					self.ghost = self.ghost.move( 0, self.step )
 				elif self.movement[0] == back:
-					self.ghost = self.rect.move( 0, -self.step )
+					self.ghost = self.ghost.move( 0, -self.step )
 				elif self.movement[0] == left:
-					self.ghost = self.rect.move( -self.step, 0 )
+					self.ghost = self.ghost.move( -self.step, 0 )
 				elif self.movement[0] == right:
-					self.ghost = self.rect.move( self.step, 0 )
+					self.ghost = self.ghost.move( self.step, 0 )
 			
 			return True
 		else:
@@ -345,22 +356,22 @@ class PlayableCharacter( Character ):
 			if self.ghost.colliderect( other.getRect() ):
 				if self.movement[0] == front:
 					self.movement[1] = 0
-					self.ghost = self.rect.copy()
+					self.resetGhost()
 					# print 'collided with the top!'
 					return True
 				elif self.movement[0] == back:
 					self.movement[1] = 0
-					self.ghost = self.rect.copy()
+					self.resetGhost()
 					# print 'collided with the bottom!'
 					return True
 				elif self.movement[0] == left:
 					self.movement[1] = 0
-					self.ghost = self.rect.copy()
+					self.resetGhost()
 					# print 'collided with the right!'
 					return True
 				elif self.movement[0] == right:
 					self.movement[1] = 0
-					self.ghost = self.rect.copy()
+					self.resetGhost()
 					# print 'collided with the left!'
 					return True
 			else:
@@ -482,7 +493,7 @@ class PlayableCharacter( Character ):
 		elif self.orientation == right:
 			self.image = self.imgRight
 		
-		# pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
+		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
 		Character.draw( self, screen )
 	
@@ -626,7 +637,7 @@ def main():
 	
 	# make image list
 	imglist = [ hunterF, hunterB, hunterL, hunterR, hunterL ]
-	priya = PlayableCharacter( pos, imglist, 'priya' )
+	priya = PlayableCharacter( pos, ( 0, 0 ), imglist, 'priya' )
 	print 'priya bounds', priya.getBounds()
 	'''
 	print priya.toString()
