@@ -338,19 +338,19 @@ class PlayableCharacter( Character ):
 				if self.movement[0] == front:
 					self.movement[1] = 0
 					self.ghost = self.rect.copy()
-					print 'collided with the top!'
+					# print 'collided with the top!'
 				elif self.movement[0] == back:
 					self.movement[1] = 0
 					self.ghost = self.rect.copy()
-					print 'collided with the bottom!'
+					# print 'collided with the bottom!'
 				elif self.movement[0] == left:
 					self.movement[1] = 0
 					self.ghost = self.rect.copy()
-					print 'collided with the right!'
+					# print 'collided with the right!'
 				elif self.movement[0] == right:
 					self.movement[1] = 0
 					self.ghost = self.rect.copy()
-					print 'collided with the left!'
+					# print 'collided with the left!'
 	
 	# setter for total HP
 	def setTotalHP( self, h ):
