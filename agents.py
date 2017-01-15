@@ -107,6 +107,7 @@ class Character( Thing ):
 		self.totalHP = hp
 		self.hp = hp
 		self.showHP = False
+		self.level = 1
 		
 		# rects for drawing health bar
 		self.hpbarWidth = 70
@@ -188,9 +189,10 @@ class Enemy( Character ):
 	# creates a new Enemy at the given position with the given image, name,
 	# and starting amount of HP
 	# all stats are given a default value of 700
-	def __init__( self, pos, img, name, hp = 700 ):
+	def __init__( self, pos, img, name, level, hp = 700 ):
 		Character.__init__( self, pos, img, name ) # call parent constructor
 		self.showHP = True # Enemies only appear in battle, so always show HP
+		self.level = level
 		
 		# initialize stats
 		self.atk = 700
@@ -228,6 +230,7 @@ class PlayableCharacter( Character ):
 		self.spd = 700
 		self.acc = 700
 		self.time = 5
+		self.xp = 0
 		
 		# initialize growth rates
 		self.hpGR = 100
@@ -241,7 +244,6 @@ class PlayableCharacter( Character ):
 		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
 		
 		# variables for current player state
-		self.level = 1
 		self.orientation = front
 		
 		# variables for player movement
@@ -405,6 +407,10 @@ class PlayableCharacter( Character ):
 	def setTime( self, t ):
 		self.time = t
 	
+	# increases the character's XP by the given amount
+	def increaseXP( self, amt ):
+		self.xp += amt
+	
 	# sets all stats except for current health points (assumed to be full)
 	# passed in as a list in the following order: total HP, ATK, DFN, SPD, ACC, time
 	def setAllStats( self, list ):
@@ -515,6 +521,7 @@ class PlayableCharacter( Character ):
 		s += '\n  SPD (speed) ' + str( self.spd )
 		s += '\n  ACC (accuracy) ' + str( self.acc )
 		s += '\n  time ' + str( self.time )
+		s += '\n XP ' + str( self.xp )
 		return s
 	
 	def reportGrowthRates( self ):
