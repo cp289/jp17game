@@ -388,10 +388,10 @@ class Game:
 					print 'leave stat screen'
 					
 					if self.inBattle: # redraw battle screen
-						self.fillBattleBG( self.statScreenRect )
-						self.refresh.append( self.statScreenRect )
+						self.fillBattleBG( self.statBGRect )
+						self.refresh.append( self.statBGRect )
 					else: # redraw stage
-						self.stage.fillBG( self.screen, self.refresh, self.statScreenRect)
+						self.stage.fillBG( self.screen, self.refresh, self.statBGRect)
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
