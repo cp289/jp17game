@@ -1,16 +1,20 @@
-import sys, pygame
+import sys, pygame, time
 
 pygame.init()
 
 pygame.mixer.init()
 
+
+screen=pygame.display.set_mode((400,400))
+
 print "Loading battle music"
 
-battleMusic=pygame.mixer.Sound("sounds/battleMusic.wav")
+sound=pygame.mixer.Sound("sounds/battleMusic.ogg")
 
 print "Playing battle music"
 
-battleMusic.play()
+sound.play(loops=1000)
 
 while 1:
-	pass
+	for event in pygame.event.get():
+		pass
