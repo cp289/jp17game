@@ -16,6 +16,7 @@ import random
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
+green = ( 150, 180, 160 )
 
 '''
 This class represents one stage/room of the game.
@@ -102,6 +103,7 @@ class Game:
 		# start out with no enemies, because not in battle
 		#self.enemies = pygame.sprite.RenderUpdates()
 		self.enemies = []
+		self.selectedEnemyIDX = -1 # index of current selected enemy
 		self.bugImgs = [ pygame.image.load( "images/bug1.png" ).convert_alpha(),
 						 pygame.image.load( "images/bug2.png" ).convert_alpha(),
 						 pygame.image.load( "images/bug3.png" ).convert_alpha(),
@@ -113,11 +115,20 @@ class Game:
 		self.stage = None # set by calling the stage-loading methods
 		
 		# load specific screen backgrounds
-		self.statBG = pygame.image.load( 'images/statScreenBG.png' ).convert_alpha()
+		statBGorig = pygame.image.load( 'images/statScreenBG.png' ).convert_alpha()
+		self.statBG = pygame.transform.scale( statBGorig, self.screenSize ) # force it to be square for now
 		self.statBGRect = pygame.Rect( ( 20, 20 ), ( self.screenSize[0] - 40, self.screenSize[1] - 40 ) )
-		self.battleBG = pygame.Surface( self.screenSize ) # replace with an image later
-		self.battleBG.fill( ( 100, 100, 120 ) )
+		battleBGorig = pygame.image.load( 'images/Robotics Lab.png' ).convert_alpha()
+		self.battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
 		
+		# makes boxes for the characters on the stat screen
+		offset = 20
+		boxWidth = ( self.statBGRect.width - 4 * offset ) / 2
+		boxHeight = ( self.statBGRect.height - 4 * offset ) / 2
+		self.melBox = pygame.Rect( ( 2 * offset, 2 * offset ), ( boxWidth, boxHeight ) )
+		self.faBox = pygame.Rect( ( 2 * offset, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
+		self.zenBox = pygame.Rect( ( 3 * offset + boxWidth, 2 * offset ), ( boxWidth, boxHeight ) )
+		self.chaBox = pygame.Rect( ( 3 * offset + boxWidth, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
 	
 	# returns the PlayableCharacter for the main character
 	def initPlayer( self ):
@@ -150,6 +161,13 @@ class Game:
 	def showStatScreen( self ):
 		self.onStatScreen = True
 		self.screen.blit( self.statBG, ( 20, 20 ), self.statBGRect )
+		
+		# draw in boxes
+		pygame.draw.rect( self.screen, green, self.melBox )
+		pygame.draw.rect( self.screen, green, self.faBox )
+		pygame.draw.rect( self.screen, green, self.zenBox )
+		pygame.draw.rect( self.screen, green, self.chaBox )
+		
 		self.refresh.append( self.statBGRect )
 	
 	# sets the stored stage field to the Stage object representing stage 1 and draws it on the game screen
@@ -243,10 +261,18 @@ class Game:
 	def spawnEnemies( self, num, level ):
 		for i in range( num ):
 			# position based on index i
-			pos = ( 100, i * 250 )
+			pos = ( 100, i * 250 + 50 )
 			img = random.choice( self.bugImgs )
 			name = 'bug' + str( i )
 			self.enemies.append( agents.Enemy( pos, img, name, level ) )
+	
+	# changes game state back to exploration mode
+	def leaveBattle( self ):
+		self.inBattle = False
+		self.stage.fillBG( self.screen, self.refresh )
+		self.player.leaveBattle()
+		self.enemies = [] # empty enemies list
+		print 'leave battle'
 	
 	# updates the game for one time-step (when the player is playing through a stage)
 	def update( self ):
@@ -276,7 +302,7 @@ class Game:
 					self.onStatScreen = True
 					print 'show stat screen'
 					self.showStatScreen()
-				
+					return # so that characters aren't still drawn over stat screens
 				elif event.key == pygame.K_UP:
 					self.player.goBackward( self.tileSize )
 					moved = True
@@ -299,6 +325,8 @@ class Game:
 					self.player.enterBattle()
 					
 					self.spawnEnemies( 3, 1 ) # 3 enemies of level 1
+					self.enemies[0].select()
+					self.selectedEnemyIDX = 0
 					print 'enter battle'
 			
 			if event.type == pygame.QUIT:
@@ -346,23 +374,81 @@ class Game:
 					self.onStatScreen = True
 					print 'show stat screen'
 					self.showStatScreen()
-				
+					return # so that characters aren't still drawn over stat screen
 				elif event.key == pygame.K_b: # leave battle
-					self.inBattle = False
-					self.stage.fillBG( self.screen, self.refresh )
-					self.player.leaveBattle()
-					self.enemies = [] # empty enemies list
-					print 'leave battle'
+					self.leaveBattle()
 				
+				# change enemy selection
+				elif event.key == pygame.K_UP:
+					newIDX = self.selectedEnemyIDX - 1
+					if newIDX > -1:
+						prev = self.enemies[self.selectedEnemyIDX]
+						rad = 10
+						prev.deselect()
+						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+												   ( 2 * rad + 2, 2 * rad + 2 ) )
+						self.fillBattleBG( eraseRect )
+						
+						self.selectedEnemyIDX -= 1
+						self.enemies[self.selectedEnemyIDX].select()
+					elif newIDX == -1:
+						prev = self.enemies[self.selectedEnemyIDX]
+						rad = 10
+						prev.deselect()
+						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+												   ( 2 * rad + 2, 2 * rad + 2 ) )
+						self.fillBattleBG( eraseRect )
+						
+						self.selectedEnemyIDX = len( self.enemies ) - 1
+						self.enemies[self.selectedEnemyIDX].select()
+				elif event.key == pygame.K_DOWN:
+					newIDX = self.selectedEnemyIDX + 1
+					if newIDX < len( self.enemies ):
+						prev = self.enemies[self.selectedEnemyIDX]
+						rad = 10
+						prev.deselect()
+						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+												   ( 2 * rad + 2, 2 * rad + 2 ) )
+						self.fillBattleBG( eraseRect )
+						
+						self.selectedEnemyIDX += 1
+						self.enemies[self.selectedEnemyIDX].select()
+					elif newIDX == len( self.enemies ):
+						prev = self.enemies[self.selectedEnemyIDX]
+						rad = 10
+						prev.deselect()
+						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+												   ( 2 * rad + 2, 2 * rad + 2 ) )
+						self.fillBattleBG( eraseRect )
+						
+						self.selectedEnemyIDX = 0
+						self.enemies[self.selectedEnemyIDX].select()
+				
+				# attack currently selected enemy
 				elif event.key == pygame.K_a:
-					self.player.attack( self.enemies[0], 50 )
-					print 'attack edna!'
+					target = self.enemies[self.selectedEnemyIDX]
+					self.player.attack( target, 50 )
+					#print 'attack edna!'
 					
-					if self.enemies[0].isDead():
-						print 'you win!'
+					if target.isDead():
+						toRemove = self.enemies.pop( self.selectedEnemyIDX )
+						self.selectedEnemyIDX = 0 # reset selection to 0
+						
+						# erase killed target
+						eraseRect = toRemove.getRect()
+						eraseRect.width += 12
+						eraseRect.height += 12
+						self.fillBattleBG( eraseRect ) 
+						
+						if len( self.enemies ) != 0: # if still enemies, reselect first one
+							self.enemies[0].select()
+						else: # if all enemies are gone
+							self.selectedEnemyIDX = -1
+							self.leaveBattle()
+							'''add code here to increase XP'''
 				elif event.key == pygame.K_z:
 					self.enemies[0].attack( self.player, 50 )
-					print 'attack player!'
+					#print 'attack player!'
 					
 					if self.player.isDead():
 						print 'you lose!'
@@ -392,6 +478,8 @@ class Game:
 						self.refresh.append( self.statBGRect )
 					else: # redraw stage
 						self.stage.fillBG( self.screen, self.refresh, self.statBGRect)
+						self.player.draw( self.screen )
+						self.refresh.append( self.player.getRect() )
 			
 			if event.type == pygame.QUIT:
 				sys.exit()

@@ -18,6 +18,8 @@ import sys
 back, front, left, right, none = range( 5 )
 green = ( 150, 255, 150 )
 red = ( 255, 150, 150 )
+black = ( 0, 0, 0 )
+bluegreen = ( 150, 170, 170 )
 
 
 '''
@@ -152,7 +154,7 @@ class Character( Thing ):
 	#def die( self ):
 	'''I'm not quite sure what this does'''
 	
-	# draws the Enemy with a health bar at its current position on the given Surface
+	# draws the Character with a health bar at its current position on the given Surface
 	def draw( self, screen ):
 		screen.blit( self.image, self.rect )
 		
@@ -193,12 +195,43 @@ class Enemy( Character ):
 		Character.__init__( self, pos, img, name ) # call parent constructor
 		self.showHP = True # Enemies only appear in battle, so always show HP
 		self.level = level
+		self.selected = False
 		
 		# initialize stats
 		self.atk = 700
 		self.dfn = 700
 		self.spd = 700
 		self.acc = 700
+	
+	# sets this Enemy to be selected
+	def select( self ):
+		self.selected = True
+	
+	# sets this Enemy to be unselected
+	def deselect( self ):
+		self.selected = False
+	
+	# draws the Enemy at its current position on the given Surface
+	def draw( self, screen ):
+		Character.draw( self, screen ) # call parent method
+		
+		# draw pointer if selected
+		if self.selected:
+			radius = 10
+			arrowPos = ( self.rightEdge - radius, self.bottomEdge - radius )
+			arrowBottom = ( self.rightEdge - radius, self.bottomEdge + radius + 1 )
+			arrowRight = ( self.rightEdge + radius + 1, self.bottomEdge - radius )
+			points = [ arrowPos, arrowBottom, arrowRight ]
+			
+			pygame.draw.polygon( screen, black, points )
+			
+			inRadius = 9
+			innerPos = ( self.rightEdge - inRadius, self.bottomEdge - inRadius )
+			innerBottom = ( self.rightEdge - inRadius, self.bottomEdge + inRadius )
+			innerRight = ( self.rightEdge + inRadius, self.bottomEdge - inRadius )
+			innerPoints = [ innerPos, innerBottom, innerRight ]
+			
+			pygame.draw.polygon( screen, bluegreen, innerPoints )
 	
 	# returns a string reporting the name and current HP of the Enemy
 	def toString( self ):
@@ -221,7 +254,8 @@ class PlayableCharacter( Character ):
 	def __init__( self, pos, battlePos, imglist, name ):
 		Character.__init__( self, pos, imglist[0], name ) # call parent constructor
 		
-		self.battlePos = [ battlePos[0], battlePos[1] ] # separate from the exploring pos, which is self.explorePos
+		# self.pos is location on screen
+		self.battlePos = [ battlePos[0], battlePos[1] ] # location on screen when in battle mode
 		self.explorePos = [ pos[0], pos[1] ] # stores last exploring position when character goes into battle mode
 		
 		# initialize stats
@@ -261,6 +295,11 @@ class PlayableCharacter( Character ):
 		self.imgLeft = imglist[2]
 		self.imgRight = imglist[3]
 		self.imgStatus = imglist[4]
+	
+	# returns a tuple of this character's stats, in the following order:
+	# hp, attack, defense, speed, accuracy, xp
+	def getStats( self ):
+		return ( self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp )
 	
 	# puts the ghost directly on top of the character's current position
 	def resetGhost( self ):
