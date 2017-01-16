@@ -17,6 +17,7 @@ import random
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
 green = ( 150, 180, 160 )
+white = ( 255, 255, 255 )
 
 '''
 This class represents one stage/room of the game.
@@ -27,9 +28,10 @@ class Stage:
 	# fields: number battles to win, background image, list of Thing contents, Surface screen
 	
 	# creates a new Stage with the given number of battles to win and background image
-	def __init__( self, numBattles, bg ):
+	def __init__( self, numBattles, bg, battleBG ):
 		self.numBattles = numBattles
 		self.background = bg
+		self.battleBG = battleBG
 		#self.contents = [] # initialize list of Thing contents as empty
 		self.contents = pygame.sprite.Group()
 	
@@ -67,6 +69,14 @@ class Stage:
 			screen.blit( self.background, rect, rect )
 			
 			refresh.append( rect )
+	
+	# fills in the given rectangular section of the given screen with the battle background
+	# if no rect given, fills the entire screen
+	def fillBattleBG( self, screen, rect = None ):
+		if rect == None:
+			screen.blit( self.battleBG, ( 0, 0 ) )
+		else:
+			screen.blit( self.battleBG, rect, rect )
 
 '''
 This class represents a single game.
@@ -98,7 +108,12 @@ class Game:
 		self.inDialogue = False
 		self.onStatScreen = False
 		
-		self.player = self.initPlayer()
+		self.mel = None
+		self.fa = None
+		self.zen = None
+		self.cha = None
+		self.initPlayers()
+		self.player = self.mel
 		
 		# start out with no enemies, because not in battle
 		#self.enemies = pygame.sprite.RenderUpdates()
@@ -112,14 +127,15 @@ class Game:
 						 pygame.image.load( "images/bug6.png" ).convert_alpha()
 						]
 		
-		self.stage = None # set by calling the stage-loading methods
+		self.stage = None # set by calling the methods for entering stages
+		self.stage1 = None # these three are created when the loading methods are called
+		self.stage2 = None
+		self.stage3 = None
 		
 		# load specific screen backgrounds
 		statBGorig = pygame.image.load( 'images/statScreenBG.png' ).convert_alpha()
 		self.statBG = pygame.transform.scale( statBGorig, self.screenSize ) # force it to be square for now
 		self.statBGRect = pygame.Rect( ( 20, 20 ), ( self.screenSize[0] - 40, self.screenSize[1] - 40 ) )
-		battleBGorig = pygame.image.load( 'images/Robotics Lab.png' ).convert_alpha()
-		self.battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
 		
 		# makes boxes for the characters on the stat screen
 		offset = 20
@@ -129,44 +145,70 @@ class Game:
 		self.faBox = pygame.Rect( ( 2 * offset, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
 		self.zenBox = pygame.Rect( ( 3 * offset + boxWidth, 2 * offset ), ( boxWidth, boxHeight ) )
 		self.chaBox = pygame.Rect( ( 3 * offset + boxWidth, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
+		
+		# create fonts
+		self.bigFont = pygame.font.SysFont( "Helvetica", 44, bold=True )
+		self.smallFont = pygame.font.SysFont( 'Helvetica', 20 )
 	
 	# returns the PlayableCharacter for the main character
-	def initPlayer( self ):
+	def initPlayers( self ):
 		# load images
 		playerL = pygame.image.load( "images/melStandLeft.png" ).convert_alpha()
 		playerR = pygame.image.load( "images/melStandRight.png" ).convert_alpha()
 		playerF = pygame.image.load( "images/melStandFront.png" ).convert_alpha()
 		playerB = pygame.image.load( "images/melStandBack.png" ).convert_alpha()
 		
-		# initialize player
+		# initialize mel
 		initpos = ( 300, 400 ) # hopefully the middle of the bottom
 		battlePos = ( 600, 100 )
 		imglist = [ playerF, playerB, playerL, playerR, playerL ]
-		return agents.PlayableCharacter( initpos, battlePos, imglist, 'player' )
+		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody' )
+		
+		
 	
 	# draws game start screen
 	def showStartScreen( self ):
-		# create a font
-		afont = pygame.font.SysFont( "Helvetica", 44, bold=True )
-		
 		startScreen = pygame.Surface( self.screenSize )
 		startScreen.fill( ( 100, 120, 100 ) )
-		startText = afont.render( 'press s to start', True, ( 255, 255, 255 ) )
+		startText = self.bigFont.render( 'press s to start', True, white )
 	
 		self.screen.blit( startScreen, ( 0, 0 ) )
 		self.screen.blit( startText, ( self.screenSize[0] / 3, self.screenSize[1] / 2 ) )
 		pygame.display.update()
+	
+	# displays the given PlayableCharacter's stats at the given position on the stat screen
+	def showCharaStats( self, chara, pos ):
+		stats = chara.getStats()
+		
+		lines = [ chara.name ]
+		lines.append( ' - hp:       ' + str( stats[0] ) )
+		lines.append( ' - attack:   ' + str( stats[1] ) )
+		lines.append( ' - defense:  ' + str( stats[2] ) )
+		lines.append( ' - speed:    ' + str( stats[3] ) )
+		lines.append( ' - accuracy: ' + str( stats[4] ) )
+		lines.append( ' - xp:       ' + str( stats[5] ) )
+		
+		for idx in range( len ( lines ) ):
+			lineText = self.smallFont.render( lines[idx], True, white )
+			lineHeight = 25
+			linePos = ( pos[0], pos[1] + idx * lineHeight )
+			self.screen.blit( lineText, linePos )
 	
 	# draws the current stat screen on the game window
 	def showStatScreen( self ):
 		self.onStatScreen = True
 		self.screen.blit( self.statBG, ( 20, 20 ), self.statBGRect )
 		
+		'''might be better to put these directly in the background'''
 		# draw in boxes
 		pygame.draw.rect( self.screen, green, self.melBox )
 		pygame.draw.rect( self.screen, green, self.faBox )
 		pygame.draw.rect( self.screen, green, self.zenBox )
 		pygame.draw.rect( self.screen, green, self.chaBox )
+		
+		offset = 20
+		melPos = self.melBox.topleft[0] + offset, self.melBox.topleft[1] + offset
+		self.showCharaStats( self.player, melPos )
 		
 		self.refresh.append( self.statBGRect )
 	
@@ -175,27 +217,30 @@ class Game:
 		bgOrig = pygame.image.load( "images/Davis Robotics Lab.png" ).convert_alpha()
 		bg = pygame.transform.scale( bgOrig, self.screenSize ) # rescales the background image
 		
-		self.stage = Stage( 1, bg )
+		battleBGorig = pygame.image.load( 'images/Robotics Lab.png' ).convert_alpha()
+		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
+		
+		self.stage1 = Stage( 1, bg, battleBG )
 		
 		lWall = pygame.Surface( ( 5, self.screenSize[1] ) )
 		lWall.set_alpha( 0 ) # set image transparency
 		leftWall = agents.Thing( ( -5, 0 ), lWall )
-		self.stage.addThing( leftWall )
+		self.stage1.addThing( leftWall )
 	
 		rWall = pygame.Surface( ( 5, self.screenSize[1] ) )
 		rWall.set_alpha( 0 ) # set image transparency
 		rightWall = agents.Thing( ( self.screenSize[0], 0 ), rWall )
-		self.stage.addThing( rightWall )
+		self.stage1.addThing( rightWall )
 	
 		tWall = pygame.Surface( ( self.screenSize[0], 207 ) )
 		tWall.set_alpha( 0 ) # set image transparency
 		topWall = agents.Thing( ( 0, 0 ), tWall )
-		self.stage.addThing( topWall )
+		self.stage1.addThing( topWall )
 	
 		bWall = pygame.Surface( ( self.screenSize[0], 5 ) )
 		bWall.set_alpha( 0 ) # set image transparency
 		bottomWall = agents.Thing( ( 0, self.screenSize[1] ), bWall )
-		self.stage.addThing( bottomWall )
+		self.stage1.addThing( bottomWall )
 	
 		lTableDim = ( int( 700 * self.scale ), int( 1040 * self.scale ) )
 		lTablePos = ( int( 960 * self.scale ), int( 860 * self.scale ) )
@@ -203,7 +248,7 @@ class Game:
 		#lTable.fill( ( 100, 100, 50 ) )
 		lTable.set_alpha( 0 ) # set image transparency
 		leftTable = agents.Thing( lTablePos, lTable )
-		self.stage.addThing( leftTable )
+		self.stage1.addThing( leftTable )
 	
 		rTableDim = ( int( 700 * self.scale ), int( 1040 * self.scale ) )
 		rTablePos = ( int( 2400 * self.scale ), int( 860 * self.scale ) )
@@ -211,7 +256,7 @@ class Game:
 		#rTable.fill( ( 100, 100, 50 ) )
 		rTable.set_alpha( 0 ) # set image transparency
 		rightTable = agents.Thing( rTablePos, rTable )
-		self.stage.addThing( rightTable )
+		self.stage1.addThing( rightTable )
 	
 		iboardDim = ( int( 380 * self.scale ), int( 1100 * self.scale ) )
 		iboardPos = ( int( 100 * self.scale ), int( 2100 * self.scale ) )
@@ -219,7 +264,7 @@ class Game:
 		#iboard.fill( ( 100, 100, 50 ) )
 		iboard.set_alpha( 0 ) # set image transparency
 		board = agents.Thing( iboardPos, iboard )
-		self.stage.addThing( board )
+		self.stage1.addThing( board )
 	
 		bTableDim = ( int( 790 * self.scale ), int( 485 * self.scale ) )
 		bTablePos = ( int( 925 * self.scale ), int( 3085 * self.scale ) )
@@ -227,7 +272,7 @@ class Game:
 		#bTable.fill( ( 100, 100, 50 ) )
 		bTable.set_alpha( 0 ) # set image transparency
 		bottomTable = agents.Thing( bTablePos, bTable )
-		self.stage.addThing( bottomTable )
+		self.stage1.addThing( bottomTable )
 	
 		lCouchDim = ( int( 785 * self.scale ), int( 480 * self.scale ) )
 		lCouchPos = ( int( 2670 * self.scale ), int( 2530 * self.scale ) )
@@ -235,7 +280,7 @@ class Game:
 		#lCouch.fill( ( 100, 100, 50 ) )
 		lCouch.set_alpha( 0 ) # set image transparency
 		leftCouch = agents.Thing( lCouchPos, lCouch )
-		self.stage.addThing( leftCouch )
+		self.stage1.addThing( leftCouch )
 	
 		rCouchDim = ( int( 610 * self.scale ), int( 1080 * self.scale ) )
 		rCouchPos = ( int ( 3440 * self.scale ), int( 1920 * self.scale ) )
@@ -243,19 +288,15 @@ class Game:
 		#rCouch.fill( ( 100, 100, 50 ) )
 		rCouch.set_alpha( 0 ) # set image transparency
 		rightCouch = agents.Thing( rCouchPos, rCouch )
-		self.stage.addThing( rightCouch )
-		
+		self.stage1.addThing( rightCouch )
+	
+	def enterStage1( self ):
+		self.stage = self.stage1
 		self.stage.draw( self.screen )
+		
+		self.player.setPosition( 650, 550 )
 		self.player.draw( self.screen )
 		pygame.display.update()
-	
-	# fills in the given rectangular section with the battle background
-	# if no rect given, fills the entire screen
-	def fillBattleBG( self, rect = None ):
-		if rect == None:
-			self.screen.blit( self.battleBG, ( 0, 0 ) )
-		else:
-			self.screen.blit( self.battleBG, rect, rect )
 	
 	# creates the given number of Enemies, of the given level
 	def spawnEnemies( self, num, level ):
@@ -265,6 +306,20 @@ class Game:
 			img = random.choice( self.bugImgs )
 			name = 'bug' + str( i )
 			self.enemies.append( agents.Enemy( pos, img, name, level ) )
+	
+	# changes game state to battle mode
+	def enterBattle( self ):
+		# update display for background
+		self.stage.fillBattleBG( self.screen )
+		self.refresh.append( self.screen.get_rect() )
+		
+		self.inBattle = True
+		self.player.enterBattle()
+		
+		self.spawnEnemies( 3, 1 ) # 3 enemies of level 1
+		self.enemies[0].select()
+		self.selectedEnemyIDX = 0
+		print 'enter battle'
 	
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
@@ -317,17 +372,7 @@ class Game:
 					moved = True
 				
 				elif event.key == pygame.K_b:
-					# update display for background
-					self.fillBattleBG()
-					self.refresh.append( self.screen.get_rect() )
-					
-					self.inBattle = True
-					self.player.enterBattle()
-					
-					self.spawnEnemies( 3, 1 ) # 3 enemies of level 1
-					self.enemies[0].select()
-					self.selectedEnemyIDX = 0
-					print 'enter battle'
+					self.enterBattle()
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
@@ -387,7 +432,7 @@ class Game:
 						prev.deselect()
 						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
 												   ( 2 * rad + 2, 2 * rad + 2 ) )
-						self.fillBattleBG( eraseRect )
+						self.stage.fillBattleBG( self.screen, eraseRect )
 						
 						self.selectedEnemyIDX -= 1
 						self.enemies[self.selectedEnemyIDX].select()
@@ -397,7 +442,7 @@ class Game:
 						prev.deselect()
 						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
 												   ( 2 * rad + 2, 2 * rad + 2 ) )
-						self.fillBattleBG( eraseRect )
+						self.stage.fillBattleBG( self.screen, eraseRect )
 						
 						self.selectedEnemyIDX = len( self.enemies ) - 1
 						self.enemies[self.selectedEnemyIDX].select()
@@ -409,7 +454,7 @@ class Game:
 						prev.deselect()
 						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
 												   ( 2 * rad + 2, 2 * rad + 2 ) )
-						self.fillBattleBG( eraseRect )
+						self.stage.fillBattleBG( self.screen, eraseRect )
 						
 						self.selectedEnemyIDX += 1
 						self.enemies[self.selectedEnemyIDX].select()
@@ -419,7 +464,7 @@ class Game:
 						prev.deselect()
 						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
 												   ( 2 * rad + 2, 2 * rad + 2 ) )
-						self.fillBattleBG( eraseRect )
+						self.stage.fillBattleBG( self.screen, eraseRect )
 						
 						self.selectedEnemyIDX = 0
 						self.enemies[self.selectedEnemyIDX].select()
@@ -438,7 +483,7 @@ class Game:
 						eraseRect = toRemove.getRect()
 						eraseRect.width += 12
 						eraseRect.height += 12
-						self.fillBattleBG( eraseRect ) 
+						self.stage.fillBattleBG( self.screen, eraseRect )
 						
 						if len( self.enemies ) != 0: # if still enemies, reselect first one
 							self.enemies[0].select()
@@ -452,6 +497,7 @@ class Game:
 					
 					if self.player.isDead():
 						print 'you lose!'
+						self.leaveBattle()
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
@@ -474,7 +520,7 @@ class Game:
 					print 'leave stat screen'
 					
 					if self.inBattle: # redraw battle screen
-						self.fillBattleBG( self.statBGRect )
+						self.stage.fillBattleBG( self.screen, self.statBGRect )
 						self.refresh.append( self.statBGRect )
 					else: # redraw stage
 						self.stage.fillBG( self.screen, self.refresh, self.statBGRect)
@@ -513,6 +559,7 @@ def main():
 	
 	print 'enter stage 1'
 	game.loadStage1()
+	game.enterStage1()
 	
 	# run a loop with the first stage
 	while 1:
