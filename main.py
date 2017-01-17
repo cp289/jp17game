@@ -123,10 +123,12 @@ class Game:
 		self.cha = None
 		self.initPlayers()
 		self.player = self.mel
+		
+		# variables for battle mode
 		self.battleParticipants = [] # list to loop through for battle turns
 		self.currentBattleTurn = -1 # stores index of current turn within battleParticipants
 		self.livePlayers = [] # stores players who are currently alive so that enemies can choose targets easily
-		# (will go through all of battleParticipants, and then all enemies)
+		self.storedPoints = 0 # amount of XP all live players will gain on winning
 		
 		self.bugImgs = [ pygame.image.load( "images/bug1.png" ).convert_alpha(),
 						 pygame.image.load( "images/bug2.png" ).convert_alpha(),
@@ -236,7 +238,7 @@ class Game:
 			linePos = ( pos[0], pos[1] + idx * lineHeight )
 			self.screen.blit( lineText, linePos )
 		
-		lineWidth = 200
+		lineWidth = 170
 		self.screen.blit( chara.getStatusIMG(), ( pos[0] + lineWidth, pos[1] ) )
 	
 	# draws the current stat screen on the game window
@@ -388,6 +390,9 @@ class Game:
 		self.selectedEnemyIDX = 0
 		print 'enter battle'
 		
+		# reset stored points for new battle
+		self.storedPoints = 0
+		
 		# if Charles is currently playable
 		if charles:
 			self.cha.enterBattle()
@@ -400,6 +405,7 @@ class Game:
 		self.stage.fillBG( self.screen, self.refresh )
 		self.player.leaveBattle()
 		self.enemies = [] # empty enemies list
+		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
 		print 'leave battle'
 	
@@ -481,20 +487,69 @@ class Game:
 		self.player.draw( self.screen )
 		self.refresh.append( self.player.getRect() )
 	
-	# parses keyboard input for a player turn in battle
-	def playerTurn( self ):
-		# either change selection or attack selection
-		# pass on turn <actually probably in updateBattle
-		pass
-	
 	# determines enemy attack for an enemy turn in battle
+	# returns whether the turn ended the battle
 	def enemyTurn( self ):
 		# randomly select a livePlayer and attack
-		# pass on turn
-		pass
+		target = random.choice( self.livePlayers )
+		#self.battleParticipants[self.currentBattleTurn].attack( target, 100 ) # to always lose
+		self.battleParticipants[self.currentBattleTurn].attack( target, 50 ) # to always win
+		
+		if not target.isDead(): # if the target is still alive, pass on turn index
+			self.passOnTurn()
+		
+		# if the attack was fatal, remove that character from the lists
+		# do not pass on turn here, because removing player makes indices for enemies go one down
+		else:
+			print '--died: ' + target.name
+			
+			self.battleParticipants.remove( target )
+			self.livePlayers.remove( target )
+			
+			#print 'turn stays at', self.currentBattleTurn, 'out of', len( self.battleParticipants )
+			
+			# erase killed target
+			eraseRect = target.getRect()
+			eraseRect.width += 12
+			eraseRect.height += 12
+			self.stage.fillBattleBG( self.screen, eraseRect )
+			self.refresh.append( eraseRect )
+			
+			# if indices are now off (which happens when the attacker is the last in the participant list)
+			if self.currentBattleTurn == len( self.battleParticipants ):
+				self.currentBattleTurn = 0
+		
+		if len( self.livePlayers ) == 0:
+			print 'you lose!'
+			return True
+		else:
+			return False
+	
+	# moves the battle turn to the next character
+	def passOnTurn( self ):
+		# pass on battle turn
+		self.currentBattleTurn += 1
+		if self.currentBattleTurn > len( self.battleParticipants ) - 1: # wrap around to front of list
+			self.currentBattleTurn = 0
+		print '\ncurrent battle turn is', self.battleParticipants[self.currentBattleTurn].name + ',', \
+			self.currentBattleTurn, 'out of', len( self.battleParticipants), 'left'
+	
+	# for wins: awards the currently stored amount of XP to all player characters who are still alive
+	def awardXP( self ) :
+		for chara in self.livePlayers:
+			chara.increaseXP( self.storedPoints )
 	
 	# parses keyboard input for battle mode and updates screen contents
 	def updateBattle( self ):
+		done = False
+		
+		attacker = self.battleParticipants[self.currentBattleTurn]
+		if attacker.getType() == 'PlayableCharacter':
+			playerTurn = True
+			attacker.attacking = True # make blue box appear
+		else:
+			playerTurn = False
+			print 'enemy turn'
 		
 		# parse keyboard/mouse input events
 		for event in pygame.event.get():
@@ -504,98 +559,118 @@ class Game:
 					print 'show stat screen'
 					self.showStatScreen()
 					return # so that characters aren't still drawn over stat screen
-				elif event.key == pygame.K_b: # leave battle
-					self.leaveBattle()
-					return # so characters aren't still drawn
 				
-				# change enemy selection
-				elif event.key == pygame.K_UP:
-					newIDX = self.selectedEnemyIDX - 1
-					if newIDX > -1:
-						prev = self.enemies[self.selectedEnemyIDX]
-						rad = 10
-						prev.deselect()
-						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-												   ( 2 * rad + 2, 2 * rad + 2 ) )
-						self.stage.fillBattleBG( self.screen, eraseRect )
+				# if it's the player's turn, check for other input
+				if playerTurn:
+					#print 'player turn'
+					
+					# change enemy selection
+					if event.key == pygame.K_UP:
+						newIDX = self.selectedEnemyIDX - 1
+						if newIDX > -1:
+							prev = self.enemies[self.selectedEnemyIDX]
+							rad = 10
+							prev.deselect()
+							
+							# erase selection cursor
+							eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+													   ( 2 * rad + 2, 2 * rad + 2 ) )
+							self.stage.fillBattleBG( self.screen, eraseRect )
 						
-						self.selectedEnemyIDX -= 1
-						self.enemies[self.selectedEnemyIDX].select()
-					elif newIDX == -1:
-						prev = self.enemies[self.selectedEnemyIDX]
-						rad = 10
-						prev.deselect()
-						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-												   ( 2 * rad + 2, 2 * rad + 2 ) )
-						self.stage.fillBattleBG( self.screen, eraseRect )
+							self.selectedEnemyIDX -= 1
+							self.enemies[self.selectedEnemyIDX].select()
+						elif newIDX == -1:
+							prev = self.enemies[self.selectedEnemyIDX]
+							rad = 10
+							prev.deselect()
+							
+							# erase selection cursor
+							eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+													   ( 2 * rad + 2, 2 * rad + 2 ) )
+							self.stage.fillBattleBG( self.screen, eraseRect )
 						
-						self.selectedEnemyIDX = len( self.enemies ) - 1
-						self.enemies[self.selectedEnemyIDX].select()
-				elif event.key == pygame.K_DOWN:
-					newIDX = self.selectedEnemyIDX + 1
-					if newIDX < len( self.enemies ):
-						prev = self.enemies[self.selectedEnemyIDX]
-						rad = 10
-						prev.deselect()
-						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-												   ( 2 * rad + 2, 2 * rad + 2 ) )
-						self.stage.fillBattleBG( self.screen, eraseRect )
+							self.selectedEnemyIDX = len( self.enemies ) - 1
+							self.enemies[self.selectedEnemyIDX].select()
+					elif event.key == pygame.K_DOWN:
+						newIDX = self.selectedEnemyIDX + 1
+						if newIDX < len( self.enemies ):
+							prev = self.enemies[self.selectedEnemyIDX]
+							rad = 10
+							prev.deselect()
+							
+							# erase selection cursor
+							eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+													   ( 2 * rad + 2, 2 * rad + 2 ) )
+							self.stage.fillBattleBG( self.screen, eraseRect )
 						
-						self.selectedEnemyIDX += 1
-						self.enemies[self.selectedEnemyIDX].select()
-					elif newIDX == len( self.enemies ):
-						prev = self.enemies[self.selectedEnemyIDX]
-						rad = 10
-						prev.deselect()
-						eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-												   ( 2 * rad + 2, 2 * rad + 2 ) )
-						self.stage.fillBattleBG( self.screen, eraseRect )
+							self.selectedEnemyIDX += 1
+							self.enemies[self.selectedEnemyIDX].select()
+						elif newIDX == len( self.enemies ):
+							prev = self.enemies[self.selectedEnemyIDX]
+							rad = 10
+							prev.deselect()
+							
+							# erase selection cursor
+							eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+													   ( 2 * rad + 2, 2 * rad + 2 ) )
+							self.stage.fillBattleBG( self.screen, eraseRect )
 						
-						self.selectedEnemyIDX = 0
-						self.enemies[self.selectedEnemyIDX].select()
+							self.selectedEnemyIDX = 0
+							self.enemies[self.selectedEnemyIDX].select()
 				
-				# attack currently selected enemy
-				elif event.key == pygame.K_a:
-					target = self.enemies[self.selectedEnemyIDX]
-					self.player.attack( target, 50 )
-					#print 'attack edna!'
-					
-					if target.isDead():
-						toRemove = self.enemies.pop( self.selectedEnemyIDX )
-						self.selectedEnemyIDX = 0 # reset selection to 0
+					# attack currently selected enemy
+					elif event.key == pygame.K_a:
+						target = self.enemies[self.selectedEnemyIDX]
+						attacker.attack( target, 50 )
 						
-						# erase killed target
-						eraseRect = toRemove.getRect()
-						eraseRect.width += 12
-						eraseRect.height += 12
-						self.stage.fillBattleBG( self.screen, eraseRect )
+						attacker.attacking = False # make box disappear
+						self.passOnTurn()
 						
-						if len( self.enemies ) != 0: # if still enemies, reselect first one
-							self.enemies[0].select()
-						else: # if all enemies are gone
-							self.selectedEnemyIDX = -1
-							self.leaveBattle()
-							'''add code here to increase XP'''
-							return # so characters aren't still drawn 
-				elif event.key == pygame.K_z:
-					self.enemies[0].attack( self.player, 50 )
-					#print 'attack player!'
-					
-					if self.player.isDead():
-						print 'you lose!'
-						self.leaveBattle()
-						return # so characters aren't still drawn
+						# if attack killed target
+						if target.isDead():
+							print '--died: ' + target.name
+							
+							toRemove = self.enemies.pop( self.selectedEnemyIDX )
+							self.battleParticipants.remove( toRemove )
+							self.selectedEnemyIDX = 0 # reset selection to 0
+							
+							# add points for kill to stored total
+							self.storedPoints += toRemove.level
+						
+							# erase killed target
+							eraseRect = toRemove.getRect()
+							eraseRect.width += 12
+							eraseRect.height += 12
+							self.stage.fillBattleBG( self.screen, eraseRect )
+						
+							if len( self.enemies ) != 0: # if still enemies, reselect first one
+								self.enemies[0].select()
+							else: # if all enemies are gone
+								print 'you win!'
+								self.awardXP()
+								self.leaveBattle()
+								'''add code here to increase XP'''
+								done = True
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
 		
-		# update screen contents
-		for edna in self.battleParticipants:
-			edna.draw( self.screen )
-			self.refresh.append( edna.getRect() )
+		# if it's an enemy's turn, have it attack
+		if not playerTurn:
+			loss = self.enemyTurn()
+			if loss: # if the enemy turn resulted in a loss, the battle is done
+				self.leaveBattle()
+				done = True
 		
-		self.player.draw( self.screen )
-		self.refresh.append( self.player.getRect() )
+		# if we're still on the battle screen
+		if not done:
+			# update screen contents
+			for edna in self.battleParticipants:
+				edna.draw( self.screen )
+				self.refresh.append( edna.getRect() )
+		
+			#self.player.draw( self.screen )
+			self.refresh.append( self.player.getRect() )
 	
 	# parses keyboard input for stat screen mode and updates screen contents
 	def updateStatScreen( self ):

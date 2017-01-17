@@ -280,6 +280,7 @@ class PlayableCharacter( Character ):
 		# initialize attack list as empty
 		self.attacks = [] # all attacks the character is capable of
 		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
+		#self.attacking = False # whether it's currently this character's turn to attack
 		
 		# variables for current player state
 		self.orientation = front
