@@ -1,3 +1,8 @@
+# Unless you want to live a life full of pain,
+#   make sure all audio files are of the form *.ogg and have a 
+#   sample rate of 22050 Hz. Good luck.
+
+
 import sys, pygame, time
 
 pygame.init()
