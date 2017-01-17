@@ -30,6 +30,7 @@ class Stage:
 	# creates a new Stage with the given number of battles to win and background image
 	def __init__( self, numBattles, bg, battleBG ):
 		self.numBattles = numBattles
+		self.battlesCompleted = 0
 		self.background = bg
 		self.battleBG = battleBG
 		#self.contents = [] # initialize list of Thing contents as empty
@@ -38,6 +39,14 @@ class Stage:
 	# add a wall or of piece of furniture to the stage
 	def addThing( self, thing ):
 		self.contents.add( thing )
+	
+	# add 1 to the number of battles completed in this stage
+	def addBattle( self ):
+		self.battlesCompleted += 1
+	
+	# returns whether this stage has been completed
+	def completed( self ):
+		return self.numBattles == self.battlesCompleted
 	
 	# halts the given Character's movement if they are about to collide with anything in this Stage
 	# returns whether a collision was detected
@@ -114,11 +123,11 @@ class Game:
 		self.cha = None
 		self.initPlayers()
 		self.player = self.mel
+		self.battleParticipants = [] # list to loop through for battle turns
+		self.currentBattleTurn = -1 # stores index of current turn within battleParticipants
+		self.livePlayers = [] # stores players who are currently alive so that enemies can choose targets easily
+		# (will go through all of battleParticipants, and then all enemies)
 		
-		# start out with no enemies, because not in battle
-		#self.enemies = pygame.sprite.RenderUpdates()
-		self.enemies = []
-		self.selectedEnemyIDX = -1 # index of current selected enemy
 		self.bugImgs = [ pygame.image.load( "images/bug1.png" ).convert_alpha(),
 						 pygame.image.load( "images/bug2.png" ).convert_alpha(),
 						 pygame.image.load( "images/bug3.png" ).convert_alpha(),
@@ -126,6 +135,8 @@ class Game:
 						 pygame.image.load( "images/bug5.png" ).convert_alpha(),
 						 pygame.image.load( "images/bug6.png" ).convert_alpha()
 						]
+		self.enemies = []
+		self.selectedEnemyIDX = -1 # index of current selected enemy
 		
 		self.stage = None # set by calling the methods for entering stages
 		self.stage1 = None # these three are created when the loading methods are called
@@ -150,21 +161,52 @@ class Game:
 		self.bigFont = pygame.font.SysFont( "Helvetica", 44, bold=True )
 		self.smallFont = pygame.font.SysFont( 'Helvetica', 20 )
 	
-	# returns the PlayableCharacter for the main character
+	# creates the PlayableCharacters in the game
 	def initPlayers( self ):
 		# load images
 		playerL = pygame.image.load( "images/melStandLeft.png" ).convert_alpha()
 		playerR = pygame.image.load( "images/melStandRight.png" ).convert_alpha()
 		playerF = pygame.image.load( "images/melStandFront.png" ).convert_alpha()
 		playerB = pygame.image.load( "images/melStandBack.png" ).convert_alpha()
+		playerS = pygame.image.load( 'images/MelodyStatPic.png' ).convert_alpha()
+		playerBattle = pygame.image.load( 'images/MelodyBattleSprite.png' ).convert_alpha()
 		
 		# initialize mel
 		initpos = ( 300, 400 ) # hopefully the middle of the bottom
 		battlePos = ( 600, 100 )
-		imglist = [ playerF, playerB, playerL, playerR, playerL ]
+		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody' )
 		
+		playerF = pygame.image.load( "images/FatimahBattleSprite.png" ).convert_alpha() # not actually the front picture
+		playerB = None
+		playerL = None
+		playerR = None
+		playerS = pygame.image.load( "images/FatimahStatPic.png" ).convert_alpha()
+		playerBattle = playerF
 		
+		#initialize fa
+		battlePos = ( 600, 300 )
+		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
+		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah' )
+		
+		# initialize zen
+		playerF = pygame.image.load( 'images/ZenaBattleSprite.png' ).convert_alpha() # not actually the front picture
+		playerS = pygame.image.load( 'images/ZenaStatPic.png' ).convert_alpha()
+		playerBattle = playerF
+		battlePos = ( 600, 500 )
+		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
+		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena' )
+		
+		
+		# initialize cha
+		playerF = pygame.image.load( 'images/CharlesBattleSprite.png' ).convert_alpha() # not actually the front picture
+		playerS = pygame.image.load( 'images/CharlesStatPic.png' ).convert_alpha()
+		playerBattle = playerF
+		battlePos = ( 600, 700 )
+		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
+		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles' )
+		
+		print 'initialized playable characters'
 	
 	# draws game start screen
 	def showStartScreen( self ):
@@ -193,9 +235,12 @@ class Game:
 			lineHeight = 25
 			linePos = ( pos[0], pos[1] + idx * lineHeight )
 			self.screen.blit( lineText, linePos )
+		
+		lineWidth = 200
+		self.screen.blit( chara.getStatusIMG(), ( pos[0] + lineWidth, pos[1] ) )
 	
 	# draws the current stat screen on the game window
-	def showStatScreen( self ):
+	def showStatScreen( self, charles = False ):
 		self.onStatScreen = True
 		self.screen.blit( self.statBG, ( 20, 20 ), self.statBGRect )
 		
@@ -209,6 +254,16 @@ class Game:
 		offset = 20
 		melPos = self.melBox.topleft[0] + offset, self.melBox.topleft[1] + offset
 		self.showCharaStats( self.player, melPos )
+		
+		faPos = self.faBox.topleft[0] + offset, self.faBox.topleft[1] + offset
+		self.showCharaStats( self.fa, faPos )
+		
+		zenPos = self.zenBox.topleft[0] + offset, self.zenBox.topleft[1] + offset
+		self.showCharaStats( self.zen, zenPos )
+		
+		if charles:
+			chaPos = self.chaBox.topleft[0] + offset, self.chaBox.topleft[1] + offset
+			self.showCharaStats( self.cha, chaPos )
 		
 		self.refresh.append( self.statBGRect )
 	
@@ -289,6 +344,8 @@ class Game:
 		rCouch.set_alpha( 0 ) # set image transparency
 		rightCouch = agents.Thing( rCouchPos, rCouch )
 		self.stage1.addThing( rightCouch )
+		
+		print 'loaded stage 1'
 	
 	def enterStage1( self ):
 		self.stage = self.stage1
@@ -305,21 +362,37 @@ class Game:
 			pos = ( 100, i * 250 + 50 )
 			img = random.choice( self.bugImgs )
 			name = 'bug' + str( i )
-			self.enemies.append( agents.Enemy( pos, img, name, level ) )
+			e = agents.Enemy( pos, img, name, level )
+			self.enemies.append( e )
+			self.battleParticipants.append( e )
 	
 	# changes game state to battle mode
-	def enterBattle( self ):
+	def enterBattle( self, charles = False ):
 		# update display for background
 		self.stage.fillBattleBG( self.screen )
 		self.refresh.append( self.screen.get_rect() )
 		
 		self.inBattle = True
 		self.player.enterBattle()
+		self.fa.enterBattle()
+		self.zen.enterBattle()
+		
+		# build list of battle participants
+		self.battleParticipants= [ self.mel, self.fa, self.zen ]
+		self.currentBattleTurn = 0
+		
+		self.livePlayers = [ self.mel, self.fa, self.zen ]
 		
 		self.spawnEnemies( 3, 1 ) # 3 enemies of level 1
 		self.enemies[0].select()
 		self.selectedEnemyIDX = 0
 		print 'enter battle'
+		
+		# if Charles is currently playable
+		if charles:
+			self.cha.enterBattle()
+			self.battleParticipants.append( self.cha )
+			self.livePlayers.append( self.cha )
 	
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
@@ -327,6 +400,7 @@ class Game:
 		self.stage.fillBG( self.screen, self.refresh )
 		self.player.leaveBattle()
 		self.enemies = [] # empty enemies list
+		self.battleParticipants = []
 		print 'leave battle'
 	
 	# updates the game for one time-step (when the player is playing through a stage)
@@ -407,10 +481,20 @@ class Game:
 		self.player.draw( self.screen )
 		self.refresh.append( self.player.getRect() )
 	
+	# parses keyboard input for a player turn in battle
+	def playerTurn( self ):
+		# either change selection or attack selection
+		# pass on turn <actually probably in updateBattle
+		pass
+	
+	# determines enemy attack for an enemy turn in battle
+	def enemyTurn( self ):
+		# randomly select a livePlayer and attack
+		# pass on turn
+		pass
+	
 	# parses keyboard input for battle mode and updates screen contents
 	def updateBattle( self ):
-		attackedEnemy = False
-		attackedPlayer = False
 		
 		# parse keyboard/mouse input events
 		for event in pygame.event.get():
@@ -422,6 +506,7 @@ class Game:
 					return # so that characters aren't still drawn over stat screen
 				elif event.key == pygame.K_b: # leave battle
 					self.leaveBattle()
+					return # so characters aren't still drawn
 				
 				# change enemy selection
 				elif event.key == pygame.K_UP:
@@ -491,6 +576,7 @@ class Game:
 							self.selectedEnemyIDX = -1
 							self.leaveBattle()
 							'''add code here to increase XP'''
+							return # so characters aren't still drawn 
 				elif event.key == pygame.K_z:
 					self.enemies[0].attack( self.player, 50 )
 					#print 'attack player!'
@@ -498,12 +584,13 @@ class Game:
 					if self.player.isDead():
 						print 'you lose!'
 						self.leaveBattle()
+						return # so characters aren't still drawn
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
 		
 		# update screen contents
-		for edna in self.enemies:
+		for edna in self.battleParticipants:
 			edna.draw( self.screen )
 			self.refresh.append( edna.getRect() )
 		

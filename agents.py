@@ -203,6 +203,10 @@ class Enemy( Character ):
 		self.spd = 700
 		self.acc = 700
 	
+	# returns a string indicating the type of Character
+	def getType( self ):
+		return 'Enemy'
+	
 	# sets this Enemy to be selected
 	def select( self ):
 		self.selected = True
@@ -295,11 +299,20 @@ class PlayableCharacter( Character ):
 		self.imgLeft = imglist[2]
 		self.imgRight = imglist[3]
 		self.imgStatus = imglist[4]
+		self.imgBattle = imglist[5]
 	
 	# returns a tuple of this character's stats, in the following order:
 	# hp, attack, defense, speed, accuracy, xp
 	def getStats( self ):
 		return ( self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp )
+	
+	# returns the status image for this character
+	def getStatusIMG( self ):
+		return self.imgStatus
+	
+	# returns a string indicating the type of Character
+	def getType( self ):
+		return 'PlayableCharacter'
 	
 	# puts the ghost directly on top of the character's current position
 	def resetGhost( self ):
@@ -509,7 +522,7 @@ class PlayableCharacter( Character ):
 	# and orientation set to a side view
 	def enterBattle( self ):
 		self.showHP = True
-		self.orientation = left
+		self.image = self.imgBattle
 		
 		# store exploring position, switch to battle position
 		self.explorePos= self.pos[:]
@@ -528,15 +541,16 @@ class PlayableCharacter( Character ):
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar
 	def draw( self, screen ):
-		# determine which image to use based on current orientation
-		if self.orientation == front:
-			self.image = self.imgFront
-		elif self.orientation == back:
-			self.image = self.imgBack
-		elif self.orientation == left:
-			self.image = self.imgLeft
-		elif self.orientation == right:
-			self.image = self.imgRight
+		# determine which image to use based on current orientation (only in exploration mode)
+		if not self.showHP:
+			if self.orientation == front:
+				self.image = self.imgFront
+			elif self.orientation == back:
+				self.image = self.imgBack
+			elif self.orientation == left:
+				self.image = self.imgLeft
+			elif self.orientation == right:
+				self.image = self.imgRight
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
