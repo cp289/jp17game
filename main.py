@@ -134,16 +134,15 @@ class Game:
 						 pygame.image.load( "images/bug2.png" ).convert_alpha(),
 						 pygame.image.load( "images/bug3.png" ).convert_alpha(),
 						 pygame.image.load( "images/bug4.png" ).convert_alpha(),
-						 pygame.image.load( "images/bug5.png" ).convert_alpha(),
-						 pygame.image.load( "images/bug6.png" ).convert_alpha()
+						 pygame.image.load( "images/bug5.png" ).convert_alpha()
 						]
 		self.enemies = []
 		self.selectedEnemyIDX = -1 # index of current selected enemy
 		
 		self.stage = None # set by calling the methods for entering stages
-		self.stage1 = None # these three are created when the loading methods are called
-		self.stage2 = None
-		self.stage3 = None
+		self.hallwayStage = None # these three are created when the loading methods are called
+		self.roboLabStage = None
+		self.macLabStage = None
 		
 		# load specific screen backgrounds
 		statBGorig = pygame.image.load( 'images/statScreenBG.png' ).convert_alpha()
@@ -178,6 +177,10 @@ class Game:
 		battlePos = ( 600, 100 )
 		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody' )
+		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 7 ) )
+		# total HP, ATK, DFN, SPD, ACC, time
+		self.mel.setAllGR( ( 0.8, 0.9, 0.85, 0.75, 0.7 ) )
+		# HP, ATK, DFN, SPD, ACC
 		
 		playerF = pygame.image.load( "images/FatimahBattleSprite.png" ).convert_alpha() # not actually the front picture
 		playerB = None
@@ -190,6 +193,8 @@ class Game:
 		battlePos = ( 600, 300 )
 		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah' )
+		self.fa.setAllStats( ( 400, 44, 54, 51, 50, 6 ) )
+		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
 		# initialize zen
 		playerF = pygame.image.load( 'images/ZenaBattleSprite.png' ).convert_alpha() # not actually the front picture
@@ -198,7 +203,8 @@ class Game:
 		battlePos = ( 600, 500 )
 		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena' )
-		
+		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 9 ) )
+		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
 		# initialize cha
 		playerF = pygame.image.load( 'images/CharlesBattleSprite.png' ).convert_alpha() # not actually the front picture
@@ -207,6 +213,8 @@ class Game:
 		battlePos = ( 600, 700 )
 		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles' )
+		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 7 ) )
+		self.cha.setAllGR( ( 0.75, 0.7, 0.8, 0.9, 0.85 ) )
 		
 		print 'initialized playable characters'
 	
@@ -225,12 +233,14 @@ class Game:
 		stats = chara.getStats()
 		
 		lines = [ chara.name ]
-		lines.append( ' - hp:       ' + str( stats[0] ) )
-		lines.append( ' - attack:   ' + str( stats[1] ) )
-		lines.append( ' - defense:  ' + str( stats[2] ) )
-		lines.append( ' - speed:    ' + str( stats[3] ) )
-		lines.append( ' - accuracy: ' + str( stats[4] ) )
-		lines.append( ' - xp:       ' + str( stats[5] ) )
+		lines.append( ' - time:     ' + str( stats[0] ) )
+		lines.append( ' - hp:       ' + str( stats[1] ) )
+		lines.append( ' - attack:   ' + str( stats[2] ) )
+		lines.append( ' - defense:  ' + str( stats[3] ) )
+		lines.append( ' - speed:    ' + str( stats[4] ) )
+		lines.append( ' - accuracy: ' + str( stats[5] ) )
+		lines.append( ' - xp:       ' + str( stats[6] ) )
+		lines.append( ' - level:    ' + str( stats[7] ) )
 		
 		for idx in range( len ( lines ) ):
 			lineText = self.smallFont.render( lines[idx], True, white )
@@ -270,34 +280,34 @@ class Game:
 		self.refresh.append( self.statBGRect )
 	
 	# sets the stored stage field to the Stage object representing stage 1 and draws it on the game screen
-	def loadStage1( self ):
+	def loadRoboLabStage( self ):
 		bgOrig = pygame.image.load( "images/Davis Robotics Lab.png" ).convert_alpha()
 		bg = pygame.transform.scale( bgOrig, self.screenSize ) # rescales the background image
 		
 		battleBGorig = pygame.image.load( 'images/Robotics Lab.png' ).convert_alpha()
 		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
 		
-		self.stage1 = Stage( 1, bg, battleBG )
+		self.roboLabStage = Stage( 1, bg, battleBG )
 		
 		lWall = pygame.Surface( ( 5, self.screenSize[1] ) )
 		lWall.set_alpha( 0 ) # set image transparency
 		leftWall = agents.Thing( ( -5, 0 ), lWall )
-		self.stage1.addThing( leftWall )
+		self.roboLabStage.addThing( leftWall )
 	
 		rWall = pygame.Surface( ( 5, self.screenSize[1] ) )
 		rWall.set_alpha( 0 ) # set image transparency
 		rightWall = agents.Thing( ( self.screenSize[0], 0 ), rWall )
-		self.stage1.addThing( rightWall )
+		self.roboLabStage.addThing( rightWall )
 	
 		tWall = pygame.Surface( ( self.screenSize[0], 207 ) )
 		tWall.set_alpha( 0 ) # set image transparency
 		topWall = agents.Thing( ( 0, 0 ), tWall )
-		self.stage1.addThing( topWall )
+		self.roboLabStage.addThing( topWall )
 	
 		bWall = pygame.Surface( ( self.screenSize[0], 5 ) )
 		bWall.set_alpha( 0 ) # set image transparency
 		bottomWall = agents.Thing( ( 0, self.screenSize[1] ), bWall )
-		self.stage1.addThing( bottomWall )
+		self.roboLabStage.addThing( bottomWall )
 	
 		lTableDim = ( int( 700 * self.scale ), int( 1040 * self.scale ) )
 		lTablePos = ( int( 960 * self.scale ), int( 860 * self.scale ) )
@@ -305,7 +315,7 @@ class Game:
 		#lTable.fill( ( 100, 100, 50 ) )
 		lTable.set_alpha( 0 ) # set image transparency
 		leftTable = agents.Thing( lTablePos, lTable )
-		self.stage1.addThing( leftTable )
+		self.roboLabStage.addThing( leftTable )
 	
 		rTableDim = ( int( 700 * self.scale ), int( 1040 * self.scale ) )
 		rTablePos = ( int( 2400 * self.scale ), int( 860 * self.scale ) )
@@ -313,7 +323,7 @@ class Game:
 		#rTable.fill( ( 100, 100, 50 ) )
 		rTable.set_alpha( 0 ) # set image transparency
 		rightTable = agents.Thing( rTablePos, rTable )
-		self.stage1.addThing( rightTable )
+		self.roboLabStage.addThing( rightTable )
 	
 		iboardDim = ( int( 380 * self.scale ), int( 1100 * self.scale ) )
 		iboardPos = ( int( 100 * self.scale ), int( 2100 * self.scale ) )
@@ -321,7 +331,7 @@ class Game:
 		#iboard.fill( ( 100, 100, 50 ) )
 		iboard.set_alpha( 0 ) # set image transparency
 		board = agents.Thing( iboardPos, iboard )
-		self.stage1.addThing( board )
+		self.roboLabStage.addThing( board )
 	
 		bTableDim = ( int( 790 * self.scale ), int( 485 * self.scale ) )
 		bTablePos = ( int( 925 * self.scale ), int( 3085 * self.scale ) )
@@ -329,7 +339,7 @@ class Game:
 		#bTable.fill( ( 100, 100, 50 ) )
 		bTable.set_alpha( 0 ) # set image transparency
 		bottomTable = agents.Thing( bTablePos, bTable )
-		self.stage1.addThing( bottomTable )
+		self.roboLabStage.addThing( bottomTable )
 	
 		lCouchDim = ( int( 785 * self.scale ), int( 480 * self.scale ) )
 		lCouchPos = ( int( 2670 * self.scale ), int( 2530 * self.scale ) )
@@ -337,7 +347,7 @@ class Game:
 		#lCouch.fill( ( 100, 100, 50 ) )
 		lCouch.set_alpha( 0 ) # set image transparency
 		leftCouch = agents.Thing( lCouchPos, lCouch )
-		self.stage1.addThing( leftCouch )
+		self.roboLabStage.addThing( leftCouch )
 	
 		rCouchDim = ( int( 610 * self.scale ), int( 1080 * self.scale ) )
 		rCouchPos = ( int ( 3440 * self.scale ), int( 1920 * self.scale ) )
@@ -345,12 +355,13 @@ class Game:
 		#rCouch.fill( ( 100, 100, 50 ) )
 		rCouch.set_alpha( 0 ) # set image transparency
 		rightCouch = agents.Thing( rCouchPos, rCouch )
-		self.stage1.addThing( rightCouch )
+		self.roboLabStage.addThing( rightCouch )
 		
-		print 'loaded stage 1'
+		print 'loaded robotics lab stage'
 	
-	def enterStage1( self ):
-		self.stage = self.stage1
+	# changes current stage to robotics lab and places player at starting position
+	def enterRoboLabStage( self ):
+		self.stage = self.roboLabStage
 		self.stage.draw( self.screen )
 		
 		self.player.setPosition( 650, 550 )
@@ -364,7 +375,10 @@ class Game:
 			pos = ( 100, i * 250 + 50 )
 			img = random.choice( self.bugImgs )
 			name = 'bug' + str( i )
-			e = agents.Enemy( pos, img, name, level )
+			e = agents.Enemy( pos, img, name, level, hp = 400 )
+			
+			print 'spawned with', e.hp, 'hp'
+			
 			self.enemies.append( e )
 			self.battleParticipants.append( e )
 	
@@ -538,6 +552,11 @@ class Game:
 	def awardXP( self ) :
 		for chara in self.livePlayers:
 			chara.increaseXP( self.storedPoints )
+			
+			# check for leveling up
+			if chara.xp >= chara.level * 100:
+				chara.levelUp()
+				print 'leveled up', chara.name, 'to level', chara.level
 	
 	# parses keyboard input for battle mode and updates screen contents
 	def updateBattle( self ):
@@ -635,7 +654,7 @@ class Game:
 							self.selectedEnemyIDX = 0 # reset selection to 0
 							
 							# add points for kill to stored total
-							self.storedPoints += toRemove.level
+							self.storedPoints += toRemove.level * 10
 						
 							# erase killed target
 							eraseRect = toRemove.getRect()
@@ -720,8 +739,8 @@ def main():
 				sys.exit()
 	
 	print 'enter stage 1'
-	game.loadStage1()
-	game.enterStage1()
+	game.loadRoboLabStage()
+	game.enterRoboLabStage()
 	
 	# run a loop with the first stage
 	while 1:

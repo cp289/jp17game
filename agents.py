@@ -13,6 +13,7 @@
 
 import pygame
 import sys
+import random
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -191,17 +192,17 @@ class Enemy( Character ):
 	# creates a new Enemy at the given position with the given image, name,
 	# and starting amount of HP
 	# all stats are given a default value of 700
-	def __init__( self, pos, img, name, level, hp = 700 ):
-		Character.__init__( self, pos, img, name ) # call parent constructor
+	def __init__( self, pos, img, name, level, hp = 400 ):
+		Character.__init__( self, pos, img, name, hp ) # call parent constructor
 		self.showHP = True # Enemies only appear in battle, so always show HP
 		self.level = level
 		self.selected = False
 		
 		# initialize stats
-		self.atk = 700
-		self.dfn = 700
-		self.spd = 700
-		self.acc = 700
+		self.atk = 50
+		self.dfn = 50
+		self.spd = 50
+		self.acc = 50
 	
 	# returns a string indicating the type of Character
 	def getType( self ):
@@ -263,19 +264,21 @@ class PlayableCharacter( Character ):
 		self.explorePos = [ pos[0], pos[1] ] # stores last exploring position when character goes into battle mode
 		
 		# initialize stats
+		self.time = 5
 		self.atk = 700
 		self.dfn = 700
 		self.spd = 700
 		self.acc = 700
-		self.time = 5
 		self.xp = 0
 		
 		# initialize growth rates
-		self.hpGR = 100
-		self.atkGR = 100
-		self.dfnGR = 100
-		self.spdGR = 100
-		self.accGR = 100
+		self.hpGR = 0.8
+		self.atkGR = 0.8
+		self.dfnGR = 0.8
+		self.spdGR = 0.8
+		self.accGR = 0.8
+		self.statStep = 5 # how much a stat can increase in one level-up
+		self.hpStep = 55 # how much HP can increase in one level-up
 		
 		# initialize attack list as empty
 		self.attacks = [] # all attacks the character is capable of
@@ -303,9 +306,9 @@ class PlayableCharacter( Character ):
 		self.imgBattle = imglist[5]
 	
 	# returns a tuple of this character's stats, in the following order:
-	# hp, attack, defense, speed, accuracy, xp
+	# time, hp, attack, defense, speed, accuracy, xp, level
 	def getStats( self ):
-		return ( self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp )
+		return ( self.time, self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp, self.level )
 	
 	# returns the status image for this character
 	def getStatusIMG( self ):
@@ -508,16 +511,27 @@ class PlayableCharacter( Character ):
 	def addAttack( self, aaa ):
 		self.attacks.append( aaa )
 	
-	# level up the character, increasing all stats by the growth rate
+	# level up the character, using growth rates to determine which stats
+	# will be leveled up
+	# HP increases by 55 at a time, all others by 5
 	def levelUp( self ):
 		self.level += 1
 		
-		# increase stats
-		self.totalHP += self.hpGR
-		self.atk += self.atkGR
-		self.dfn += self.dfnGR
-		self.spd += self.spdGR
-		self.acc += self.accGR
+		# increase stats based on growth rates
+		if random.random() < self.hpGR:
+			self.totalHP += self.hpStep
+		
+		if random.random() < self.atkGR:
+			self.atk += self.statStep
+		
+		if random.random() < self.dfnGR:
+			self.dfn += self.statStep
+		
+		if random.random() < self.spdGR:
+			self.spd += self.statStep
+		
+		if random.random() < self.accGR:
+			self.acc += self.statStep
 	
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view
