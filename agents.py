@@ -616,6 +616,24 @@ class PlayableCharacter( Character ):
 	def toString( self ):
 		return 'playable character ' + self.name + ' at (' + str( self.pos[0] ) + ', ' + str( self.pos[1] ) + ')'
 
+'''
+This class represents a doorway from one stage to another in the game.
+'''
+class Door:
+	
+	# creates a new Door with the given position and dimensions, and the given name of a Stage to lead to
+	def __init__( self, pos, dim, room ):
+		self.rect = pygame.Rect( pos[:], dim[:] )
+		self.room = room
+	
+	# returns the Rect representing this door
+	def getRect( self ):
+		return self.rect
+		
+		
+
+
+
 
 
 

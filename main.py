@@ -25,25 +25,25 @@ It stores its furniture and walls as Things.
 '''
 class Stage:
 	
-	# fields: number battles to win, background image, list of Thing contents, Surface screen
+	# fields: number battles to win, background images, list of Thing contents, Surface screen
 	
 	# creates a new Stage with the given number of battles to win and background image
 	# optional to give starting player Position on stage and starting camera position (upper left corner)
-	def __init__( self, numBattles, bg, battleBG, playerPos = ( 0, 0 ), camPos = ( 0, 0 ) ):
+	def __init__( self, name, numBattles, bg, battleBG, bugs ):
+		self.name = name
 		self.numBattles = numBattles
 		self.battlesCompleted = 0
 		self.background = bg
 		self.battleBG = battleBG
+		
 		self.contents = pygame.sprite.Group()
+		self.doors = []
+		self.bugImgs = bugs
 		
 		# variables for dimensions of stage
 		self.height = bg.get_rect().height
 		self.width = bg.get_rect().width
 		self.topWallEdge = 0 # y-coordinate for the bottom of the top wall
-		
-		# initial player and camera positions for this stage
-		self.playerStart = playerPos
-		self.camStart = camPos
 	
 	# sets the field storing the bottom of the top walls
 	def setTopWallEdge( self, e ):
@@ -52,6 +52,14 @@ class Stage:
 	# add a wall or of piece of furniture to the stage
 	def addThing( self, thing ):
 		self.contents.add( thing )
+	
+	# add a door to another room
+	def addDoor( self, door ):
+		self.doors.append( door )
+	
+	# returns a randomly chosen bug image from the set for this stage
+	def randomBug( self ):
+		return random.choice( self.bugImgs )
 	
 	# add 1 to the number of battles completed in this stage
 	def addBattle( self ):
@@ -89,6 +97,16 @@ class Stage:
 				collided = True
 		
 		return collided
+	
+	# returns the door the given character is at, if there is one
+	# otherwise returns None
+	def atDoor( self, chara ):
+		for door in self.doors:
+			#print 'checking door', door.rect
+			if door.getRect().colliderect( chara.ghost ):
+				return door
+		
+		return None
 	
 	# draws the section of the stage that is now in the camera view
 	def moveCamView( self, screen, refresh, camrect ):
@@ -164,12 +182,6 @@ class Game:
 		self.livePlayers = [] # stores players who are currently alive so that enemies can choose targets easily
 		self.storedPoints = 0 # amount of XP all live players will gain on winning
 		
-		self.bugImgs = [ pygame.image.load( 'images/bug1.png' ).convert_alpha(),
-						 pygame.image.load( 'images/bug2.png' ).convert_alpha(),
-						 pygame.image.load( 'images/bug3.png' ).convert_alpha(),
-						 pygame.image.load( 'images/bug4.png' ).convert_alpha(),
-						 pygame.image.load( 'images/bug5.png' ).convert_alpha()
-						]
 		self.enemies = [] # start out with no enemies, because not in battle
 		self.selectedEnemyIDX = -1 # index of current selected enemy
 		
@@ -186,8 +198,8 @@ class Game:
 		
 		# makes boxes for the characters on the stat screen
 		offset = 20
-		boxWidth = ( self.statBGRect.width - 4 * offset ) / 2
-		boxHeight = ( self.statBGRect.height - 4 * offset ) / 2
+		boxWidth = ( self.statBGRect.width - 3 * offset ) / 2
+		boxHeight = ( self.statBGRect.height - 3 * offset ) / 2
 		self.melBox = pygame.Rect( ( 2 * offset, 2 * offset ), ( boxWidth, boxHeight ) )
 		self.faBox = pygame.Rect( ( 2 * offset, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
 		self.zenBox = pygame.Rect( ( 3 * offset + boxWidth, 2 * offset ), ( boxWidth, boxHeight ) )
@@ -212,7 +224,7 @@ class Game:
 		
 		# initialize mel
 		initpos = ( 300, 400 ) # hopefully the middle of the bottom
-		battlePos = ( 600, 100 )
+		battlePos = ( 700, 50 )
 		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody' )
 		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 7 ) )
@@ -228,7 +240,7 @@ class Game:
 		playerBattle = playerF
 		
 		#initialize fa
-		battlePos = ( 600, 300 )
+		battlePos = ( 600, 178 )
 		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah' )
 		self.fa.setAllStats( ( 400, 44, 54, 51, 50, 6 ) )
@@ -238,7 +250,7 @@ class Game:
 		playerF = pygame.image.load( 'images/ZenaBattleSprite.png' ).convert_alpha() # not actually the front picture
 		playerS = pygame.image.load( 'images/ZenaStatPic.png' ).convert_alpha()
 		playerBattle = playerF
-		battlePos = ( 600, 500 )
+		battlePos = ( 500, 306 )
 		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena' )
 		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 9 ) )
@@ -248,7 +260,7 @@ class Game:
 		playerF = pygame.image.load( 'images/CharlesBattleSprite.png' ).convert_alpha() # not actually the front picture
 		playerS = pygame.image.load( 'images/CharlesStatPic.png' ).convert_alpha()
 		playerBattle = playerF
-		battlePos = ( 600, 700 )
+		battlePos = ( 400, 404 )
 		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles' )
 		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 7 ) )
@@ -265,57 +277,6 @@ class Game:
 		self.screen.blit( startScreen, ( 0, 0 ) )
 		self.screen.blit( startText, ( self.screenSize[0] / 3, self.screenSize[1] / 2 ) )
 		pygame.display.update()
-	
-	# displays the given PlayableCharacter's stats at the given position on the stat screen
-	def showCharaStats( self, chara, pos ):
-		stats = chara.getStats()
-		
-		lines = [ chara.name ]
-		lines.append( ' - time:     ' + str( stats[0] ) )
-		lines.append( ' - hp:       ' + str( stats[1] ) )
-		lines.append( ' - attack:   ' + str( stats[2] ) )
-		lines.append( ' - defense:  ' + str( stats[3] ) )
-		lines.append( ' - speed:    ' + str( stats[4] ) )
-		lines.append( ' - accuracy: ' + str( stats[5] ) )
-		lines.append( ' - xp:       ' + str( stats[6] ) )
-		lines.append( ' - level:    ' + str( stats[7] ) )
-		
-		for idx in range( len ( lines ) ):
-			lineText = self.smallFont.render( lines[idx], True, white )
-			lineHeight = 22
-			linePos = ( pos[0], pos[1] + idx * lineHeight )
-			self.screen.blit( lineText, linePos )
-		
-		lineWidth = 170
-		self.screen.blit( chara.getStatusIMG(), ( pos[0] + lineWidth, pos[1] ) )
-	
-	# draws the current stat screen on the game window
-	def showStatScreen( self, charles = False ):
-		self.onStatScreen = True
-		self.screen.blit( self.statBG, ( 20, 20 ), self.statBGRect )
-		
-		'''might be better to put these directly in the background'''
-		# draw in boxes
-		pygame.draw.rect( self.screen, green, self.melBox )
-		pygame.draw.rect( self.screen, green, self.faBox )
-		pygame.draw.rect( self.screen, green, self.zenBox )
-		pygame.draw.rect( self.screen, green, self.chaBox )
-		
-		offset = 20
-		melPos = self.melBox.topleft[0] + offset, self.melBox.topleft[1] + offset
-		self.showCharaStats( self.player, melPos )
-		
-		faPos = self.faBox.topleft[0] + offset, self.faBox.topleft[1] + offset
-		self.showCharaStats( self.fa, faPos )
-		
-		zenPos = self.zenBox.topleft[0] + offset, self.zenBox.topleft[1] + offset
-		self.showCharaStats( self.zen, zenPos )
-		
-		if charles:
-			chaPos = self.chaBox.topleft[0] + offset, self.chaBox.topleft[1] + offset
-			self.showCharaStats( self.cha, chaPos )
-		
-		self.refresh.append( self.statBGRect )
 	
 	# sets the player's onscreen position so that it matches its stage position,
 	# based on the current camera view
@@ -339,7 +300,19 @@ class Game:
 		battleBGorig = pygame.image.load( 'images/Hallway Battle.png' ).convert_alpha()
 		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
 		
-		self.hallwayStage = Stage( 1, bg, battleBG )
+		bugImgs = [ pygame.image.load( 'images/Bug 0.png' ).convert_alpha(),
+						 pygame.image.load( 'images/Bug 1.png' ).convert_alpha(),
+						 pygame.image.load( 'images/Bug 10.png' ).convert_alpha(),
+						 pygame.image.load( 'images/Bug 11.png' ).convert_alpha(),
+						 pygame.image.load( 'images/BUg 100.png' ).convert_alpha()
+						]
+		
+		self.hallwayStage = Stage( 'hallway', 1, bg, battleBG, bugImgs )
+		
+		# create doors
+		
+		doorToRoboLab = agents.Door( ( 0, 1800 * self.scale ), ( 10, 350 * self.scale ), 'robotics lab' )
+		self.hallwayStage.addDoor( doorToRoboLab )
 		
 		# create walls
 		
@@ -347,10 +320,10 @@ class Game:
 		lWall.set_alpha( 0 ) # set image transparency
 		leftWall = agents.Thing( ( -5, 0 ), lWall )
 		self.hallwayStage.addThing( leftWall )
-	
+		
 		rWall = pygame.Surface( ( 5, self.hallwayStage.height ) )
 		rWall.set_alpha( 0 ) # set image transparency
-		rightWall = agents.Thing( ( self.hallwayStage.width, 0 ), rWall )
+		rightWall = agents.Thing( ( self.hallwayStage.width - 5, 0 ), rWall )
 		self.hallwayStage.addThing( rightWall )
 		
 		topWallHeight = 715 * self.scale
@@ -394,17 +367,47 @@ class Game:
 		leftBox = agents.Thing( lBoxPos, lBox )
 		self.hallwayStage.addThing( leftBox )
 		
-		#rBox
+		rBoxDim = ( 300 * self.scale, 305 * self.scale )
+		rBoxPos = ( 1050 * self.scale, 1510 * self.scale )
+		rBox = pygame.Surface( rBoxDim )
+		rBox.set_alpha( 0 )
+		rightBox = agents.Thing( rBoxPos, rBox )
+		self.hallwayStage.addThing( rightBox )
 		
-		#iSofa
+		iSofaDim = ( 960 * self.scale, 370 * self.scale )
+		iSofaPos = ( 470 * self.scale, 1900 * self.scale )
+		iSofa = pygame.Surface( iSofaDim )
+		iSofa.set_alpha( 0 )
+		sofa = agents.Thing( iSofaPos, iSofa )
+		self.hallwayStage.addThing( sofa )
 		
-		#iTrash
+		iTrashDim = ( 550 * self.scale, 170 * self.scale )
+		iTrashPos = ( 2450 * self.scale, 715 * self.scale )
+		iTrash = pygame.Surface( iTrashDim )
+		iTrash.set_alpha( 0 )
+		trash = agents.Thing( iTrashPos, iTrash )
+		self.hallwayStage.addThing( trash )
 		
-		#uTable
+		uTableDim = ( 500 * self.scale, 405 * self.scale )
+		uTablePos = ( 2300 * self.scale, 1000 * self.scale )
+		uTable = pygame.Surface( uTableDim )
+		uTable.set_alpha( 0 )
+		upTable = agents.Thing( uTablePos, uTable )
+		self.hallwayStage.addThing( upTable )
 		
-		#dTable
+		dTableDim = ( 500 * self.scale, 405 * self.scale )
+		dTablePos = ( 2150 * self.scale, 1600 * self.scale )
+		dTable = pygame.Surface( dTableDim )
+		dTable.set_alpha( 0 )
+		downTable = agents.Thing( dTablePos, dTable )
+		self.hallwayStage.addThing( downTable )
 		
-		#sLab
+		sLabDim = ( 2000 * self.scale, 2220 * self.scale )
+		sLabPos = ( 3000 * self.scale, 0 * self.scale )
+		sLab = pygame.Surface( sLabDim )
+		sLab.set_alpha( 0 )
+		smallLab = agents.Thing( sLabPos, sLab )
+		self.hallwayStage.addThing( smallLab )
 		
 		print 'loaded hallway stage'
 	
@@ -413,17 +416,38 @@ class Game:
 		self.stage = self.hallwayStage
 		
 		# set initial player and camera positions for this room
-		self.camera.topleft = 0 * self.scale, 0 * self.scale
-		initPos = ( 100 * self.scale, 500 * self.scale )
+		self.camera.topleft = 3400 * self.scale, 1900 * self.scale
+		initPos = ( 4800 * self.scale, 2600 * self.scale )
 		
 		self.player.setStagePos( initPos[0], initPos[1] )
 		self.placePlayerOnScreen()
+		
+		self.player.goLeft( self.tileSize )
 		
 		self.hallwayStage.moveCamView( self.screen, self.refresh, self.camera )
 		self.player.draw( self.screen )
 		pygame.display.update()
 		
 		print 'enter hallway from right'
+	
+	# changes current stage to hallway and places player and camera at starting positions
+	def enterHallwayStageLeft( self ):
+		self.stage = self.hallwayStage
+		
+		# set initial player and camera positions for this room
+		self.camera.topleft = 0 * self.scale, 1100 * self.scale
+		initPos = ( 10 * self.scale, 1800 * self.scale )
+		
+		self.player.setStagePos( initPos[0], initPos[1] )
+		self.placePlayerOnScreen()
+		
+		self.player.goRight( self.tileSize )
+		
+		self.hallwayStage.moveCamView( self.screen, self.refresh, self.camera )
+		self.player.draw( self.screen )
+		pygame.display.update()
+		
+		print 'enter hallway from left'
 	
 	# loads images for robotics lab stage and creates the furniture objects
 	def loadRoboLabStage( self ):
@@ -434,7 +458,20 @@ class Game:
 		battleBGorig = pygame.image.load( 'images/Robotics Lab Battle.png' ).convert_alpha()
 		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
 		
-		self.roboLabStage = Stage( 3, bg, battleBG )
+		bugImgs = [ pygame.image.load( 'images/Bug 101.png' ).convert_alpha(),
+						 pygame.image.load( 'images/Bug 110.png' ).convert_alpha(),
+						 pygame.image.load( 'images/Bug 111.png' ).convert_alpha(),
+						 pygame.image.load( 'images/Bug 1000.png' ).convert_alpha(),
+						 pygame.image.load( 'images/BUg 1001.png' ).convert_alpha()
+						]
+		
+		self.roboLabStage = Stage( 'robotics lab', 3, bg, battleBG, bugImgs )
+		
+		# create door
+		
+		doorToHall = agents.Door( ( self.roboLabStage.width - 10, 3672 * self.scale ), \
+			( 10, 378 * self.scale ), 'hallway' )
+		self.roboLabStage.addDoor( doorToHall )
 		
 		# create walls
 		
@@ -460,7 +497,7 @@ class Game:
 		bWall.set_alpha( 0 ) # set image transparency
 		bottomWall = agents.Thing( ( 0, self.roboLabStage.height ), bWall )
 		self.roboLabStage.addThing( bottomWall )
-	
+		
 		# load furniture
 		
 		lTableDim = ( int( 700 * self.scale ), int( 1040 * self.scale ) )
@@ -519,10 +556,12 @@ class Game:
 		
 		# set initial player and camera positions for this room
 		self.camera.topleft = 2450 * self.scale, 2850 * self.scale
-		initPos = ( 3900 * self.scale, 3300 * self.scale )
+		initPos = ( 3900 * self.scale, 3672 * self.scale )
 		
 		self.player.setStagePos( initPos[0], initPos[1] )
 		self.placePlayerOnScreen()
+		
+		self.player.goLeft( self.tileSize )
 		
 		self.roboLabStage.moveCamView( self.screen, self.refresh, self.camera )
 		self.player.draw( self.screen )
@@ -530,12 +569,20 @@ class Game:
 		
 		print 'enter robotics lab'
 	
+	# loads images for Mac lab stage and creates the furniture objects
+	def loadMacLabStage( self ):
+		pass
+	
+	# changes current stage to Mac lab and places player and camera at starting positions
+	def enterMacLabStage( self ):
+		pass
+	
 	# creates the given number of Enemies, of the given level
 	def spawnEnemies( self, num, level ):
 		for i in range( num ):
 			# position based on index i
-			pos = ( 100, i * 250 + 50 )
-			img = random.choice( self.bugImgs )
+			pos = ( 20, i * 145 + 20 )
+			img = self.stage.randomBug()
 			name = 'bug' + str( i )
 			e = agents.Enemy( pos, img, name, level )
 			
@@ -559,7 +606,7 @@ class Game:
 		
 		self.livePlayers = [ self.mel, self.fa, self.zen ]
 		
-		self.spawnEnemies( 3, 1 ) # 3 enemies of level 1
+		self.spawnEnemies( 4, 1 ) # 3 enemies of level 1
 		self.enemies[0].select()
 		self.selectedEnemyIDX = 0
 		print 'enter battle'
@@ -582,6 +629,57 @@ class Game:
 		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
 		print 'leave battle'
+	
+	# displays the given PlayableCharacter's stats at the given position on the stat screen
+	def showCharaStats( self, chara, pos ):
+		stats = chara.getStats()
+		
+		lines = [ chara.name ]
+		lines.append( ' - time:     ' + str( stats[0] ) )
+		lines.append( ' - hp:       ' + str( stats[1] ) )
+		lines.append( ' - attack:   ' + str( stats[2] ) )
+		lines.append( ' - defense:  ' + str( stats[3] ) )
+		lines.append( ' - speed:    ' + str( stats[4] ) )
+		lines.append( ' - accuracy: ' + str( stats[5] ) )
+		lines.append( ' - xp:       ' + str( stats[6] ) )
+		lines.append( ' - level:    ' + str( stats[7] ) )
+		
+		for idx in range( len ( lines ) ):
+			lineText = self.smallFont.render( lines[idx], True, white )
+			lineHeight = 22
+			linePos = ( pos[0], pos[1] + idx * lineHeight )
+			self.screen.blit( lineText, linePos )
+		
+		lineWidth = 170
+		self.screen.blit( chara.getStatusIMG(), ( pos[0] + lineWidth, pos[1] ) )
+	
+	# draws the current stat screen on the game window
+	def showStatScreen( self, charles = False ):
+		self.onStatScreen = True
+		self.screen.blit( self.statBG, ( 20, 20 ), self.statBGRect )
+		
+		'''might be better to put these directly in the background'''
+		# draw in boxes
+		pygame.draw.rect( self.screen, green, self.melBox )
+		pygame.draw.rect( self.screen, green, self.faBox )
+		pygame.draw.rect( self.screen, green, self.zenBox )
+		pygame.draw.rect( self.screen, green, self.chaBox )
+		
+		offset = 20
+		melPos = self.melBox.topleft[0] + offset, self.melBox.topleft[1] + offset
+		self.showCharaStats( self.player, melPos )
+		
+		faPos = self.faBox.topleft[0] + offset, self.faBox.topleft[1] + offset
+		self.showCharaStats( self.fa, faPos )
+		
+		zenPos = self.zenBox.topleft[0] + offset, self.zenBox.topleft[1] + offset
+		self.showCharaStats( self.zen, zenPos )
+		
+		if charles:
+			chaPos = self.chaBox.topleft[0] + offset, self.chaBox.topleft[1] + offset
+			self.showCharaStats( self.cha, chaPos )
+		
+		self.refresh.append( self.statBGRect )
 	
 	# updates the game for one time-step (when the player is playing through a stage)
 	def update( self ):
@@ -649,9 +747,20 @@ class Game:
 		elif keysdown[pygame.K_RIGHT]:
 			self.player.goRight( self.tileSize )
 			moved = True
-	
-		self.stage.collide( self.player ) # stop movement if it leads to collision
+		
+		# stop movement if it leads to collision
+		self.stage.collide( self.player )
 			#print 'collided!'
+		
+		# check for entering a door
+		door = self.stage.atDoor( self.player )
+		if door != None:
+			# if entering a door, determine which room the door leads to
+			if door.room == 'robotics lab':
+				self.enterRoboLabStage()
+			elif door.room == 'hallway': # if entering the hallway, determine from which room
+				if self.stage == self.roboLabStage:
+					self.enterHallwayStageLeft()
 		
 		# update screen contents
 		
@@ -763,7 +872,7 @@ class Game:
 			attacker.attacking = True # make blue box appear
 		else:
 			playerTurn = False
-			print 'enemy turn'
+			#print 'enemy turn'
 		
 		# parse keyboard/mouse input events
 		for event in pygame.event.get():
@@ -861,10 +970,13 @@ class Game:
 								self.enemies[0].select()
 							else: # if all enemies are gone
 								self.awardXP()
-								self.stage.addBattle()
 								self.leaveBattle()
 								done = True
 								print 'you win the battle!'
+								
+								self.stage.addBattle()
+								if self.stage.completed():
+									print 'this stage has been completed'
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
@@ -932,11 +1044,10 @@ def main():
 			if event.type == pygame.QUIT:
 				sys.exit()
 	
-# 	game.loadHallwayStage()
-# 	game.enterHallwayStageRight()
-	
+	game.loadHallwayStage()
 	game.loadRoboLabStage()
-	game.enterRoboLabStage()
+	
+	game.enterHallwayStageLeft()
 	
 	'''
 	just load all stages to begin with (probably put a loading screen on while that's going)
@@ -952,6 +1063,9 @@ def main():
 	if you walk into the robotics lab, call enterRoboLabStage
 	
 	'''
+	
+	
+	#game.enterRoboLabStage()
 	
 	# run a loop for the robotics lab
 	while 2:
