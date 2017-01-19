@@ -28,13 +28,26 @@ class Stage:
 	# fields: number battles to win, background image, list of Thing contents, Surface screen
 	
 	# creates a new Stage with the given number of battles to win and background image
-	def __init__( self, numBattles, bg, battleBG ):
+	# optional to give starting player Position on stage and starting camera position (upper left corner)
+	def __init__( self, numBattles, bg, battleBG, playerPos = ( 0, 0 ), camPos = ( 0, 0 ) ):
 		self.numBattles = numBattles
 		self.battlesCompleted = 0
 		self.background = bg
 		self.battleBG = battleBG
-		#self.contents = [] # initialize list of Thing contents as empty
 		self.contents = pygame.sprite.Group()
+		
+		# variables for dimensions of stage
+		self.height = bg.get_rect().height
+		self.width = bg.get_rect().width
+		self.topWallEdge = 0 # y-coordinate for the bottom of the top wall
+		
+		# initial player and camera positions for this stage
+		self.playerStart = playerPos
+		self.camStart = camPos
+	
+	# sets the field storing the bottom of the top walls
+	def setTopWallEdge( self, e ):
+		self.topWallEdge = e
 	
 	# add a wall or of piece of furniture to the stage
 	def addThing( self, thing ):
@@ -48,6 +61,24 @@ class Stage:
 	def completed( self ):
 		return self.numBattles == self.battlesCompleted
 	
+	# returns whether the given character is within the given range of the left wall
+	# for stopping camera view adjustment at the wall
+	def approachingLeftWall( self, chara, dist ):
+		return chara.getStagePos()[0] <= dist
+	
+	# returns whether the given character is within the given range of the right wall
+	# for stopping camera view adjustment at the wall
+	def approachingRightWall( self, chara, dist ):
+		return self.width - chara.getStagePos()[0] - chara.rect.width <= dist + 10 # add 10 because the right wall is weird
+	
+	# returns whether the given character is within the given range of the top wall
+	def approachingTopWall( self, chara, dist ):
+		return chara.ghost.topleft[1] <= self.topWallEdge + dist
+	
+	# returns whether the given character is within the given range of the bottom wall
+	# for stopping camera view adjustment at the wall
+	def approachingBottomWall( self, chara, dist ):
+		return self.height - chara.getStagePos()[1] - chara.rect.height <= dist
 	# halts the given Character's movement if they are about to collide with anything in this Stage
 	# returns whether a collision was detected
 	def collide( self, chara ):
@@ -59,13 +90,14 @@ class Stage:
 		
 		return collided
 	
-	# draws the Stage and its contents on the given Surface
-	def draw( self, screen ):
-		screen.blit( self.background, ( 0, 0 ) )
-		self.contents.draw( screen )
+	# draws the section of the stage that is now in the camera view
+	def moveCamView( self, screen, refresh, camrect ):
+		screen.blit( self.background, ( 0, 0 ), camrect )
+		refresh.append( screen.get_rect() )
 	
 	# draws the subsection of the stage background within the given rectangle
-	def fillBG( self, screen, refresh, rect = None ):
+	# if camera is given, adjusts for camera view
+	def fillBG( self, screen, refresh, rect = None, cam = None ):
 		# draw the entire screen
 		if ( rect == None ):
 			# now draw the surfaces to the screen using the blit function
@@ -75,9 +107,12 @@ class Stage:
 	
 		# draw a specific section
 		else:
-			screen.blit( self.background, rect, rect )
+			adjustedRect = rect.move( cam.topleft[0], cam.topleft[1] ) # to make it fill in the correct section of the background
+			screen.blit( self.background, rect, adjustedRect )
 			
 			refresh.append( rect )
+			
+			#print 'filled', rect
 	
 	# fills in the given rectangular section of the given screen with the battle background
 	# if no rect given, fills the entire screen
@@ -98,14 +133,13 @@ class Game:
 	# start a new Game on stage 1
 	def __init__( self ):
 		# create a screen (width, height)
-		self.screenSize = (750, 750)
+		self.screenSize = ( 800, 600 )
 		self.screen = pygame.display.set_mode( self.screenSize )
-		self.scale = float( self.screenSize[0] ) / 4050 # may be obsolete later when we have the camera thing working
-		# scale assumes window is square
+		self.scale = 0.5
 		
-		pygame.display.set_caption( "debugDavis()" )
-		
+		pygame.display.set_caption( 'debugDavis()' )
 		print 'init screen'
+		
 		self.refresh = [] # list of rectangles that currently should be updated in the display
 		self.tileSize = 50
 		
@@ -130,15 +164,16 @@ class Game:
 		self.livePlayers = [] # stores players who are currently alive so that enemies can choose targets easily
 		self.storedPoints = 0 # amount of XP all live players will gain on winning
 		
-		self.bugImgs = [ pygame.image.load( "images/bug1.png" ).convert_alpha(),
-						 pygame.image.load( "images/bug2.png" ).convert_alpha(),
-						 pygame.image.load( "images/bug3.png" ).convert_alpha(),
-						 pygame.image.load( "images/bug4.png" ).convert_alpha(),
-						 pygame.image.load( "images/bug5.png" ).convert_alpha()
+		self.bugImgs = [ pygame.image.load( 'images/bug1.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bug2.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bug3.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bug4.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bug5.png' ).convert_alpha()
 						]
-		self.enemies = []
+		self.enemies = [] # start out with no enemies, because not in battle
 		self.selectedEnemyIDX = -1 # index of current selected enemy
 		
+		self.camera = pygame.Rect( ( 0, 0 ), self.screenSize ) # represents current section of stage in view
 		self.stage = None # set by calling the methods for entering stages
 		self.hallwayStage = None # these three are created when the loading methods are called
 		self.roboLabStage = None
@@ -159,16 +194,19 @@ class Game:
 		self.chaBox = pygame.Rect( ( 3 * offset + boxWidth, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
 		
 		# create fonts
-		self.bigFont = pygame.font.SysFont( "Helvetica", 44, bold=True )
-		self.smallFont = pygame.font.SysFont( 'Helvetica', 20 )
+		self.bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
+		self.smallFont = pygame.font.SysFont( 'Helvetica', 18 )
+		
+		# mostly for testing
+		self.timeStep = 0
 	
 	# creates the PlayableCharacters in the game
 	def initPlayers( self ):
 		# load images
-		playerL = pygame.image.load( "images/melStandLeft.png" ).convert_alpha()
-		playerR = pygame.image.load( "images/melStandRight.png" ).convert_alpha()
-		playerF = pygame.image.load( "images/melStandFront.png" ).convert_alpha()
-		playerB = pygame.image.load( "images/melStandBack.png" ).convert_alpha()
+		playerL = pygame.image.load( 'images/melStandLeft.png' ).convert_alpha()
+		playerR = pygame.image.load( 'images/melStandRight.png' ).convert_alpha()
+		playerF = pygame.image.load( 'images/melStandFront.png' ).convert_alpha()
+		playerB = pygame.image.load( 'images/melStandBack.png' ).convert_alpha()
 		playerS = pygame.image.load( 'images/MelodyStatPic.png' ).convert_alpha()
 		playerBattle = pygame.image.load( 'images/MelodyBattleSprite.png' ).convert_alpha()
 		
@@ -182,11 +220,11 @@ class Game:
 		self.mel.setAllGR( ( 0.8, 0.9, 0.85, 0.75, 0.7 ) )
 		# HP, ATK, DFN, SPD, ACC
 		
-		playerF = pygame.image.load( "images/FatimahBattleSprite.png" ).convert_alpha() # not actually the front picture
+		playerF = pygame.image.load( 'images/FatimahBattleSprite.png' ).convert_alpha() # not actually the front picture
 		playerB = None
 		playerL = None
 		playerR = None
-		playerS = pygame.image.load( "images/FatimahStatPic.png" ).convert_alpha()
+		playerS = pygame.image.load( 'images/FatimahStatPic.png' ).convert_alpha()
 		playerBattle = playerF
 		
 		#initialize fa
@@ -244,7 +282,7 @@ class Game:
 		
 		for idx in range( len ( lines ) ):
 			lineText = self.smallFont.render( lines[idx], True, white )
-			lineHeight = 25
+			lineHeight = 22
 			linePos = ( pos[0], pos[1] + idx * lineHeight )
 			self.screen.blit( lineText, linePos )
 		
@@ -279,36 +317,152 @@ class Game:
 		
 		self.refresh.append( self.statBGRect )
 	
-	# sets the stored stage field to the Stage object representing stage 1 and draws it on the game screen
-	def loadRoboLabStage( self ):
-		bgOrig = pygame.image.load( "images/Davis Robotics Lab.png" ).convert_alpha()
-		bg = pygame.transform.scale( bgOrig, self.screenSize ) # rescales the background image
+	# sets the player's onscreen position so that it matches its stage position,
+	# based on the current camera view
+	# returns previous player rect for erasure
+	def placePlayerOnScreen( self ):
+		pos = self.player.getStagePos()
 		
-		battleBGorig = pygame.image.load( 'images/Robotics Lab.png' ).convert_alpha()
+		prevRect = self.player.rect.copy()
+		
+		screenPos = ( pos[0] - self.camera.topleft[0], pos[1] - self.camera.topleft[1] )
+		self.player.setScreenPos( screenPos[0], screenPos[1] )
+		
+		return prevRect
+	
+	# loads images for robotics lab stage and creates the furniture objects
+	def loadHallwayStage( self ):
+		bgOrig = pygame.image.load( 'images/Davis Hallway.png' ).convert_alpha()
+		newDim = ( int( bgOrig.get_width() * self.scale ), int( bgOrig.get_height() * self.scale ) )
+		bg = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
+		
+		battleBGorig = pygame.image.load( 'images/Hallway Battle.png' ).convert_alpha()
 		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
 		
-		self.roboLabStage = Stage( 1, bg, battleBG )
+		self.hallwayStage = Stage( 1, bg, battleBG )
 		
-		lWall = pygame.Surface( ( 5, self.screenSize[1] ) )
+		# create walls
+		
+		lWall = pygame.Surface( ( 5, self.hallwayStage.height ) )
+		lWall.set_alpha( 0 ) # set image transparency
+		leftWall = agents.Thing( ( -5, 0 ), lWall )
+		self.hallwayStage.addThing( leftWall )
+	
+		rWall = pygame.Surface( ( 5, self.hallwayStage.height ) )
+		rWall.set_alpha( 0 ) # set image transparency
+		rightWall = agents.Thing( ( self.hallwayStage.width, 0 ), rWall )
+		self.hallwayStage.addThing( rightWall )
+		
+		topWallHeight = 715 * self.scale
+		self.hallwayStage.setTopWallEdge( topWallHeight )
+		tWall = pygame.Surface( ( self.hallwayStage.width, topWallHeight ) )
+		#tWall.fill( ( 100, 100, 50 ) )
+		tWall.set_alpha( 0 ) # set image transparency
+		topWall = agents.Thing( ( 0, 0 ), tWall )
+		self.hallwayStage.addThing( topWall )
+	
+		bWall = pygame.Surface( ( self.hallwayStage.width, 5 ) )
+		bWall.set_alpha( 0 ) # set image transparency
+		bottomWall = agents.Thing( ( 0, self.hallwayStage.height ), bWall )
+		self.hallwayStage.addThing( bottomWall )
+		
+		lChairDim = ( 325 * self.scale, 400 * self.scale )
+		lChairPos = ( 480 * self.scale, 865 * self.scale )
+		lChair = pygame.Surface( lChairDim )
+		lChair.set_alpha( 0 )
+		leftChair = agents.Thing( lChairPos, lChair )
+		self.hallwayStage.addThing( leftChair )
+		
+		mChairDim = ( 325 * self.scale, 400 * self.scale )
+		mChairPos = ( 1100 * self.scale, 865 * self.scale )
+		mChair = pygame.Surface( mChairDim )
+		mChair.set_alpha( 0 )
+		middleChair = agents.Thing( mChairPos, mChair )
+		self.hallwayStage.addThing( middleChair )
+		
+		rChairDim = ( 365 * self.scale, 320 * self.scale )
+		rChairPos = ( 1545 * self.scale, 1420 * self.scale )
+		rChair = pygame.Surface( rChairDim )
+		rChair.set_alpha( 0 )
+		rightChair = agents.Thing( rChairPos, rChair )
+		self.hallwayStage.addThing( rightChair )
+		
+		lBoxDim = ( 295 * self.scale, 320 * self.scale )
+		lBoxPos = ( 605 * self.scale, 1365 * self.scale )
+		lBox = pygame.Surface( lBoxDim )
+		lBox.set_alpha( 0 )
+		leftBox = agents.Thing( lBoxPos, lBox )
+		self.hallwayStage.addThing( leftBox )
+		
+		#rBox
+		
+		#iSofa
+		
+		#iTrash
+		
+		#uTable
+		
+		#dTable
+		
+		#sLab
+		
+		print 'loaded hallway stage'
+	
+	# changes current stage to hallway and places player and camera at starting positions
+	def enterHallwayStageRight( self ):
+		self.stage = self.hallwayStage
+		
+		# set initial player and camera positions for this room
+		self.camera.topleft = 0 * self.scale, 0 * self.scale
+		initPos = ( 100 * self.scale, 500 * self.scale )
+		
+		self.player.setStagePos( initPos[0], initPos[1] )
+		self.placePlayerOnScreen()
+		
+		self.hallwayStage.moveCamView( self.screen, self.refresh, self.camera )
+		self.player.draw( self.screen )
+		pygame.display.update()
+		
+		print 'enter hallway from right'
+	
+	# loads images for robotics lab stage and creates the furniture objects
+	def loadRoboLabStage( self ):
+		bgOrig = pygame.image.load( 'images/Davis Robotics Lab.png' ).convert_alpha()
+		newDim = ( int( bgOrig.get_width() * self.scale ), int( bgOrig.get_height() * self.scale ) )
+		bg = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
+		
+		battleBGorig = pygame.image.load( 'images/Robotics Lab Battle.png' ).convert_alpha()
+		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
+		
+		self.roboLabStage = Stage( 3, bg, battleBG )
+		
+		# create walls
+		
+		lWall = pygame.Surface( ( 10, self.roboLabStage.height ) )
 		lWall.set_alpha( 0 ) # set image transparency
 		leftWall = agents.Thing( ( -5, 0 ), lWall )
 		self.roboLabStage.addThing( leftWall )
 	
-		rWall = pygame.Surface( ( 5, self.screenSize[1] ) )
+		rWall = pygame.Surface( ( 5, self.roboLabStage.height ) )
 		rWall.set_alpha( 0 ) # set image transparency
-		rightWall = agents.Thing( ( self.screenSize[0], 0 ), rWall )
+		rightWall = agents.Thing( ( self.roboLabStage.width, 0 ), rWall )
 		self.roboLabStage.addThing( rightWall )
-	
-		tWall = pygame.Surface( ( self.screenSize[0], 207 ) )
+		
+		topWallHeight = 1110 * self.scale
+		self.roboLabStage.setTopWallEdge( topWallHeight )
+		tWall = pygame.Surface( ( self.roboLabStage.width, topWallHeight ) )
+		#tWall.fill( ( 100, 100, 50 ) )
 		tWall.set_alpha( 0 ) # set image transparency
 		topWall = agents.Thing( ( 0, 0 ), tWall )
 		self.roboLabStage.addThing( topWall )
 	
-		bWall = pygame.Surface( ( self.screenSize[0], 5 ) )
+		bWall = pygame.Surface( ( self.roboLabStage.width, 5 ) )
 		bWall.set_alpha( 0 ) # set image transparency
-		bottomWall = agents.Thing( ( 0, self.screenSize[1] ), bWall )
+		bottomWall = agents.Thing( ( 0, self.roboLabStage.height ), bWall )
 		self.roboLabStage.addThing( bottomWall )
 	
+		# load furniture
+		
 		lTableDim = ( int( 700 * self.scale ), int( 1040 * self.scale ) )
 		lTablePos = ( int( 960 * self.scale ), int( 860 * self.scale ) )
 		lTable = pygame.Surface( lTableDim )
@@ -359,14 +513,22 @@ class Game:
 		
 		print 'loaded robotics lab stage'
 	
-	# changes current stage to robotics lab and places player at starting position
+	# changes current stage to robotics lab and places player and camera at starting positions
 	def enterRoboLabStage( self ):
 		self.stage = self.roboLabStage
-		self.stage.draw( self.screen )
 		
-		self.player.setPosition( 650, 550 )
+		# set initial player and camera positions for this room
+		self.camera.topleft = 2450 * self.scale, 2850 * self.scale
+		initPos = ( 3900 * self.scale, 3300 * self.scale )
+		
+		self.player.setStagePos( initPos[0], initPos[1] )
+		self.placePlayerOnScreen()
+		
+		self.roboLabStage.moveCamView( self.screen, self.refresh, self.camera )
 		self.player.draw( self.screen )
 		pygame.display.update()
+		
+		print 'enter robotics lab'
 	
 	# creates the given number of Enemies, of the given level
 	def spawnEnemies( self, num, level ):
@@ -375,9 +537,7 @@ class Game:
 			pos = ( 100, i * 250 + 50 )
 			img = random.choice( self.bugImgs )
 			name = 'bug' + str( i )
-			e = agents.Enemy( pos, img, name, level, hp = 400 )
-			
-			print 'spawned with', e.hp, 'hp'
+			e = agents.Enemy( pos, img, name, level )
 			
 			self.enemies.append( e )
 			self.battleParticipants.append( e )
@@ -416,7 +576,7 @@ class Game:
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
 		self.inBattle = False
-		self.stage.fillBG( self.screen, self.refresh )
+		self.stage.moveCamView( self.screen, self.refresh, self.camera )
 		self.player.leaveBattle()
 		self.enemies = [] # empty enemies list
 		self.selectedEnemyIDX = -1
@@ -442,6 +602,9 @@ class Game:
 		
 	# parses keyboard input for exploration mode and updates screen contents
 	def updateExplore( self ):
+		
+		#print '\ntime step', self.timeStep # for testing
+		self.timeStep += 1
 		moved = False # whether the player moved this time-step
 		
 		# parse keyboard/mouse input events
@@ -452,6 +615,7 @@ class Game:
 					print 'show stat screen'
 					self.showStatScreen()
 					return # so that characters aren't still drawn over stat screens
+				
 				elif event.key == pygame.K_UP:
 					self.player.goBackward( self.tileSize )
 					moved = True
@@ -491,11 +655,45 @@ class Game:
 		
 		# update screen contents
 		
-		tempRect = self.player.getRect()
-		walked = self.player.update()
-		if moved or walked: # if player moved, update those parts of the screen
-			#print 'moving player'
-			self.stage.fillBG( self.screen, self.refresh, tempRect )
+		walked = self.player.update() # whether player actually walked across screen
+		if walked:
+			# if player is going out of bounds, move camera view and player's onscreen position
+			eraseRect = self.placePlayerOnScreen()
+			newScreenPos = self.player.getPosition()
+			
+			buffer = 20 # distance from edge of screen at which it starts scrolling
+			shift = 10 # distance the camera moves in one time-step when it scrolls (should match one step for player)
+			
+			# move camera to left
+			if newScreenPos[0] <= buffer and not self.stage.approachingLeftWall( self.player, buffer ):
+				self.camera = self.camera.move( -shift, 0 )
+				self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			
+			# move camera to right
+			elif self.player.rightEdge >= self.screenSize[0] - buffer and not self.stage.approachingRightWall( self.player, buffer ):
+				self.camera = self.camera.move( shift, 0 )
+				self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			
+			# move camera up
+			elif newScreenPos[1] <= buffer and not self.stage.approachingTopWall( self.player, buffer ):
+					self.camera = self.camera.move( 0, -shift )
+					self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			
+			# move camera down
+			elif self.player.bottomEdge >= self.screenSize[1] - buffer and not self.stage.approachingBottomWall( self.player, buffer ):
+				self.camera = self.camera.move( 0, shift )
+				self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			
+			# otherwise update display normally
+			else:
+				self.stage.fillBG( self.screen, self.refresh, eraseRect, self.camera )
+				self.refresh.append( self.player.getRect() )
+			
+			self.placePlayerOnScreen() # arrrrrrrrgh
+		
+		elif moved: # if player was given a movement command but did not walk
+			eraseRect = self.placePlayerOnScreen()
+			self.stage.fillBG( self.screen, self.refresh, eraseRect, self.camera )
 			self.refresh.append( self.player.getRect() )
 		
 		self.player.draw( self.screen )
@@ -506,7 +704,6 @@ class Game:
 	def enemyTurn( self ):
 		# randomly select a livePlayer and attack
 		target = random.choice( self.livePlayers )
-		#self.battleParticipants[self.currentBattleTurn].attack( target, 100 ) # to always lose
 		self.battleParticipants[self.currentBattleTurn].attack( target, 50 ) # to always win
 		
 		if not target.isDead(): # if the target is still alive, pass on turn index
@@ -520,8 +717,6 @@ class Game:
 			self.battleParticipants.remove( target )
 			self.livePlayers.remove( target )
 			
-			#print 'turn stays at', self.currentBattleTurn, 'out of', len( self.battleParticipants )
-			
 			# erase killed target
 			eraseRect = target.getRect()
 			eraseRect.width += 12
@@ -534,7 +729,7 @@ class Game:
 				self.currentBattleTurn = 0
 		
 		if len( self.livePlayers ) == 0:
-			print 'you lose!'
+			print 'you lose the battle!'
 			return True
 		else:
 			return False
@@ -545,8 +740,8 @@ class Game:
 		self.currentBattleTurn += 1
 		if self.currentBattleTurn > len( self.battleParticipants ) - 1: # wrap around to front of list
 			self.currentBattleTurn = 0
-		print '\ncurrent battle turn is', self.battleParticipants[self.currentBattleTurn].name + ',', \
-			self.currentBattleTurn, 'out of', len( self.battleParticipants), 'left'
+# 		print '\ncurrent battle turn is', self.battleParticipants[self.currentBattleTurn].name + ',', \
+# 			self.currentBattleTurn, 'out of', len( self.battleParticipants), 'left'
 	
 	# for wins: awards the currently stored amount of XP to all player characters who are still alive
 	def awardXP( self ) :
@@ -665,11 +860,11 @@ class Game:
 							if len( self.enemies ) != 0: # if still enemies, reselect first one
 								self.enemies[0].select()
 							else: # if all enemies are gone
-								print 'you win!'
 								self.awardXP()
+								self.stage.addBattle()
 								self.leaveBattle()
-								'''add code here to increase XP'''
 								done = True
+								print 'you win the battle!'
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
@@ -687,8 +882,7 @@ class Game:
 			for edna in self.battleParticipants:
 				edna.draw( self.screen )
 				self.refresh.append( edna.getRect() )
-		
-			#self.player.draw( self.screen )
+			
 			self.refresh.append( self.player.getRect() )
 	
 	# parses keyboard input for stat screen mode and updates screen contents
@@ -704,7 +898,7 @@ class Game:
 						self.stage.fillBattleBG( self.screen, self.statBGRect )
 						self.refresh.append( self.statBGRect )
 					else: # redraw stage
-						self.stage.fillBG( self.screen, self.refresh, self.statBGRect)
+						self.stage.fillBG( self.screen, self.refresh, self.statBGRect, self.camera)
 						self.player.draw( self.screen )
 						self.refresh.append( self.player.getRect() )
 			
@@ -738,12 +932,29 @@ def main():
 			if event.type == pygame.QUIT:
 				sys.exit()
 	
-	print 'enter stage 1'
+# 	game.loadHallwayStage()
+# 	game.enterHallwayStageRight()
+	
 	game.loadRoboLabStage()
 	game.enterRoboLabStage()
 	
-	# run a loop with the first stage
-	while 1:
+	'''
+	just load all stages to begin with (probably put a loading screen on while that's going)
+	
+	enter hallway stage
+	
+	run a loop with just update
+	within update, if you enter another room, just call the enter for that stage
+	just keep going...
+	
+	in beginning: macLabUnlocked = False
+	if you walk into the door, trigger dialogue with Kimberly
+	if you walk into the robotics lab, call enterRoboLabStage
+	
+	'''
+	
+	# run a loop for the robotics lab
+	while 2:
 		game.update()
 	'''put the above loop inside another loop for while the stage is not finished'''
 	
@@ -761,3 +972,7 @@ def main():
 
 if __name__ == '__main__':
 	main()
+
+
+
+
