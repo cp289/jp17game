@@ -13,12 +13,15 @@ class DebuggingMethod:
 class AskBruce(DebuggingMethod):
 	
 	def __init__(self):
-		DebuggingMethod.__init__("Ask Bruce", 5, 300)
-
+		
+		DebuggingMethod.__init__(self,"Ask Bruce", 5, 300)
+		
+	
 
 def main():
-	attack=DeguggingMethod()
+	attack=AskBruce()
 	
 
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+	main()
