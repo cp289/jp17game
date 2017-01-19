@@ -5,22 +5,35 @@
 
 import sys, pygame, time
 
-pygame.init()
+class Sound:
+	def __init__(self):
+		# Initialize pygame sound module
+		pygame.mixer.init()
+		
+		# Load music files
+		
+		self.files={}
+		
+		self.battle=self.load([
+			"battleMusic.ogg"
+		])
+		
+	def load(self, files):
+		for file in files:
+			self.files.update({".".join(file.split(".")[0:-1]):pygame.mixer.Sound("sounds/"+file)})
+		
+	def play(self, name, loops=1):
+		self.files[name].play(loops)
+		
+	def pause(self, name):
+		pass
 
-pygame.mixer.init()
 
-
-screen=pygame.display.set_mode((400,400))
-
-#Loading battle music
-
-sound=pygame.mixer.Sound("sounds/battleMusic.ogg")
-
-#Playing battle music
-
-sound.play(loops=1000)
-
-while 1:
-	for event in pygame.event.get():
-		if event.type==pygame.QUIT:
-			sys.exit()
+if __name__ == '__main__':
+	pygame.init()
+	sound=Sound()
+	sound.play("battleMusic")
+	while 1:
+		for event in pygame.event.get():
+			if event.type==pygame.QUIT:
+				sys.exit()
