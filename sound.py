@@ -17,7 +17,8 @@ class Sound:
 		
 		# Load a list of sound files in the sounds/ directory
 		self.battle=self.load([
-			"battleMusic.ogg"
+			"battleMusic.ogg",
+			"enemyMusic.ogg"
 		])
 	
 	# Loads list of music files in the sounds/ directory
@@ -37,7 +38,7 @@ class Sound:
 def main():
 	pygame.init()
 	sound=Sound()
-	sound.play("battleMusic")
+	sound.play("enemyMusic")
 	while 1:
 		for event in pygame.event.get():
 			if event.type==pygame.QUIT:
