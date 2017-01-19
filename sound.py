@@ -12,24 +12,29 @@ class Sound:
 		
 		# Load music files
 		
+		# Dictionary of extensionless filenames and pygame Sound objects
 		self.files={}
 		
+		# Load a list of sound files in the sounds/ directory
 		self.battle=self.load([
 			"battleMusic.ogg"
 		])
-		
+	
+	# Loads list of music files in the sounds/ directory
 	def load(self, files):
 		for file in files:
 			self.files.update({".".join(file.split(".")[0:-1]):pygame.mixer.Sound("sounds/"+file)})
-		
+	
+	# Plays music file where `name' is the filename without the file extension
 	def play(self, name, loops=1):
 		self.files[name].play(loops)
 		
+	# Pauses the specified sound
 	def pause(self, name):
 		pass
 
-
-if __name__ == '__main__':
+# Main method
+def main():
 	pygame.init()
 	sound=Sound()
 	sound.play("battleMusic")
@@ -37,3 +42,6 @@ if __name__ == '__main__':
 		for event in pygame.event.get():
 			if event.type==pygame.QUIT:
 				sys.exit()
+
+if __name__ == '__main__':
+	main()
