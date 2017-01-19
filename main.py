@@ -304,7 +304,7 @@ class Game:
 						 pygame.image.load( 'images/Bug 1.png' ).convert_alpha(),
 						 pygame.image.load( 'images/Bug 10.png' ).convert_alpha(),
 						 pygame.image.load( 'images/Bug 11.png' ).convert_alpha(),
-						 pygame.image.load( 'images/BUg 100.png' ).convert_alpha()
+						 pygame.image.load( 'images/Bug 100.png' ).convert_alpha()
 						]
 		
 		self.hallwayStage = Stage( 'hallway', 1, bg, battleBG, bugImgs )
@@ -462,7 +462,7 @@ class Game:
 						 pygame.image.load( 'images/Bug 110.png' ).convert_alpha(),
 						 pygame.image.load( 'images/Bug 111.png' ).convert_alpha(),
 						 pygame.image.load( 'images/Bug 1000.png' ).convert_alpha(),
-						 pygame.image.load( 'images/BUg 1001.png' ).convert_alpha()
+						 pygame.image.load( 'images/Bug 1001.png' ).convert_alpha()
 						]
 		
 		self.roboLabStage = Stage( 'robotics lab', 3, bg, battleBG, bugImgs )
