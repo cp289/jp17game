@@ -1,4 +1,4 @@
-# Melody Mao
+ # Melody Mao
 # CS269, January 2017
 # Debug Davis (temporary title)
 
@@ -13,6 +13,7 @@ import pygame
 import sys
 import agents
 import random
+import sound
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -205,6 +206,9 @@ class Game:
 		self.zenBox = pygame.Rect( ( 3 * offset + boxWidth, 2 * offset ), ( boxWidth, boxHeight ) )
 		self.chaBox = pygame.Rect( ( 3 * offset + boxWidth, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
 		
+		# load sounds
+		self.sound=sound.Sound()
+		
 		# create fonts
 		self.bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
 		self.smallFont = pygame.font.SysFont( 'Helvetica', 18 )
@@ -304,7 +308,7 @@ class Game:
 						 pygame.image.load( 'images/Bug 1.png' ).convert_alpha(),
 						 pygame.image.load( 'images/Bug 10.png' ).convert_alpha(),
 						 pygame.image.load( 'images/Bug 11.png' ).convert_alpha(),
-						 pygame.image.load( 'images/BUg 100.png' ).convert_alpha()
+						 pygame.image.load( 'images/Bug 100.png' ).convert_alpha()
 						]
 		
 		self.hallwayStage = Stage( 'hallway', 1, bg, battleBG, bugImgs )
@@ -462,7 +466,7 @@ class Game:
 						 pygame.image.load( 'images/Bug 110.png' ).convert_alpha(),
 						 pygame.image.load( 'images/Bug 111.png' ).convert_alpha(),
 						 pygame.image.load( 'images/Bug 1000.png' ).convert_alpha(),
-						 pygame.image.load( 'images/BUg 1001.png' ).convert_alpha()
+						 pygame.image.load( 'images/Bug 1001.png' ).convert_alpha()
 						]
 		
 		self.roboLabStage = Stage( 'robotics lab', 3, bg, battleBG, bugImgs )
@@ -609,6 +613,7 @@ class Game:
 		self.spawnEnemies( 4, 1 ) # 3 enemies of level 1
 		self.enemies[0].select()
 		self.selectedEnemyIDX = 0
+		self.sound.play("battleMusic",1000)
 		print 'enter battle'
 		
 		# reset stored points for new battle
@@ -623,6 +628,7 @@ class Game:
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
 		self.inBattle = False
+		self.sound.stop("battleMusic") # stop battle music
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
 		self.player.leaveBattle()
 		self.enemies = [] # empty enemies list

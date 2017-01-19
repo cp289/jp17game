@@ -1,3 +1,6 @@
+# File: sound.py
+# Author: Charles Parham
+#
 # Unless you want to live a life full of pain,
 #   make sure all audio files are of the form *.ogg and have a 
 #   sample rate of 22050 Hz. Good luck.
@@ -30,9 +33,9 @@ class Sound:
 	def play(self, name, loops=1):
 		self.files[name].play(loops)
 		
-	# Pauses the specified sound
-	def pause(self, name):
-		pass
+	# Stops the specified sound
+	def stop(self, name):
+		self.files[name].stop()
 
 # Main method
 def main():
