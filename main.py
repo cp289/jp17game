@@ -29,12 +29,13 @@ class Stage:
 	
 	# creates a new Stage with the given number of battles to win and background image
 	# optional to give starting player Position on stage and starting camera position (upper left corner)
-	def __init__( self, name, numBattles, bg, battleBG, bugs ):
+	def __init__( self, name, numBattles, scale, bg, battleBG, bugs ):
 		self.name = name
 		self.numBattles = numBattles
 		self.battlesCompleted = 0
 		self.background = bg
 		self.battleBG = battleBG
+		self.scale = scale
 		
 		self.contents = pygame.sprite.Group()
 		self.doors = []
@@ -153,7 +154,6 @@ class Game:
 		# create a screen (width, height)
 		self.screenSize = ( 800, 600 )
 		self.screen = pygame.display.set_mode( self.screenSize )
-		self.scale = 0.5
 		
 		pygame.display.set_caption( 'debugDavis()' )
 		print 'init screen'
@@ -293,8 +293,10 @@ class Game:
 	
 	# loads images for robotics lab stage and creates the furniture objects
 	def loadHallwayStage( self ):
+		scale = 0.5
+		
 		bgOrig = pygame.image.load( 'images/Davis Hallway.png' ).convert_alpha()
-		newDim = ( int( bgOrig.get_width() * self.scale ), int( bgOrig.get_height() * self.scale ) )
+		newDim = ( int( bgOrig.get_width() * scale ), int( bgOrig.get_height() * scale ) )
 		bg = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
 		
 		battleBGorig = pygame.image.load( 'images/Hallway Battle.png' ).convert_alpha()
@@ -307,11 +309,11 @@ class Game:
 						 pygame.image.load( 'images/Bug 100.png' ).convert_alpha()
 						]
 		
-		self.hallwayStage = Stage( 'hallway', 1, bg, battleBG, bugImgs )
+		self.hallwayStage = Stage( 'hallway', 1, scale, bg, battleBG, bugImgs )
 		
 		# create doors
 		
-		doorToRoboLab = agents.Door( ( 0, 1800 * self.scale ), ( 10, 350 * self.scale ), 'robotics lab' )
+		doorToRoboLab = agents.Door( ( 0, 1800 * scale ), ( 10, 350 * scale ), 'robotics lab' )
 		self.hallwayStage.addDoor( doorToRoboLab )
 		
 		# create walls
@@ -326,7 +328,7 @@ class Game:
 		rightWall = agents.Thing( ( self.hallwayStage.width - 5, 0 ), rWall )
 		self.hallwayStage.addThing( rightWall )
 		
-		topWallHeight = 715 * self.scale
+		topWallHeight = 715 * scale
 		self.hallwayStage.setTopWallEdge( topWallHeight )
 		tWall = pygame.Surface( ( self.hallwayStage.width, topWallHeight ) )
 		#tWall.fill( ( 100, 100, 50 ) )
@@ -339,71 +341,71 @@ class Game:
 		bottomWall = agents.Thing( ( 0, self.hallwayStage.height ), bWall )
 		self.hallwayStage.addThing( bottomWall )
 		
-		lChairDim = ( 325 * self.scale, 400 * self.scale )
-		lChairPos = ( 480 * self.scale, 865 * self.scale )
+		lChairDim = ( 325 * scale, 400 * scale )
+		lChairPos = ( 480 * scale, 865 * scale )
 		lChair = pygame.Surface( lChairDim )
 		lChair.set_alpha( 0 )
 		leftChair = agents.Thing( lChairPos, lChair )
 		self.hallwayStage.addThing( leftChair )
 		
-		mChairDim = ( 325 * self.scale, 400 * self.scale )
-		mChairPos = ( 1100 * self.scale, 865 * self.scale )
+		mChairDim = ( 325 * scale, 400 * scale )
+		mChairPos = ( 1100 * scale, 865 * scale )
 		mChair = pygame.Surface( mChairDim )
 		mChair.set_alpha( 0 )
 		middleChair = agents.Thing( mChairPos, mChair )
 		self.hallwayStage.addThing( middleChair )
 		
-		rChairDim = ( 365 * self.scale, 320 * self.scale )
-		rChairPos = ( 1545 * self.scale, 1420 * self.scale )
+		rChairDim = ( 365 * scale, 320 * scale )
+		rChairPos = ( 1545 * scale, 1420 * scale )
 		rChair = pygame.Surface( rChairDim )
 		rChair.set_alpha( 0 )
 		rightChair = agents.Thing( rChairPos, rChair )
 		self.hallwayStage.addThing( rightChair )
 		
-		lBoxDim = ( 295 * self.scale, 320 * self.scale )
-		lBoxPos = ( 605 * self.scale, 1365 * self.scale )
+		lBoxDim = ( 295 * scale, 320 * scale )
+		lBoxPos = ( 605 * scale, 1365 * scale )
 		lBox = pygame.Surface( lBoxDim )
 		lBox.set_alpha( 0 )
 		leftBox = agents.Thing( lBoxPos, lBox )
 		self.hallwayStage.addThing( leftBox )
 		
-		rBoxDim = ( 300 * self.scale, 305 * self.scale )
-		rBoxPos = ( 1050 * self.scale, 1510 * self.scale )
+		rBoxDim = ( 300 * scale, 305 * scale )
+		rBoxPos = ( 1050 * scale, 1510 * scale )
 		rBox = pygame.Surface( rBoxDim )
 		rBox.set_alpha( 0 )
 		rightBox = agents.Thing( rBoxPos, rBox )
 		self.hallwayStage.addThing( rightBox )
 		
-		iSofaDim = ( 960 * self.scale, 370 * self.scale )
-		iSofaPos = ( 470 * self.scale, 1900 * self.scale )
+		iSofaDim = ( 960 * scale, 370 * scale )
+		iSofaPos = ( 470 * scale, 1900 * scale )
 		iSofa = pygame.Surface( iSofaDim )
 		iSofa.set_alpha( 0 )
 		sofa = agents.Thing( iSofaPos, iSofa )
 		self.hallwayStage.addThing( sofa )
 		
-		iTrashDim = ( 550 * self.scale, 170 * self.scale )
-		iTrashPos = ( 2450 * self.scale, 715 * self.scale )
+		iTrashDim = ( 550 * scale, 170 * scale )
+		iTrashPos = ( 2450 * scale, 715 * scale )
 		iTrash = pygame.Surface( iTrashDim )
 		iTrash.set_alpha( 0 )
 		trash = agents.Thing( iTrashPos, iTrash )
 		self.hallwayStage.addThing( trash )
 		
-		uTableDim = ( 500 * self.scale, 405 * self.scale )
-		uTablePos = ( 2300 * self.scale, 1000 * self.scale )
+		uTableDim = ( 500 * scale, 405 * scale )
+		uTablePos = ( 2300 * scale, 1000 * scale )
 		uTable = pygame.Surface( uTableDim )
 		uTable.set_alpha( 0 )
 		upTable = agents.Thing( uTablePos, uTable )
 		self.hallwayStage.addThing( upTable )
 		
-		dTableDim = ( 500 * self.scale, 405 * self.scale )
-		dTablePos = ( 2150 * self.scale, 1600 * self.scale )
+		dTableDim = ( 500 * scale, 405 * scale )
+		dTablePos = ( 2150 * scale, 1600 * scale )
 		dTable = pygame.Surface( dTableDim )
 		dTable.set_alpha( 0 )
 		downTable = agents.Thing( dTablePos, dTable )
 		self.hallwayStage.addThing( downTable )
 		
-		sLabDim = ( 2000 * self.scale, 2220 * self.scale )
-		sLabPos = ( 3000 * self.scale, 0 * self.scale )
+		sLabDim = ( 2000 * scale, 2220 * scale )
+		sLabPos = ( 3000 * scale, 0 * scale )
 		sLab = pygame.Surface( sLabDim )
 		sLab.set_alpha( 0 )
 		smallLab = agents.Thing( sLabPos, sLab )
@@ -416,8 +418,8 @@ class Game:
 		self.stage = self.hallwayStage
 		
 		# set initial player and camera positions for this room
-		self.camera.topleft = 3400 * self.scale, 1900 * self.scale
-		initPos = ( 4800 * self.scale, 2600 * self.scale )
+		self.camera.topleft = 3400 * self.stage.scale, 1900 * self.stage.scale
+		initPos = ( 4800 * self.stage.scale, 2600 * self.stage.scale )
 		
 		self.player.setStagePos( initPos[0], initPos[1] )
 		self.placePlayerOnScreen()
@@ -435,8 +437,8 @@ class Game:
 		self.stage = self.hallwayStage
 		
 		# set initial player and camera positions for this room
-		self.camera.topleft = 0 * self.scale, 1100 * self.scale
-		initPos = ( 10 * self.scale, 1800 * self.scale )
+		self.camera.topleft = 0 * self.stage.scale, 1100 * self.stage.scale
+		initPos = ( 10 * self.stage.scale, 1800 * self.stage.scale )
 		
 		self.player.setStagePos( initPos[0], initPos[1] )
 		self.placePlayerOnScreen()
@@ -451,8 +453,10 @@ class Game:
 	
 	# loads images for robotics lab stage and creates the furniture objects
 	def loadRoboLabStage( self ):
+		scale = 0.4
+		
 		bgOrig = pygame.image.load( 'images/Davis Robotics Lab.png' ).convert_alpha()
-		newDim = ( int( bgOrig.get_width() * self.scale ), int( bgOrig.get_height() * self.scale ) )
+		newDim = ( int( bgOrig.get_width() * scale ), int( bgOrig.get_height() * scale ) )
 		bg = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
 		
 		battleBGorig = pygame.image.load( 'images/Robotics Lab Battle.png' ).convert_alpha()
@@ -465,12 +469,12 @@ class Game:
 						 pygame.image.load( 'images/Bug 1001.png' ).convert_alpha()
 						]
 		
-		self.roboLabStage = Stage( 'robotics lab', 3, bg, battleBG, bugImgs )
+		self.roboLabStage = Stage( 'robotics lab', 3, scale, bg, battleBG, bugImgs )
 		
 		# create door
 		
-		doorToHall = agents.Door( ( self.roboLabStage.width - 10, 3672 * self.scale ), \
-			( 10, 378 * self.scale ), 'hallway' )
+		doorToHall = agents.Door( ( self.roboLabStage.width - 15, 3672 * scale ), \
+			( 15, 378 * scale ), 'hallway' )
 		self.roboLabStage.addDoor( doorToHall )
 		
 		# create walls
@@ -480,12 +484,12 @@ class Game:
 		leftWall = agents.Thing( ( -5, 0 ), lWall )
 		self.roboLabStage.addThing( leftWall )
 	
-		rWall = pygame.Surface( ( 5, self.roboLabStage.height ) )
+		rWall = pygame.Surface( ( 10, self.roboLabStage.height ) )
 		rWall.set_alpha( 0 ) # set image transparency
-		rightWall = agents.Thing( ( self.roboLabStage.width, 0 ), rWall )
+		rightWall = agents.Thing( ( self.roboLabStage.width - 5, 0 ), rWall )
 		self.roboLabStage.addThing( rightWall )
 		
-		topWallHeight = 1110 * self.scale
+		topWallHeight = 1110 * scale
 		self.roboLabStage.setTopWallEdge( topWallHeight )
 		tWall = pygame.Surface( ( self.roboLabStage.width, topWallHeight ) )
 		#tWall.fill( ( 100, 100, 50 ) )
@@ -500,48 +504,48 @@ class Game:
 		
 		# load furniture
 		
-		lTableDim = ( int( 700 * self.scale ), int( 1040 * self.scale ) )
-		lTablePos = ( int( 960 * self.scale ), int( 860 * self.scale ) )
+		lTableDim = ( int( 700 * scale ), int( 1040 * scale ) )
+		lTablePos = ( int( 960 * scale ), int( 860 * scale ) )
 		lTable = pygame.Surface( lTableDim )
 		#lTable.fill( ( 100, 100, 50 ) )
 		lTable.set_alpha( 0 ) # set image transparency
 		leftTable = agents.Thing( lTablePos, lTable )
 		self.roboLabStage.addThing( leftTable )
 	
-		rTableDim = ( int( 700 * self.scale ), int( 1040 * self.scale ) )
-		rTablePos = ( int( 2400 * self.scale ), int( 860 * self.scale ) )
+		rTableDim = ( int( 700 * scale ), int( 1040 * scale ) )
+		rTablePos = ( int( 2400 * scale ), int( 860 * scale ) )
 		rTable = pygame.Surface( rTableDim )
 		#rTable.fill( ( 100, 100, 50 ) )
 		rTable.set_alpha( 0 ) # set image transparency
 		rightTable = agents.Thing( rTablePos, rTable )
 		self.roboLabStage.addThing( rightTable )
 	
-		iboardDim = ( int( 380 * self.scale ), int( 1100 * self.scale ) )
-		iboardPos = ( int( 100 * self.scale ), int( 2100 * self.scale ) )
+		iboardDim = ( int( 380 * scale ), int( 1100 * scale ) )
+		iboardPos = ( int( 100 * scale ), int( 2100 * scale ) )
 		iboard = pygame.Surface( iboardDim )
 		#iboard.fill( ( 100, 100, 50 ) )
 		iboard.set_alpha( 0 ) # set image transparency
 		board = agents.Thing( iboardPos, iboard )
 		self.roboLabStage.addThing( board )
 	
-		bTableDim = ( int( 790 * self.scale ), int( 485 * self.scale ) )
-		bTablePos = ( int( 925 * self.scale ), int( 3085 * self.scale ) )
+		bTableDim = ( int( 790 * scale ), int( 485 * scale ) )
+		bTablePos = ( int( 925 * scale ), int( 3085 * scale ) )
 		bTable = pygame.Surface( bTableDim )
 		#bTable.fill( ( 100, 100, 50 ) )
 		bTable.set_alpha( 0 ) # set image transparency
 		bottomTable = agents.Thing( bTablePos, bTable )
 		self.roboLabStage.addThing( bottomTable )
 	
-		lCouchDim = ( int( 785 * self.scale ), int( 480 * self.scale ) )
-		lCouchPos = ( int( 2670 * self.scale ), int( 2530 * self.scale ) )
+		lCouchDim = ( int( 785 * scale ), int( 480 * scale ) )
+		lCouchPos = ( int( 2670 * scale ), int( 2530 * scale ) )
 		lCouch = pygame.Surface( lCouchDim )
 		#lCouch.fill( ( 100, 100, 50 ) )
 		lCouch.set_alpha( 0 ) # set image transparency
 		leftCouch = agents.Thing( lCouchPos, lCouch )
 		self.roboLabStage.addThing( leftCouch )
 	
-		rCouchDim = ( int( 610 * self.scale ), int( 1080 * self.scale ) )
-		rCouchPos = ( int ( 3440 * self.scale ), int( 1920 * self.scale ) )
+		rCouchDim = ( int( 610 * scale ), int( 1080 * scale ) )
+		rCouchPos = ( int ( 3440 * scale ), int( 1920 * scale ) )
 		rCouch = pygame.Surface( rCouchDim )
 		#rCouch.fill( ( 100, 100, 50 ) )
 		rCouch.set_alpha( 0 ) # set image transparency
@@ -555,8 +559,12 @@ class Game:
 		self.stage = self.roboLabStage
 		
 		# set initial player and camera positions for this room
-		self.camera.topleft = 2450 * self.scale, 2850 * self.scale
-		initPos = ( 3900 * self.scale, 3672 * self.scale )
+		
+		#self.camera.topleft = 2450 * self.stage.scale, 2850 * self.stage.scale # for scale 0.5
+		#initPos = ( 3900 * self.stage.scale, 3672 * self.stage.scale )
+		
+		self.camera.topleft = 2050 * self.stage.scale, 2550 * self.stage.scale # for scale 0.4
+		initPos = ( 3900 * self.stage.scale, 3600 * self.stage.scale )
 		
 		self.player.setStagePos( initPos[0], initPos[1] )
 		self.placePlayerOnScreen()
@@ -603,10 +611,11 @@ class Game:
 		# build list of battle participants
 		self.battleParticipants= [ self.mel, self.fa, self.zen ]
 		self.currentBattleTurn = 0
+# 		self.mel.attacking = True
 		
 		self.livePlayers = [ self.mel, self.fa, self.zen ]
 		
-		self.spawnEnemies( 4, 1 ) # 3 enemies of level 1
+		self.spawnEnemies( 3, 1 ) # number, level
 		self.enemies[0].select()
 		self.selectedEnemyIDX = 0
 		print 'enter battle'
@@ -770,7 +779,7 @@ class Game:
 			eraseRect = self.placePlayerOnScreen()
 			newScreenPos = self.player.getPosition()
 			
-			buffer = 20 # distance from edge of screen at which it starts scrolling
+			buffer = 180 # distance from edge of screen at which it starts scrolling
 			shift = 10 # distance the camera moves in one time-step when it scrolls (should match one step for player)
 			
 			# move camera to left
@@ -845,10 +854,19 @@ class Game:
 	
 	# moves the battle turn to the next character
 	def passOnTurn( self ):
+# 		prev = self.battleParticipants[self.currentBattleTurn]
+# 		if prev.getType() == 'PlayableCharacter':
+# 			prev.attacking = False
+		
 		# pass on battle turn
 		self.currentBattleTurn += 1
 		if self.currentBattleTurn > len( self.battleParticipants ) - 1: # wrap around to front of list
 			self.currentBattleTurn = 0
+		
+# 		next = self.battleParticipants[self.currentBattleTurn]
+# 		if next.getType() == 'PlayableCharacter':
+# 			next.attacking = True
+		
 # 		print '\ncurrent battle turn is', self.battleParticipants[self.currentBattleTurn].name + ',', \
 # 			self.currentBattleTurn, 'out of', len( self.battleParticipants), 'left'
 	

@@ -157,7 +157,7 @@ class Character( Thing ):
 		if self.showHP:
 			# draw health bar background (in black)
 			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
-		
+			
 			# draw health bar foreground based on current HP left (if there is any)
 			if self.hp != 0:
 				fraction = float( self.hp ) / self.totalHP
@@ -283,6 +283,7 @@ class PlayableCharacter( Character ):
 		# initialize attack list as empty
 		self.attacks = [] # all attacks the character is capable of
 		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
+		self.attacking = False # whether it is this character's turn to attack
 		
 		# variables for current player state
 		self.orientation = front
@@ -576,6 +577,10 @@ class PlayableCharacter( Character ):
 				self.image = self.imgLeft
 			elif self.orientation == right:
 				self.image = self.imgRight
+		
+		# if this character is attacking, draw a box indicator
+# 		if self.attacking:
+# 			pygame.draw.rect( screen, (215, 200, 255), self.imgBattle.get_rect() )
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
