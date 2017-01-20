@@ -725,6 +725,7 @@ class Game:
 		#print '\ntime step', self.timeStep # for testing
 		self.timeStep += 1
 		moved = False # whether the player moved this time-step
+		keydown = False
 		
 		# parse keyboard/mouse input events
 		for event in pygame.event.get():
@@ -738,36 +739,47 @@ class Game:
 				elif event.key == pygame.K_UP:
 					self.player.goBackward( self.tileSize )
 					moved = True
+					keydown = True
+					break
 				elif event.key == pygame.K_DOWN:
 					self.player.goForward( self.tileSize )
 					moved = True
+					keydown = True
+					break
 				elif event.key == pygame.K_LEFT:
 					self.player.goLeft( self.tileSize )
 					moved = True
+					keydown = True
+					break
 				elif event.key == pygame.K_RIGHT:
 					self.player.goRight( self.tileSize )
 					moved = True
+					keydown = True
+					break
 				
 				elif event.key == pygame.K_b:
 					self.enterBattle()
+					keydown = True
+					break
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
 		
 		# for when the key is held down
-		keysdown = pygame.key.get_pressed()
-		if keysdown[pygame.K_UP]:
-			self.player.goBackward( self.tileSize )
-			moved = True
-		elif keysdown[pygame.K_DOWN]:
-			self.player.goForward( self.tileSize )
-			moved = True
-		elif keysdown[pygame.K_LEFT]:
-			self.player.goLeft( self.tileSize )
-			moved = True
-		elif keysdown[pygame.K_RIGHT]:
-			self.player.goRight( self.tileSize )
-			moved = True
+		if not keydown: # only check if there isn't a new button down
+			keysdown = pygame.key.get_pressed()
+			if keysdown[pygame.K_UP]:
+				self.player.goBackward( self.tileSize )
+				moved = True
+			elif keysdown[pygame.K_DOWN]:
+				self.player.goForward( self.tileSize )
+				moved = True
+			elif keysdown[pygame.K_LEFT]:
+				self.player.goLeft( self.tileSize )
+				moved = True
+			elif keysdown[pygame.K_RIGHT]:
+				self.player.goRight( self.tileSize )
+				moved = True
 		
 		# stop movement if it leads to collision
 		self.stage.collide( self.player )
