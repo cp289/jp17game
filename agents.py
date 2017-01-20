@@ -1,6 +1,6 @@
 # Melody Mao
 # CS269, January 2017
-# Debug Davis (temporary title)
+# Debug Davis
 
 # agents.py
 # This file defines the Thing class and its child classes.
