@@ -45,6 +45,8 @@ class Stage:
 		self.height = bg.get_rect().height
 		self.width = bg.get_rect().width
 		self.topWallEdge = 0 # y-coordinate for the bottom of the top wall
+		
+		self.stepsTaken = 0 # number of steps taken in this stage
 	
 	# sets the field storing the bottom of the top walls
 	def setTopWallEdge( self, e ):
@@ -57,6 +59,10 @@ class Stage:
 	# add a door to another room
 	def addDoor( self, door ):
 		self.doors.append( door )
+	
+	# add 1 step to those recorded for this stage
+	def addStep( self ):
+		self.stepsTaken += 1
 	
 	# returns a randomly chosen bug image from the set for this stage
 	def randomBug( self ):
@@ -636,7 +642,10 @@ class Game:
 	def leaveBattle( self ):
 		self.inBattle = False
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
+		self.stage.stepsTaken = 0 # reset steps
+		
 		self.player.leaveBattle()
+		
 		self.enemies = [] # empty enemies list
 		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
@@ -769,15 +778,18 @@ class Game:
 		if door != None:
 			# if entering a door, determine which room the door leads to
 			if door.room == 'robotics lab':
-				self.enterRoboLabStage()
+				if self.player.movement[0] == left: # make sure player is going in the correct direction
+					self.enterRoboLabStage()
 			elif door.room == 'hallway': # if entering the hallway, determine from which room
-				if self.stage == self.roboLabStage:
+				if self.stage == self.roboLabStage and self.player.movement[0] == right:
 					self.enterHallwayStageLeft()
 		
 		# update screen contents
 		
 		walked = self.player.update() # whether player actually walked across screen
 		if walked:
+			self.stage.addStep()
+			
 			# if player is going out of bounds, move camera view and player's onscreen position
 			eraseRect = self.placePlayerOnScreen()
 			newScreenPos = self.player.getPosition()
@@ -816,6 +828,11 @@ class Game:
 			eraseRect = self.placePlayerOnScreen()
 			self.stage.fillBG( self.screen, self.refresh, eraseRect, self.camera )
 			self.refresh.append( self.player.getRect() )
+		
+# 		else: # otherwise, player did not move at all, can trigger battle
+# 			probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
+# 			if random.random() < probBattle:
+# 				self.enterBattle()
 		
 		self.player.draw( self.screen )
 		self.refresh.append( self.player.getRect() )
@@ -980,7 +997,7 @@ class Game:
 							
 							# add points for kill to stored total
 							self.storedPoints += toRemove.level * 10
-						
+							
 							# erase killed target
 							eraseRect = toRemove.getRect()
 							eraseRect.width += 12
