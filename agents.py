@@ -145,6 +145,13 @@ class Character( Thing ):
 		if self.hp < 0: # if the damage would make the HP negative, just make it 0
 			self.hp = 0
 	
+	# increases the Character's HP by the given percentage (0 <= perc < 1)
+	def takeHealth( self, perc ):
+		self.hp += perc*self.totalHP
+		
+		if self.hp > totalHP:
+			self.hp = totalHP
+	
 	# attacks the given Character target and does the given amount of damage
 	def attack( self, target, dmg ):
 		target.takeDamage( dmg )
