@@ -313,7 +313,7 @@ class Game:
 		
 		# create doors
 		
-		doorToRoboLab = agents.Door( ( 0, 1800 * scale ), ( 10, 350 * scale ), 'robotics lab' )
+		doorToRoboLab = agents.Door( ( 0, 1365 * scale ), ( 10, 60 / scale ), 'robotics lab' )
 		self.hallwayStage.addDoor( doorToRoboLab )
 		
 		# create walls
@@ -341,43 +341,43 @@ class Game:
 		bottomWall = agents.Thing( ( 0, self.hallwayStage.height ), bWall )
 		self.hallwayStage.addThing( bottomWall )
 		
-		lChairDim = ( 325 * scale, 400 * scale )
-		lChairPos = ( 480 * scale, 865 * scale )
+		lChairDim = ( 370 * scale, 470 * scale )
+		lChairPos = ( 445 * scale, 965 * scale )
 		lChair = pygame.Surface( lChairDim )
 		lChair.set_alpha( 0 )
 		leftChair = agents.Thing( lChairPos, lChair )
 		self.hallwayStage.addThing( leftChair )
 		
-		mChairDim = ( 325 * scale, 400 * scale )
-		mChairPos = ( 1100 * scale, 865 * scale )
+		mChairDim = ( 370 * scale, 470 * scale )
+		mChairPos = ( 1080 * scale, 990 * scale )
 		mChair = pygame.Surface( mChairDim )
 		mChair.set_alpha( 0 )
 		middleChair = agents.Thing( mChairPos, mChair )
 		self.hallwayStage.addThing( middleChair )
 		
-		rChairDim = ( 365 * scale, 320 * scale )
-		rChairPos = ( 1545 * scale, 1420 * scale )
+		rChairDim = ( 425 * scale, 375 * scale )
+		rChairPos = ( 1520 * scale, 1610 * scale )
 		rChair = pygame.Surface( rChairDim )
 		rChair.set_alpha( 0 )
 		rightChair = agents.Thing( rChairPos, rChair )
 		self.hallwayStage.addThing( rightChair )
 		
-		lBoxDim = ( 295 * scale, 320 * scale )
-		lBoxPos = ( 605 * scale, 1365 * scale )
+		lBoxDim = ( 350 * scale, 350 * scale )
+		lBoxPos = ( 435 * scale, 1675 * scale )
 		lBox = pygame.Surface( lBoxDim )
 		lBox.set_alpha( 0 )
 		leftBox = agents.Thing( lBoxPos, lBox )
 		self.hallwayStage.addThing( leftBox )
 		
-		rBoxDim = ( 300 * scale, 305 * scale )
-		rBoxPos = ( 1050 * scale, 1510 * scale )
+		rBoxDim = ( 350 * scale, 350 * scale )
+		rBoxPos = ( 940 * scale, 1820 * scale )
 		rBox = pygame.Surface( rBoxDim )
 		rBox.set_alpha( 0 )
 		rightBox = agents.Thing( rBoxPos, rBox )
 		self.hallwayStage.addThing( rightBox )
 		
-		iSofaDim = ( 960 * scale, 370 * scale )
-		iSofaPos = ( 470 * scale, 1900 * scale )
+		iSofaDim = ( 1090 * scale, 430 * scale )
+		iSofaPos = ( 410 * scale, 2430 * scale )
 		iSofa = pygame.Surface( iSofaDim )
 		iSofa.set_alpha( 0 )
 		sofa = agents.Thing( iSofaPos, iSofa )
@@ -390,15 +390,15 @@ class Game:
 		trash = agents.Thing( iTrashPos, iTrash )
 		self.hallwayStage.addThing( trash )
 		
-		uTableDim = ( 500 * scale, 405 * scale )
-		uTablePos = ( 2300 * scale, 1000 * scale )
+		uTableDim = ( 510 * scale, 455 * scale )
+		uTablePos = ( 2235 * scale, 1060 * scale )
 		uTable = pygame.Surface( uTableDim )
 		uTable.set_alpha( 0 )
 		upTable = agents.Thing( uTablePos, uTable )
 		self.hallwayStage.addThing( upTable )
 		
-		dTableDim = ( 500 * scale, 405 * scale )
-		dTablePos = ( 2150 * scale, 1600 * scale )
+		dTableDim = ( 520 * scale, 430 * scale )
+		dTablePos = ( 2195 * scale, 1950 * scale )
 		dTable = pygame.Surface( dTableDim )
 		dTable.set_alpha( 0 )
 		downTable = agents.Thing( dTablePos, dTable )
@@ -437,8 +437,8 @@ class Game:
 		self.stage = self.hallwayStage
 		
 		# set initial player and camera positions for this room
-		self.camera.topleft = 0 * self.stage.scale, 1100 * self.stage.scale
-		initPos = ( 10 * self.stage.scale, 1800 * self.stage.scale )
+		self.camera.topleft = 0 * self.stage.scale, 700 * self.stage.scale
+		initPos = ( 10 * self.stage.scale, 1100 * self.stage.scale )
 		
 		self.player.setStagePos( initPos[0], initPos[1] )
 		self.placePlayerOnScreen()
@@ -628,6 +628,9 @@ class Game:
 			self.cha.enterBattle()
 			self.battleParticipants.append( self.cha )
 			self.livePlayers.append( self.cha )
+		
+# 		for chara in self.livePlayers:
+# 			print 'drew', chara.name, 'hp bar at', chara.hpbarBG
 	
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
