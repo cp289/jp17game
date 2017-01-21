@@ -164,9 +164,10 @@ class Character( Thing ):
 		if self.hp > totalHP:
 			self.hp = totalHP
 	
+	# cedits
 	# attacks the given Character target and does the given amount of damage
-	def attack( self, target, dmg ):
-		target.takeDamage( dmg )
+	def attack( self, target, index ):
+		self.availableAttacks[index].attack(target, self)
 	
 	# draws the Character with a health bar at its current position on the given Surface
 	def draw( self, screen ):
@@ -286,9 +287,13 @@ class PlayableCharacter( Character ):
 		self.statStep = 5 # how much a stat can increase in one level-up
 		self.hpStep = 55 # how much HP can increase in one level-up
 		
-		# initialize attack list as empty
-		self.attacks = [] # all attacks the character is capable of
-		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
+		# initialize level 1 attacks
+		self.attacks = [
+				AskSomeone(),
+				TakeBreak(),
+				ReadProject(),
+				PrintStatements()
+			]
 		self.attacking = False # whether it is this character's turn to attack
 		
 		# variables for current player state
@@ -549,6 +554,27 @@ class PlayableCharacter( Character ):
 		
 		if random.random() < self.accGR:
 			self.acc += self.statStep
+			
+		# add new attack
+		if level == 2:
+			newatk = ReferNotes()
+			
+		if level == 3:
+			newatk = ReadCode()
+			
+		if level == 4:
+			newatk = ShareCode()
+			
+		if level == 5:
+			newatk = LookTime()
+			
+		if level == 6:
+			newatk = UseInternet()
+			
+		if level == 7:
+			newatk = CommentLines()
+			
+		self.addAttack(newatk)
 	
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view

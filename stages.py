@@ -980,6 +980,9 @@ class Game:
 					# attack currently selected enemy
 					elif event.key == pygame.K_a:
 						target = self.enemies[self.selectedEnemyIDX]
+						
+						#debuggingMethod->
+						
 						attacker.attack( target, 50 )
 						
 						attacker.attacking = False # make box disappear
