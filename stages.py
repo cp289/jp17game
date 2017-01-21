@@ -10,6 +10,7 @@ import sys
 import agents
 import random
 from attackChooser import *
+from sound import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -211,6 +212,9 @@ class Game:
 		# create fonts
 		self.bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
 		self.smallFont = pygame.font.SysFont( 'Helvetica', 18 )
+		
+		# load sound object
+		self.sound = Sound()
 		
 		# mostly for testing
 		self.timeStep = 0
@@ -596,6 +600,9 @@ class Game:
 		self.stage.fillBattleBG( self.screen )
 		self.refresh.append( self.screen.get_rect() )
 		
+		# play battle music
+		self.sound.play("battleMusic", -1 )
+		
 		self.inBattle = True
 		self.player.enterBattle()
 		self.fa.enterBattle()
@@ -634,6 +641,9 @@ class Game:
 	
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
+		# stop battle music
+		self.sound.stop("battleMusic")
+		
 		self.inBattle = False
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
 		self.stage.stepsTaken = 0 # reset steps
@@ -914,7 +924,7 @@ class Game:
 			
 			# check for leveling up
 			if chara.xp >= chara.level * 100:
-				chara.levelUp()
+				chara.levelUp(self)
 				print 'leveled up', chara.name, 'to level', chara.level
 	
 	# parses keyboard input for battle mode and updates screen contents
@@ -1072,6 +1082,7 @@ class Game:
 					if self.inBattle: # redraw battle screen
 						self.stage.fillBattleBG( self.screen, self.statBGRect )
 						self.refresh.append( self.statBGRect )
+						self.dashboard.draw()
 					else: # redraw stage
 						self.stage.fillBG( self.screen, self.refresh, self.statBGRect, self.camera)
 						self.player.draw( self.screen )

@@ -5,8 +5,6 @@
 # 	background needed? (currently gray)
 #
 # Issues:
-# 	Status screen destroys this
-# 	need to handle leveling up
 #	need to make the dashboard more visually apealing
 # 	rename this file to 'dashboard'
 
@@ -45,7 +43,7 @@ class AttackChooser:
 		# setup text elements
 		self.chara = chara
 		self.attacks = chara.attacks
-		self.atkindex = 0
+		self.atkIndex = 0
 	
 	def draw(self): # too much rendering ( in most cases, only text needs updating )
 		self.parSurface.blit(self.surface, self.pos )
@@ -59,9 +57,12 @@ class AttackChooser:
 		
 		pygame.display.update(self.rect)
 		
-		
 	def switchAtk(self, num):
+		if self.attack().name == "Share Code":
+			self.attack().oldCursor()
 		self.atkIndex = (self.atkIndex + num) % len(self.attacks)
+		if self.attack().name == "Share Code":
+			self.attack().newCursor()
 
 
 def main():

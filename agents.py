@@ -194,6 +194,7 @@ class Character( Thing ):
 		
 		# draw pointer if selected
 		if self.selected:
+			#print "should draw cursor for " + self.name
 			radius = 10
 			arrowPos = ( self.rightEdge - radius, self.bottomEdge - radius )
 			arrowBottom = ( self.rightEdge - radius, self.bottomEdge + radius + 1 )
@@ -579,7 +580,7 @@ class PlayableCharacter( Character ):
 	# level up the character, using growth rates to determine which stats
 	# will be leveled up
 	# HP increases by 55 at a time, all others by 5
-	def levelUp( self ):
+	def levelUp( self, game ):
 		self.level += 1
 		
 		# increase stats based on growth rates
@@ -599,22 +600,17 @@ class PlayableCharacter( Character ):
 			self.acc += self.statStep
 			
 		# add new attack
-		if level == 2:
+		if self.level == 2:
 			newatk = ReferNotes()
-			
-		if level == 3:
+		elif self.level == 3:
 			newatk = ReadCode()
-			
-		if level == 4:
-			newatk = ShareCode()
-			
-		if level == 5:
+		elif self.level == 4:
+			newatk = ShareCode(game)
+		elif self.level == 5:
 			newatk = LookTime()
-			
-		if level == 6:
+		elif self.level == 6:
 			newatk = UseInternet()
-			
-		if level == 7:
+		elif self.level == 7:
 			newatk = CommentLines()
 			
 		self.addAttack(newatk)

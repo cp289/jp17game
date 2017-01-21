@@ -30,7 +30,7 @@ class Sound:
 			self.files.update({".".join(file.split(".")[0:-1]):pygame.mixer.Sound("sounds/"+file)})
 	
 	# Plays music file where `name' is the filename without the file extension
-	def play(self, name, loops=1):
+	def play(self, name, loops=0):
 		self.files[name].play(loops)
 		
 	# Stops the specified sound
