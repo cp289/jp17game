@@ -2,7 +2,13 @@
 # Author: Charles Parham
 # 
 # Notes:
-# 	background needed (currently white)
+# 	background needed? (currently gray)
+#
+# Issues:
+# 	Status screen destroys this
+# 	need to handle leveling up
+#	need to make the dashboard more visually apealing
+# 	rename this file to 'dashboard'
 
 import pygame, sys, agents
 

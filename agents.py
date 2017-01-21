@@ -300,6 +300,8 @@ class PlayableCharacter( Character ):
 		
 		# variables for current player state
 		self.orientation = front
+		self.turns = 0
+		self.tempStats = {}
 		
 		# variables for player movement
 		self.movement = [ 0, 0 ] # current stored movement to follow: direction, distance left to go
@@ -317,6 +319,18 @@ class PlayableCharacter( Character ):
 		self.imgRight = imglist[3]
 		self.imgStatus = imglist[4]
 		self.imgBattle = imglist[5]
+	
+	# adds a temporary stat
+	def addTempStat( self, stat, value, expir ):
+		if stat == 'acc':
+			self.acc += value
+		elif stat == 'atk':
+			self.atk += value
+		elif stat == 'spd':
+			self.spd += value
+		elif stat == 'dfn':
+			self.dfn += value
+		self.tempStats.update( { stat: (value, self.turns + expir) } )
 	
 	# returns the current position onstage of the character
 	def getStagePos( self ):
@@ -390,6 +404,21 @@ class PlayableCharacter( Character ):
 		self.resetGhost()
 		self.ghost = self.ghost.move( 0, -self.step )
 	
+	# updates temporary stats
+	def updateStats( self ):
+		for i in ['acc','atk','spd','def']:
+			if i in self.tempStats and self.turns >= self.tempStats[i][1]:
+				value = self.tempStats[i][0]
+				if i == 'acc':
+					self.acc -= value
+				elif i == 'atk':
+					self.atk -= value
+				elif i == 'spd':
+					self.spd -= value
+				elif i == 'dfn':
+					self.dfn -= value
+				del self.tempStats[i]
+	
 	# updates the character's position to move along its current trajectory
 	# returns whether the character moved
 	def update( self ):
@@ -458,6 +487,12 @@ class PlayableCharacter( Character ):
 					return True
 			else:
 				return False
+	
+	# raise HP by percentage (value between 0 & 1)
+	def raiseHP( self, perc ):
+		self.hp += self.hp * perc
+		if self.hp > self.totalHP:
+			self.hp = self.totalHP
 	
 	# setter for total HP
 	def setTotalHP( self, h ):
@@ -530,6 +565,12 @@ class PlayableCharacter( Character ):
 		self.dfnGR = ratelist[2]
 		self.spdGR = ratelist[3]
 		self.accGR = ratelist[4]
+	
+	# decreases time stat by specified amount
+	def takeTime( self, amt ):
+		self.time -= amt
+		if self.time < 0:
+			self.time = 0
 	
 	# add a given DebuggingMethod to this character's repertoire of attacks
 	def addAttack( self, aaa ):

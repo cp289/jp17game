@@ -889,8 +889,14 @@ class Game:
 		if self.currentBattleTurn > len( self.battleParticipants ) - 1: # wrap around to front of list
 			self.currentBattleTurn = 0
 		
-		# reconfigure dashboard
 		if self.battleParticipants[self.currentBattleTurn].getType() == 'PlayableCharacter':
+			# increment character's turn count
+			self.battleParticipants[self.currentBattleTurn].turns += 1
+			
+			# update character's temp stats
+			self.battleParticipants[self.currentBattleTurn].updateStats()
+			
+			# reconfigure dashboard
 			self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
 			self.dashboard.draw() # is this necessary?
 		
