@@ -13,6 +13,7 @@
 import pygame
 import sys
 import random
+import pyganim
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -248,11 +249,15 @@ class PlayableCharacter( Character ):
 	# fields: stats, growth rates, sprite images & status portrait, attacks
 	
 	# creates a new PlayableCharacter with the given position, images, and name
-	# images should be given in the following order: front, back, left, right, status
-	# all images besides status portrait should be the same size
+	# the given image list should contain six lists: standing, walking, battle, attacking, dying, and other
+	# the standing list contains the standing images in the order: front, back, left, right
+	# the walking, attacking, and dying lists are animation frames in orders
+	# the battle list contains two frames for idle, and two frames for taking damage
+	# the other list contains: status, conversation heads
+	# all images for an animation should be the same size
 	# all stats and growth rates are given a default value, use setAllStats and setAllGR to specialize
 	def __init__( self, pos, battlePos, imglist, name, namePos, stagePos = None ):
-		Character.__init__( self, pos, imglist[0], name ) # call parent constructor
+		Character.__init__( self, pos, imglist[2], name ) # call parent constructor
 		
 		# self.pos is location on screen
 		self.battlePos = [ battlePos[0], battlePos[1] ] # location on screen when in battle mode
@@ -298,13 +303,62 @@ class PlayableCharacter( Character ):
 		self.resetGhost()
 		
 		# sprite images
-		self.imgFront = imglist[0]
-		self.imgBack = imglist[1]
-		self.imgLeft = imglist[2]
-		self.imgRight = imglist[3]
-		self.imgStatus = imglist[4]
-		self.imgBattle = imglist[5]
-		self.imgConvo = imglist[6]
+		standing = imglist[0]
+		if standing != None:
+			self.imgFront = standing[0]
+			self.imgBack = standing[1]
+			self.imgLeft = standing[2]
+			self.imgRight = standing[3]
+		
+		walking = imglist[1]
+		if walking != None:
+			walkingF = walking[0]
+			walkingFList = []
+			for i in range( 6 ):
+				walkingFList.append( ( walkingF + str( i ) + '.png', 0.1 ) )
+			self.walkingForward = pyganim.PygAnimation( walkingFList )
+			
+			walkingB = walking[1]
+			walkingBList = []
+			for i in range( 6 ):
+				walkingBList.append( ( walkingB + str( i ) + '.png', 0.1 ) )
+			self.walkingBackward = pyganim.PygAnimation( walkingBList )
+			
+			walkingL = walking[2]
+			walkingLList = []
+			for i in range( 6 ):
+				walkingLList.append( ( walkingL + str( i ) + '.png', 0.1 ) )
+			self.walkingLeft = pyganim.PygAnimation( walkingLList )
+			
+			walkingR = walking[3]
+			walkingRList = []
+			for i in range( 6 ):
+				walkingRList.append( ( walkingR + str( i ) + '.png', 0.1 ) )
+			self.walkingRight = pyganim.PygAnimation( walkingRList )
+			
+			self.walkingAnim = self.walkingForward
+		
+		battle = imglist[2]
+		if battle != None:
+			self.imgBattle = battle # TEMPORARY
+# 				battleReady = battle[0:2] # first two images are for idle
+# 				'''make pyganim'''
+# 				battleDamage = battle[2:] # last two images are for taking damage
+		
+		attacking = imglist[3]
+		if attacking != None:
+			pass
+			'''make pyganim'''
+		
+		dying = imglist[4]
+		if dying != None:
+			pass
+			'''make pyganim'''
+		
+		# THESE IMAGES MUST BE PROVIDED
+		other = imglist[5]
+		self.imgStatus = other[0]
+		self.imgConvo = other[1]
 	
 	# returns the current position onstage of the character
 	def getStagePos( self ):
@@ -351,36 +405,52 @@ class PlayableCharacter( Character ):
 	def goLeft( self, tileSize ):
 		self.movement[0] = left
 		self.movement[1] = tileSize
-		self.orientation = left
+		
 		self.resetGhost()
 		self.ghost = self.ghost.move( -self.step, 0 )
+		
+		self.orientation = left
+		self.walkingAnim = self.walkingLeft
+		self.walkingAnim.play()
 	
 	# send the character towards the right
 	# tile size should be a multiple of the player step size
 	def goRight( self, tileSize ):
 		self.movement[0] = right
 		self.movement[1] = tileSize
-		self.orientation = right
+		
 		self.resetGhost()
 		self.ghost = self.ghost.move( self.step, 0 )
+		
+		self.orientation = right
+		self.walkingAnim = self.walkingRight
+		self.walkingAnim.play()
 	
 	# send the character towards the front
 	# tile size should be a multiple of the player step size
 	def goForward( self, tileSize ):
 		self.movement[0] = front
 		self.movement[1] = tileSize
-		self.orientation = front
+		
 		self.resetGhost()
 		self.ghost = self.ghost.move( 0, self.step )
+		
+		self.orientation = front
+		self.walkingAnim = self.walkingForward
+		self.walkingAnim.play()
 	
 	# send the character towards the back
 	# tile size should be a multiple of the player step size
 	def goBackward( self, tileSize ):
 		self.movement[0] = back
 		self.movement[1] = tileSize
-		self.orientation = back
+		
 		self.resetGhost()
 		self.ghost = self.ghost.move( 0, -self.step )
+		
+		self.orientation = back
+		self.walkingAnim = self.walkingBackward
+		self.walkingAnim.play()
 	
 	# updates the character's position to move along its current trajectory
 	# returns whether the character moved
@@ -415,6 +485,8 @@ class PlayableCharacter( Character ):
 					self.ghost = self.ghost.move( -self.step, 0 )
 				elif self.movement[0] == right:
 					self.ghost = self.ghost.move( self.step, 0 )
+			else: # otherwise stop walk animation
+				self.walkingAnim.stop()
 			
 			return True
 		else:
@@ -574,18 +646,26 @@ class PlayableCharacter( Character ):
 	def draw( self, screen ):
 		# determine which image to use based on current orientation (only in exploration mode)
 		if not self.showHP:
-			if self.orientation == front:
-				self.image = self.imgFront
-			elif self.orientation == back:
-				self.image = self.imgBack
-			elif self.orientation == left:
-				self.image = self.imgLeft
-			elif self.orientation == right:
-				self.image = self.imgRight
+			if self.movement[1] > 0: # if the character is currently moving
+				self.walkingAnim.blit( screen, self.pos )
+			
+			else: # otherwise show standing image
+				if self.orientation == front:
+					self.image = self.imgFront
+				elif self.orientation == back:
+					self.image = self.imgBack
+				elif self.orientation == left:
+					self.image = self.imgLeft
+				elif self.orientation == right:
+					self.image = self.imgRight
+				
+				Character.draw( self, screen )
+		else: # draw in battle mode
+			Character.draw( self, screen )
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
-		Character.draw( self, screen )
+		#Character.draw( self, screen )
 	
 	# returns a string reporting all attacks the character has
 	def listAttacks( self ):

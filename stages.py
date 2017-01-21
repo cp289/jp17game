@@ -9,6 +9,7 @@ import pygame
 import sys
 import agents
 import random
+import conversation
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -42,7 +43,7 @@ class Stage:
 		self.width = bg.get_rect().width
 		self.topWallEdge = 0 # y-coordinate for the bottom of the top wall
 		
-		self.stepsTaken = 0 # number of steps taken in this stage
+		self.stepsTaken = 0 # number of steps taken in this stage since the last battle
 	
 	# sets the field storing the bottom of the top walls
 	def setTopWallEdge( self, e ):
@@ -120,7 +121,7 @@ class Stage:
 	# if camera is given, adjusts for camera view
 	def fillBG( self, screen, refresh, rect = None, cam = None ):
 		# draw the entire screen
-		if ( rect == None ):
+		if ( rect == None and cam == None ):
 			# now draw the surfaces to the screen using the blit function
 			screen.blit( self.background, ( 0, 0 ) )
 		
@@ -157,9 +158,6 @@ class Game:
 		self.screenSize = ( screen.get_width(), screen.get_height() )
 		self.screen = screen
 		
-		pygame.display.set_caption( 'debugDavis()' )
-		print 'init screen'
-		
 		self.refresh = [] # list of rectangles that currently should be updated in the display
 		self.tileSize = 50
 		
@@ -182,7 +180,7 @@ class Game:
 		self.battleParticipants = [] # list to loop through for battle turns
 		self.currentBattleTurn = -1 # stores index of current turn within battleParticipants
 		self.livePlayers = [] # stores players who are currently alive so that enemies can choose targets easily
-		self.storedPoints = 0 # amount of XP all live players will gain on winning
+		self.storedPoints = 0 # amount of XP all live players will gain on winning the current battle
 		
 		self.enemies = [] # start out with no enemies, because not in battle
 		self.selectedEnemyIDX = -1 # index of current selected enemy
@@ -194,7 +192,7 @@ class Game:
 		self.macLabStage = None
 		
 		# load specific screen backgrounds
-		statBGorig = pygame.image.load( 'images/statScreenBG.png' ).convert_alpha()
+		statBGorig = pygame.image.load( 'images/backgrounds/statScreenBG.png' ).convert_alpha()
 		self.statBG = pygame.transform.scale( statBGorig, self.screenSize ) # force it to be square for now
 		self.statBGRect = pygame.Rect( ( 20, 20 ), ( self.screenSize[0] - 40, self.screenSize[1] - 40 ) )
 		
@@ -210,65 +208,119 @@ class Game:
 		# create fonts
 		self.bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
 		self.smallFont = pygame.font.SysFont( 'Helvetica', 18 )
+		self.nameFont = pygame.font.SysFont( "Helvetica", 32, bold=True )
+		self.convoFont = pygame.font.SysFont( "Helvetica", 28, bold=True )
+		
+		# init Conversation object
+		self.initConvo()
+		self.convoNum = 0
 		
 		# mostly for testing
 		self.timeStep = 0
 	
 	# creates the PlayableCharacters in the game
 	def initPlayers( self ):
+		
+		# the given image list should contain six lists: standing, walking, battle, attacking, dying, and other
+		# the standing list contains the standing images in the order: front, back, left, right
+		# the walking, attacking, and dying lists are animation frames in orders
+		# the battle list contains two frames for idle, and two frames for taking damage
+		# the other list contains: status, conversation heads
+		
 		# load images
-		playerL = pygame.image.load( 'images/melStandLeft.png' ).convert_alpha()
-		playerR = pygame.image.load( 'images/melStandRight.png' ).convert_alpha()
-		playerF = pygame.image.load( 'images/melStandFront.png' ).convert_alpha()
-		playerB = pygame.image.load( 'images/melStandBack.png' ).convert_alpha()
-		playerS = pygame.image.load( 'images/MelodyStatPic.png' ).convert_alpha()
-		playerBattle = pygame.image.load( 'images/MelodyBattleSprite.png' ).convert_alpha()
+		playerL = pygame.image.load( 'images/Melody/Walk/Left/MelodyLeftStand.png' ).convert_alpha()
+		playerR = pygame.image.load( 'images/Melody/Walk/Right/MelodyRightStand.png' ).convert_alpha()
+		playerF = pygame.image.load( 'images/Melody/Walk/Down/MelodyDownStand.png' ).convert_alpha()
+		playerB = pygame.image.load( 'images/Melody/Walk/Up/MelodyUpStand.png' ).convert_alpha()
+		playerS = pygame.image.load( 'images/Melody/MelodyStatPic.png' ).convert_alpha()
+		#playerBattle = pygame.image.load( 'images/Melody/MelodyBattleSprite.png' ).convert_alpha()
+		playerC = pygame.image.load( "images/Melody/MelodyHead.png" ).convert_alpha()
+		standlist = ( playerF, playerB, playerL, playerR )
+		walkF = 'images/Melody/Walk/Down/MelodyDownWalk'
+		walkB = 'images/Melody/Walk/Up/MelodyUpWalk'
+		walkL = 'images/Melody/Walk/Left/MelodyLeftWalk'
+		walkR = 'images/Melody/Walk/Right/MelodyRightWalk'
+		walklist = ( walkF, walkB, walkL, walkR )
+		battlelist = ( pygame.image.load( 'images/Melody/MelodyBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		attacklist = None
+		dielist = None
+		otherlist = ( playerS, playerC )
 		
 		# initialize mel
 		initpos = ( 300, 400 ) # hopefully the middle of the bottom
 		battlePos = ( 700, 50 )
-		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
-		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody' )
+		namePos = ( 25, -1 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', namePos )
 		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 7 ) )
 		# total HP, ATK, DFN, SPD, ACC, time
 		self.mel.setAllGR( ( 0.8, 0.9, 0.85, 0.75, 0.7 ) )
 		# HP, ATK, DFN, SPD, ACC
 		
-		playerF = pygame.image.load( 'images/FatimahBattleSprite.png' ).convert_alpha() # not actually the front picture
-		playerB = None
-		playerL = None
-		playerR = None
-		playerS = pygame.image.load( 'images/FatimahStatPic.png' ).convert_alpha()
-		playerBattle = playerF
+		standlist = None
+		walklist = None
+		battlelist = ( pygame.image.load( 'images/Fatimah/FatimahBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		attacklist = None
+		dielist = None
+		playerS = pygame.image.load( 'images/Fatimah/FatimahStatPic.png' ).convert_alpha()
+		playerC = pygame.image.load( "images/Fatimah/FatimahHead.png" ).convert_alpha()
+		otherlist = ( playerS, playerC )
 		
 		#initialize fa
 		battlePos = ( 600, 178 )
-		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
-		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah' )
+		namePos = ( 15, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', namePos )
 		self.fa.setAllStats( ( 400, 44, 54, 51, 50, 6 ) )
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
 		# initialize zen
-		playerF = pygame.image.load( 'images/ZenaBattleSprite.png' ).convert_alpha() # not actually the front picture
-		playerS = pygame.image.load( 'images/ZenaStatPic.png' ).convert_alpha()
-		playerBattle = playerF
+		battlelist = ( pygame.image.load( 'images/Zena/ZenaBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		playerS = pygame.image.load( 'images/Zena/ZenaStatPic.png' ).convert_alpha()
+		playerC = pygame.image.load( "images/Zena/ZenaHead.png" ).convert_alpha()
+		otherlist = ( playerS, playerC )
 		battlePos = ( 500, 306 )
-		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
-		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena' )
+		namePos = ( 40, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', namePos )
 		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 9 ) )
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
 		# initialize cha
-		playerF = pygame.image.load( 'images/CharlesBattleSprite.png' ).convert_alpha() # not actually the front picture
-		playerS = pygame.image.load( 'images/CharlesStatPic.png' ).convert_alpha()
-		playerBattle = playerF
+		battlelist = ( pygame.image.load( 'images/Charles/CharlesBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		playerS = pygame.image.load( 'images/Charles/CharlesStatPic.png' ).convert_alpha()
+		playerC = pygame.image.load( "images/Charles/CharlesHead.png" ).convert_alpha()
+		otherlist = ( playerS, playerC )
 		battlePos = ( 400, 404 )
-		imglist = [ playerF, playerB, playerL, playerR, playerS, playerBattle ]
-		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles' )
+		namePos = ( 20, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', namePos )
 		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 7 ) )
 		self.cha.setAllGR( ( 0.75, 0.7, 0.8, 0.9, 0.85 ) )
 		
 		print 'initialized playable characters'
+	
+	#loads textbox images and makes a Conversation object
+	def initConvo(self):
+		textboxWidth = self.screenSize[0]
+		textboxHeight = int(self.screenSize[1]/3)
+		textboxCoord = (self.screenSize[0]-textboxWidth, self.screenSize[1]-textboxHeight)
+
+		# load and scale textbox image
+		textbox = pygame.image.load( "images/GameTextbox.png" ).convert_alpha()
+		textbox = pygame.transform.scale(textbox, (textboxWidth, textboxHeight))
+
+		cursor = pygame.image.load( "images/cursor.png" ).convert_alpha()
+
+		# list of all people who will need textboxes
+		# these are PlayableCharacter objects
+		talkingCharList = [self.mel, self.fa, self.zen, self.cha ]
+
+		dialogueFile = "dialogue.txt"
+
+		self.gameConvo = conversation.Conversation(textbox, textboxCoord, cursor, self.screen, talkingCharList, self.convoFont, self.nameFont, dialogueFile)
+
+		print "initialized convo system"
 	
 	# sets the player's onscreen position so that it matches its stage position,
 	# based on the current camera view
@@ -287,18 +339,18 @@ class Game:
 	def loadHallwayStage( self ):
 		scale = 0.5
 		
-		bgOrig = pygame.image.load( 'images/Davis Hallway.png' ).convert_alpha()
+		bgOrig = pygame.image.load( 'images/backgrounds/Davis Hallway.png' ).convert_alpha()
 		newDim = ( int( bgOrig.get_width() * scale ), int( bgOrig.get_height() * scale ) )
 		bg = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
 		
-		battleBGorig = pygame.image.load( 'images/Hallway Battle.png' ).convert_alpha()
+		battleBGorig = pygame.image.load( 'images/backgrounds/Hallway Battle.png' ).convert_alpha()
 		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
 		
-		bugImgs = [ pygame.image.load( 'images/Bug 0.png' ).convert_alpha(),
-						 pygame.image.load( 'images/Bug 1.png' ).convert_alpha(),
-						 pygame.image.load( 'images/Bug 10.png' ).convert_alpha(),
-						 pygame.image.load( 'images/Bug 11.png' ).convert_alpha(),
-						 pygame.image.load( 'images/Bug 100.png' ).convert_alpha()
+		bugImgs = [ pygame.image.load( 'images/bugs/Bug 0.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bugs/Bug 1.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bugs/Bug 10.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bugs/Bug 11.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bugs/Bug 100.png' ).convert_alpha()
 						]
 		
 		self.hallwayStage = Stage( 'hallway', 1, scale, bg, battleBG, bugImgs )
@@ -447,18 +499,18 @@ class Game:
 	def loadRoboLabStage( self ):
 		scale = 0.4
 		
-		bgOrig = pygame.image.load( 'images/Davis Robotics Lab.png' ).convert_alpha()
+		bgOrig = pygame.image.load( 'images/backgrounds/Davis Robotics Lab.png' ).convert_alpha()
 		newDim = ( int( bgOrig.get_width() * scale ), int( bgOrig.get_height() * scale ) )
 		bg = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
 		
-		battleBGorig = pygame.image.load( 'images/Robotics Lab Battle.png' ).convert_alpha()
+		battleBGorig = pygame.image.load( 'images/backgrounds/Robotics Lab Battle.png' ).convert_alpha()
 		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
 		
-		bugImgs = [ pygame.image.load( 'images/Bug 101.png' ).convert_alpha(),
-						 pygame.image.load( 'images/Bug 110.png' ).convert_alpha(),
-						 pygame.image.load( 'images/Bug 111.png' ).convert_alpha(),
-						 pygame.image.load( 'images/Bug 1000.png' ).convert_alpha(),
-						 pygame.image.load( 'images/Bug 1001.png' ).convert_alpha()
+		bugImgs = [ pygame.image.load( 'images/bugs/Bug 101.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bugs/Bug 110.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bugs/Bug 111.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bugs/Bug 1000.png' ).convert_alpha(),
+						 pygame.image.load( 'images/bugs/Bug 1001.png' ).convert_alpha()
 						]
 		
 		self.roboLabStage = Stage( 'robotics lab', 3, scale, bg, battleBG, bugImgs )
@@ -556,7 +608,7 @@ class Game:
 		#initPos = ( 3900 * self.stage.scale, 3672 * self.stage.scale )
 		
 		self.camera.topleft = 2050 * self.stage.scale, 2550 * self.stage.scale # for scale 0.4
-		initPos = ( 3900 * self.stage.scale, 3600 * self.stage.scale )
+		initPos = ( 3890 * self.stage.scale, 3600 * self.stage.scale )
 		
 		self.player.setStagePos( initPos[0], initPos[1] )
 		self.placePlayerOnScreen()
@@ -688,12 +740,24 @@ class Game:
 		
 		self.refresh.append( self.statBGRect )
 	
+	def enterDialogue(self):
+		#move to next convo every time enterDialogue is called
+		#so that story moves sequentially
+		self.inDialogue = True  
+		#self.stage.fillBG( self.screen, self.refresh ) # for code without scrolling
+		self.stage.moveCamView( self.screen, self.refresh, self.camera )
+		self.player.draw( self.screen )
+		self.gameConvo.displayText( self.convoNum )
+		print "ENTERED DIALOGUE"
+	
 	# updates the game for one time-step (when the player is playing through a stage)
 	def update( self ):
 		if self.onStatScreen:
 			self.updateStatScreen()
 		elif self.inBattle:
 			self.updateBattle()
+		elif self.inDialogue:   
+			self.updateDialogue()
 		else:
 			self.updateExplore()
 		
@@ -743,10 +807,13 @@ class Game:
 					keydown = True
 					break
 				
-				elif event.key == pygame.K_b:
+				elif event.key == pygame.K_b: # temporary easy trigger for battle
 					self.enterBattle()
 					keydown = True
 					break
+				elif event.key == pygame.K_c: # temporary easy trigger for dialogue
+					self.enterDialogue()
+					return
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
@@ -817,6 +884,10 @@ class Game:
 			
 			# otherwise update display normally
 			else:
+				# erasing when moving up with no scrolling was incorrect for some reason
+				if self.player.orientation == back:
+					eraseRect = eraseRect.move( 0, 5 )
+				
 				self.stage.fillBG( self.screen, self.refresh, eraseRect, self.camera )
 				self.refresh.append( self.player.getRect() )
 			
@@ -1052,3 +1123,36 @@ class Game:
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
+	
+	#continues to next box in dialogue	
+	def updateDialogue(self):
+		#print "IN UPDATE DIALOGUE"
+		if self.gameConvo.convoOver == True:
+			#print "EXITING DIALOGUE"
+			self.inDialogue = False
+			#self.stage.fillBG( self.screen, self.refresh) # for code without scrolling
+			self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			self.player.draw( self.screen )
+			self.refresh.append( self.player.getRect() )
+			self.convoNum += 1
+		else:
+			for event in pygame.event.get():
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_c:
+						#print "UPDATING DIALOGUE"
+						if self.gameConvo.convoOver != True:
+							#print "STILL MORE TEXT"
+							#draw BG again first
+							#self.stage.fillBG( self.screen, self.refresh) # for code without scrolling
+							self.stage.moveCamView( self.screen, self.refresh, self.camera )
+							self.player.draw( self.screen )
+
+							self.gameConvo.advanceText()
+						
+				if event.type == pygame.QUIT:
+					sys.exit()
+
+
+
+
+
