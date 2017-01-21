@@ -7,28 +7,53 @@
 
 import pygame
 import stages
-
-'''
-SCREEN PLANNING
-button class? with position, image, draw, selected
-if selected, draw > cursor to left
-run in loop: check for arrow keys left/right and enter
-'''
+import sys
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
 green = ( 150, 180, 160 )
 white = ( 255, 255, 255 )
+black = ( 0, 0, 0 )
+
+# represents a button on the start/end screens
+class Button:
+	
+	# creates a new button at the given position with the given images and name
+	def __init__( self, pos, img, imgSel, name ):
+		self.pos = pos
+		self.image = img
+		self.imageSelected = imgSel
+		self.name = name
+		self.selected = False
+	
+	# sets this button to be selected
+	def select( self ):
+		self.selected = True
+	
+	# sets this button to be unselected
+	def deselect( self ):
+		self.selected = False
+	
+	# draws the button on the given screen Surface
+	def draw( self, screen ):
+		if self.selected:
+			screen.blit( self.imageSelected, self.pos )
+		else:
+			screen.blit( self.image, self.pos )
 
 # draws game start screen
-def showStartScreen( screen ):
-	startScreen = pygame.Surface( ( 800, 600 ) )
-	startScreen.fill( ( 100, 120, 100 ) )
-	bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
-	startText = bigFont.render( 'press s to start', True, white )
+def showStartScreen( screen, buttons ):
+	startScreen = pygame.image.load( 'images/Debug Davis Start Screen.png' ).convert_alpha()
+	#bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
+	#startText = bigFont.render( 'press s to start', True, white )
 
 	screen.blit( startScreen, ( 0, 0 ) )
-	screen.blit( startText, ( screen.get_width() / 3, screen.get_height() / 2 ) )
+	pygame.draw.rect( screen, black, pygame.Rect( ( 100, 250 ), ( 600, 300 ) ) )
+	#screen.blit( startText, ( screen.get_width() / 3, screen.get_height() / 2 ) )
+	
+	for button in buttons:
+		button.draw( screen )
+	
 	pygame.display.update()
 
 # runs main game code
@@ -45,18 +70,45 @@ def main():
 		print "Fonts unavailable"
 		sys.exit()
 	
-	showStartScreen( screen )
+	pygame.display.set_caption( 'debugDavis()' )
+	print 'init screen'
+	
+	# make start screen buttons
+	
+	startImg = pygame.image.load( 'images/startUnselected.png' ).convert_alpha()
+	startImgSel = pygame.image.load( 'images/startSelected.png' ).convert_alpha()
+	startButton = Button( ( 200, 300 ), startImg, startImgSel, 'start' )
+	startButton.select()
+	
+	instrImg = pygame.image.load( 'images/instrUnselected.png' ).convert_alpha()
+	instrImgSel = pygame.image.load( 'images/instrSelected.png' ).convert_alpha()
+	instrButton = Button( ( 200, 375 ), instrImg, instrImgSel, 'instructions' )
+	
+	selectedButton = 0
+	buttons = [ startButton, instrButton ]
+	showStartScreen( screen, buttons )
+	
+	print 'start screen'
 	
 	# run a loop for start screen
 	moveOn = False
 	while not moveOn:
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_s:
-					print 'leave start screen'
-					moveOn = True
+				if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+					buttons[selectedButton].deselect()
+					selectedButton = ( selectedButton + 1 ) % 2
+					buttons[selectedButton].select()
+				elif event.key == pygame.K_RETURN:
+					if buttons[selectedButton].name == 'start':
+						moveOn = True
+						break
 			if event.type == pygame.QUIT:
 				sys.exit()
+		
+		startButton.draw( screen )
+		instrButton.draw( screen )
+		pygame.display.update()
 	
 	game = stages.Game( screen )
 	game.loadHallwayStage() # possibly do this in Game constructor later

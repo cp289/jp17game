@@ -41,7 +41,7 @@ class Thing( pygame.sprite.Sprite ):
 		self.rect = self.image.get_rect()
 		self.rect.topleft = pos[0], pos[1]
 		
-		# fields for detecting collision
+		# bounds of thing onscreen
 		self.rightEdge = pos[0] + self.rect.width
 		self.bottomEdge = pos[1] + self.rect.height
 	
@@ -53,7 +53,7 @@ class Thing( pygame.sprite.Sprite ):
 	def getRect( self ):
 		return self.rect
 	
-	# returns a tuple: top edge y, left edge x, bottom edge y, right edge x
+	# returns a tuple for onscreen bounds: top edge y, left edge x, bottom edge y, right edge x
 	def getBounds( self ):
 		return ( self.pos[1], self.pos[0], self.bottomEdge, self.rightEdge )
 	
@@ -251,7 +251,7 @@ class PlayableCharacter( Character ):
 	# images should be given in the following order: front, back, left, right, status
 	# all images besides status portrait should be the same size
 	# all stats and growth rates are given a default value, use setAllStats and setAllGR to specialize
-	def __init__( self, pos, battlePos, imglist, name, stagePos = None ):
+	def __init__( self, pos, battlePos, imglist, name, namePos, stagePos = None ):
 		Character.__init__( self, pos, imglist[0], name ) # call parent constructor
 		
 		# self.pos is location on screen
@@ -261,6 +261,7 @@ class PlayableCharacter( Character ):
 			self.stagePos = [ pos[0], pos[1] ]
 		else:
 			self.stagePos = [ stagePos[0], stagePos[1] ]
+		self.namePos = namePos
 		
 		# initialize stats
 		self.time = 6
@@ -282,7 +283,7 @@ class PlayableCharacter( Character ):
 		# initialize attack list as empty
 		self.attacks = [] # all attacks the character is capable of
 		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
-		self.attacking = False # whether it is this character's turn to attack
+		self.attacking = False
 		
 		# variables for current player state
 		self.orientation = front
@@ -303,6 +304,7 @@ class PlayableCharacter( Character ):
 		self.imgRight = imglist[3]
 		self.imgStatus = imglist[4]
 		self.imgBattle = imglist[5]
+		self.imgConvo = imglist[6]
 	
 	# returns the current position onstage of the character
 	def getStagePos( self ):
@@ -316,6 +318,10 @@ class PlayableCharacter( Character ):
 	# returns the status image for this character
 	def getStatusIMG( self ):
 		return self.imgStatus
+	
+	# returns the dialogue image for this character
+	def getConvoIMG( self ):
+		return self.imgConvo
 	
 	# returns a string indicating the type of Character
 	def getType( self ):
@@ -576,10 +582,6 @@ class PlayableCharacter( Character ):
 				self.image = self.imgLeft
 			elif self.orientation == right:
 				self.image = self.imgRight
-		
-		# if this character is attacking, draw a box indicator
-# 		if self.attacking:
-# 			pygame.draw.rect( screen, (215, 200, 255), self.imgBattle.get_rect() )
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
