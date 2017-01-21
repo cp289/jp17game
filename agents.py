@@ -1,6 +1,6 @@
 # Melody Mao
 # CS269, January 2017
-# Debug Davis (temporary title)
+# Debug Davis
 
 # agents.py
 # This file defines the Thing class and its child classes.
@@ -116,6 +116,8 @@ class Character( Thing ):
 		self.hpbarBG = pygame.Rect( ( pos[0], pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
 		self.hpbarFG = pygame.Rect( ( pos[0] + 1, pos[1] + self.rect.height + 1 ),
 			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
+		
+		self.selected = False
 	
 	# returns whether this Character has died, i.e. has 0 HP
 	def isDead( self ):
@@ -129,6 +131,8 @@ class Character( Thing ):
 		self.hpbarBG.topleft = newx, newy + self.rect.height
 		self.hpbarFG.topleft = newx + 1, newy + self.rect.height + 1
 		
+		#print self.name, 'hp bar moved to', self.hpbarBG
+		
 	
 	# change the position of the Character by the given amounts in the x and y directions
 	def move( self, dx, dy ):
@@ -137,6 +141,14 @@ class Character( Thing ):
 		# adjust position of health bar
 		self.hpbarBG = self.hpbarBG.move( dx, dy )
 		self.hpbarFG = self.hpbarFG.move( dx, dy )
+	
+	# sets this Character to be selected
+	def select( self ):
+		self.selected = True
+	
+	# sets this Character to be unselected
+	def deselect( self ):
+		self.selected = False
 	
 	# reduces the Character's HP by the given amount
 	def takeDamage( self, amt ):
@@ -164,7 +176,7 @@ class Character( Thing ):
 		if self.showHP:
 			# draw health bar background (in black)
 			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
-		
+			
 			# draw health bar foreground based on current HP left (if there is any)
 			if self.hp != 0:
 				fraction = float( self.hp ) / self.totalHP
@@ -176,6 +188,24 @@ class Character( Thing ):
 					pygame.draw.rect( screen, green, self.hpbarFG )
 				else:
 					pygame.draw.rect( screen, red, self.hpbarFG )
+		
+		# draw pointer if selected
+		if self.selected:
+			radius = 10
+			arrowPos = ( self.rightEdge - radius, self.bottomEdge - radius )
+			arrowBottom = ( self.rightEdge - radius, self.bottomEdge + radius + 1 )
+			arrowRight = ( self.rightEdge + radius + 1, self.bottomEdge - radius )
+			points = [ arrowPos, arrowBottom, arrowRight ]
+			
+			pygame.draw.polygon( screen, black, points )
+			
+			inRadius = 9
+			innerPos = ( self.rightEdge - inRadius, self.bottomEdge - inRadius )
+			innerBottom = ( self.rightEdge - inRadius, self.bottomEdge + inRadius )
+			innerRight = ( self.rightEdge + inRadius, self.bottomEdge - inRadius )
+			innerPoints = [ innerPos, innerBottom, innerRight ]
+			
+			pygame.draw.polygon( screen, bluegreen, innerPoints )
 	
 	# returns a string reporting the name and current HP of the Character
 	def toString( self ):
@@ -196,7 +226,6 @@ class Enemy( Character ):
 		Character.__init__( self, pos, img, name ) # call parent constructor
 		self.showHP = True # Enemies only appear in battle, so always show HP
 		self.level = level
-		self.selected = False
 		
 		# initialize stats by taking level 1 value and adding randomly generated level-ups
 		# to it based on the Enemy's level
@@ -210,36 +239,6 @@ class Enemy( Character ):
 	# returns a string indicating the type of Character
 	def getType( self ):
 		return 'Enemy'
-	
-	# sets this Enemy to be selected
-	def select( self ):
-		self.selected = True
-	
-	# sets this Enemy to be unselected
-	def deselect( self ):
-		self.selected = False
-	
-	# draws the Enemy at its current position on the given Surface
-	def draw( self, screen ):
-		Character.draw( self, screen ) # call parent method
-		
-		# draw pointer if selected
-		if self.selected:
-			radius = 10
-			arrowPos = ( self.rightEdge - radius, self.bottomEdge - radius )
-			arrowBottom = ( self.rightEdge - radius, self.bottomEdge + radius + 1 )
-			arrowRight = ( self.rightEdge + radius + 1, self.bottomEdge - radius )
-			points = [ arrowPos, arrowBottom, arrowRight ]
-			
-			pygame.draw.polygon( screen, black, points )
-			
-			inRadius = 9
-			innerPos = ( self.rightEdge - inRadius, self.bottomEdge - inRadius )
-			innerBottom = ( self.rightEdge - inRadius, self.bottomEdge + inRadius )
-			innerRight = ( self.rightEdge + inRadius, self.bottomEdge - inRadius )
-			innerPoints = [ innerPos, innerBottom, innerRight ]
-			
-			pygame.draw.polygon( screen, bluegreen, innerPoints )
 	
 	# returns a string reporting the name and current HP of the Enemy
 	def toString( self ):
@@ -290,6 +289,7 @@ class PlayableCharacter( Character ):
 		# initialize attack list as empty
 		self.attacks = [] # all attacks the character is capable of
 		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
+		self.attacking = False # whether it is this character's turn to attack
 		
 		# variables for current player state
 		self.orientation = front
@@ -583,6 +583,10 @@ class PlayableCharacter( Character ):
 				self.image = self.imgLeft
 			elif self.orientation == right:
 				self.image = self.imgRight
+		
+		# if this character is attacking, draw a box indicator
+# 		if self.attacking:
+# 			pygame.draw.rect( screen, (215, 200, 255), self.imgBattle.get_rect() )
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
