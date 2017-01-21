@@ -9,6 +9,7 @@ import pygame
 import sys
 import agents
 import random
+from attackChooser import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -610,6 +611,13 @@ class Game:
 		self.spawnEnemies( 3, 1 ) # number, level
 		self.enemies[0].select()
 		self.selectedEnemyIDX = 0
+		
+		
+		# create dashboard
+		self.dashboard = AttackChooser(self.screen)
+		self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
+		self.dashboard.draw()
+		
 		print 'enter battle'
 		
 		# reset stored points for new battle
@@ -881,6 +889,11 @@ class Game:
 		if self.currentBattleTurn > len( self.battleParticipants ) - 1: # wrap around to front of list
 			self.currentBattleTurn = 0
 		
+		# reconfigure dashboard
+		if self.battleParticipants[self.currentBattleTurn].getType() == 'PlayableCharacter':
+			self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
+			self.dashboard.draw() # is this necessary?
+		
 # 		next = self.battleParticipants[self.currentBattleTurn]
 # 		if next.getType() == 'PlayableCharacter':
 # 			next.attacking = True
@@ -976,14 +989,19 @@ class Game:
 						
 							self.selectedEnemyIDX = 0
 							self.enemies[self.selectedEnemyIDX].select()
-				
+					elif event.key == pygame.K_LEFT:
+						self.dashboard.switchAtk(-1)
+						self.dashboard.draw()
+					elif event.key == pygame.K_RIGHT:
+						self.dashboard.switchAtk(1)
+						self.dashboard.draw()
+					
+					
 					# attack currently selected enemy
 					elif event.key == pygame.K_a:
 						target = self.enemies[self.selectedEnemyIDX]
 						
-						#debuggingMethod->
-						
-						attacker.attack( target, 50 )
+						self.dashboard.attack().attack(target, self.battleParticipants[self.currentBattleTurn])
 						
 						attacker.attacking = False # make box disappear
 						self.passOnTurn()

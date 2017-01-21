@@ -18,6 +18,7 @@ class DebuggingMethod:
 		
 	def attack(self, enemy, character): # Needs to be tested!
 		self.effects(enemy, character)
+		print "used attack "+self.name+"."
 #		if self.attackEffects(): # performs attack actions and determines whether attack requires accuracy
 #			if random.random() < 0.5+(character.acc-enemy.spd)/(2*1000): # What should the highest value be for a stat?
 #				enemy.takeDamage(self.damage*(character.atk/enemy.dfn))  # Likely to cause problems... adjust scale factor later.
@@ -51,7 +52,7 @@ class TakeBreak(DebuggingMethod):
 		
 	def effects(self, e, c):
 		# Restore 40% max health.
-		self.c.raiseHealth(0.4)
+		c.raiseHealth(0.4)
 		return false
 	
 class ReadProject(DebuggingMethod):

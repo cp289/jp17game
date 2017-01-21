@@ -13,6 +13,7 @@
 import pygame
 import sys
 import random
+from debuggingMethod import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -110,6 +111,8 @@ class Character( Thing ):
 		self.showHP = False
 		self.level = 1
 		
+		self.attacks=[]
+		
 		# rects for drawing health bar
 		self.hpbarWidth = 70
 		self.hpbarHeight = 10
@@ -164,10 +167,9 @@ class Character( Thing ):
 		if self.hp > totalHP:
 			self.hp = totalHP
 	
-	# cedits
 	# attacks the given Character target and does the given amount of damage
-	def attack( self, target, index ):
-		self.availableAttacks[index].attack(target, self)
+	def attack( self, target, dmg ):
+		target.takeDamage(dmg)
 	
 	# draws the Character with a health bar at its current position on the given Surface
 	def draw( self, screen ):
