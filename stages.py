@@ -12,6 +12,7 @@ import random
 from attackChooser import *
 from sound import *
 import conversation
+from sound import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -213,6 +214,9 @@ class Game:
 		self.nameFont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 		self.convoFont = pygame.font.SysFont( "Helvetica", 28, bold=True )
 		
+		# load sound object
+		self.sound = Sound()
+		
 		# init Conversation object
 		self.initConvo()
 		self.convoNum = 0
@@ -310,7 +314,7 @@ class Game:
 		textboxWidth = self.screenSize[0]
 		textboxHeight = int(self.screenSize[1]/3)
 		textboxCoord = (self.screenSize[0]-textboxWidth, self.screenSize[1]-textboxHeight)
-
+		
 		# load and scale textbox image
 		textbox = pygame.image.load( "images/GameTextbox.png" ).convert_alpha()
 		textbox = pygame.transform.scale(textbox, (textboxWidth, textboxHeight))
@@ -333,7 +337,8 @@ class Game:
 	def placePlayerOnScreen( self ):
 		pos = self.player.getStagePos()
 		
-		prevRect = self.player.rect.copy()
+		#prevRect = self.player.rect.copy()
+		prevRect = self.player.eraseRect
 		
 		screenPos = ( pos[0] - self.camera.topleft[0], pos[1] - self.camera.topleft[1] )
 		self.player.setScreenPos( screenPos[0], screenPos[1] )
@@ -362,7 +367,7 @@ class Game:
 		
 		# create doors
 		
-		doorToRoboLab = agents.Door( ( 0, 1365 * scale ), ( 10, 60 / scale ), 'robotics lab' )
+		doorToRoboLab = agents.Door( ( 0, 1365 * scale ), ( 10, 40 / scale ), 'robotics lab' )
 		self.hallwayStage.addDoor( doorToRoboLab )
 		
 		# create walls
@@ -479,6 +484,8 @@ class Game:
 		self.player.draw( self.screen )
 		pygame.display.update()
 		
+		self.sound.play( 'explora', -1 )
+		
 		print 'enter hallway from right'
 	
 	# changes current stage to hallway and places player and camera at starting positions
@@ -568,15 +575,23 @@ class Game:
 		rTable.set_alpha( 0 ) # set image transparency
 		rightTable = agents.Thing( rTablePos, rTable )
 		self.roboLabStage.addThing( rightTable )
-	
-		iboardDim = ( int( 380 * scale ), int( 1100 * scale ) )
-		iboardPos = ( int( 100 * scale ), int( 2100 * scale ) )
-		iboard = pygame.Surface( iboardDim )
-		#iboard.fill( ( 100, 100, 50 ) )
-		iboard.set_alpha( 0 ) # set image transparency
-		board = agents.Thing( iboardPos, iboard )
+		
+		rboardDim = ( int( 210 * scale ), int( 710 * scale ) )
+		rboardPos = ( int( 265 * scale ), int( 2100 * scale ) )
+		rboard = pygame.Surface( rboardDim )
+		#rboard.fill( ( 100, 100, 50 ) )
+		rboard.set_alpha( 0 ) # set image transparency
+		board = agents.Thing( rboardPos, rboard )
 		self.roboLabStage.addThing( board )
-	
+		
+		lboardDim = ( int( 210 * scale ), int( 980 * scale ) )
+		lboardPos = ( int( 30 * scale ), int( 2250 * scale ) )
+		lboard = pygame.Surface( lboardDim )
+		#lboard.fill( ( 100, 100, 50 ) )
+		lboard.set_alpha( 0 ) # set image transparency
+		otherboard = agents.Thing( lboardPos, lboard )
+		self.roboLabStage.addThing( otherboard )
+		
 		bTableDim = ( int( 790 * scale ), int( 485 * scale ) )
 		bTablePos = ( int( 925 * scale ), int( 3085 * scale ) )
 		bTable = pygame.Surface( bTableDim )
@@ -653,6 +668,7 @@ class Game:
 		self.refresh.append( self.screen.get_rect() )
 		
 		# play battle music
+		self.sound.stop('explora')
 		self.sound.play("battleMusic", -1 )
 		
 		self.inBattle = True
@@ -695,6 +711,7 @@ class Game:
 	def leaveBattle( self ):
 		# stop battle music
 		self.sound.stop("battleMusic")
+		self.sound.play('explora', -1)
 		
 		self.inBattle = False
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
@@ -931,6 +948,9 @@ class Game:
 		target = random.choice( self.livePlayers )
 		self.battleParticipants[self.currentBattleTurn].attack( target, 50 ) # to always win
 		
+		# play attack sound
+		self.sound.play('zong')
+		
 		if not target.isDead(): # if the target is still alive, pass on turn index
 			self.passOnTurn()
 		
@@ -1092,6 +1112,9 @@ class Game:
 						
 						attacker.attacking = False # make box disappear
 						self.passOnTurn()
+						
+						# play attack sound
+						self.sound.play('pew')
 						
 						# if attack killed target
 						if target.isDead():

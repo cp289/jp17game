@@ -279,6 +279,11 @@ class PlayableCharacter( Character ):
 			self.stagePos = [ stagePos[0], stagePos[1] ]
 		self.namePos = namePos
 		
+		# a larger rectangle for erasing previous position, to fix issues with erasing in animation
+		self.eraseRect = self.rect.move( -10, -10 )
+		self.eraseRect.width += 20
+		self.eraseRect.height += 20
+		
 		# initialize stats
 		self.time = 6
 		self.atk = 50
@@ -419,6 +424,9 @@ class PlayableCharacter( Character ):
 	# change the screen position of the PlayableCharacter to the given coordinates
 	def setScreenPos( self, newx, newy ):
 		Character.setPosition( self, newx, newy ) # call parent method
+		
+		# adjust erasing rectangle
+		self.eraseRect.topleft = newx - 10, newy - 10
 	
 	# change the stage position of the PlayableCharacter to the given coordinates
 	def setStagePos( self, newx, newy ):
