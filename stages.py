@@ -10,6 +10,7 @@ import sys
 import agents
 import random
 import conversation
+from sound import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -211,6 +212,9 @@ class Game:
 		self.nameFont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 		self.convoFont = pygame.font.SysFont( "Helvetica", 28, bold=True )
 		
+		# load sound object
+		self.sound = Sound()
+		
 		# init Conversation object
 		self.initConvo()
 		self.convoNum = 0
@@ -305,7 +309,7 @@ class Game:
 		textboxWidth = self.screenSize[0]
 		textboxHeight = int(self.screenSize[1]/3)
 		textboxCoord = (self.screenSize[0]-textboxWidth, self.screenSize[1]-textboxHeight)
-
+		
 		# load and scale textbox image
 		textbox = pygame.image.load( "images/GameTextbox.png" ).convert_alpha()
 		textbox = pygame.transform.scale(textbox, (textboxWidth, textboxHeight))
@@ -473,6 +477,8 @@ class Game:
 		self.hallwayStage.moveCamView( self.screen, self.refresh, self.camera )
 		self.player.draw( self.screen )
 		pygame.display.update()
+		
+		self.sound.play( 'explora', -1 )
 		
 		print 'enter hallway from right'
 	
@@ -655,6 +661,10 @@ class Game:
 		self.stage.fillBattleBG( self.screen )
 		self.refresh.append( self.screen.get_rect() )
 		
+		# play battle music
+		self.sound.stop('explora')
+		self.sound.play("battleMusic", -1 )
+		
 		self.inBattle = True
 		self.player.enterBattle()
 		self.fa.enterBattle()
@@ -686,6 +696,10 @@ class Game:
 	
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
+		# stop battle music
+		self.sound.stop("battleMusic")
+		self.sound.play('explora', -1)
+		
 		self.inBattle = False
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
 		self.stage.stepsTaken = 0 # reset steps
