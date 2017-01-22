@@ -1,6 +1,6 @@
 # Melody Mao
 # CS269, January 2017
-# Debug Davis (temporary title)
+# Debug Davis
 
 # agents.py
 # This file defines the Thing class and its child classes.
@@ -8,17 +8,20 @@
 # The position of an Thing is the upper left corner of its image/rect.
 # Playable Characters increase their stats with every level-up.
 
-# to run test code for the classes in this file, call like this:
-# python agents.py
+# test code is now obsolete
 
 import pygame
 import sys
+import random
+from debuggingMethod import *
+import pyganim
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
 green = ( 150, 255, 150 )
 red = ( 255, 150, 150 )
-
+black = ( 0, 0, 0 )
+bluegreen = ( 150, 170, 170 )
 
 '''
 This class represents any entity in the game that has a position on the screen,
@@ -40,7 +43,7 @@ class Thing( pygame.sprite.Sprite ):
 		self.rect = self.image.get_rect()
 		self.rect.topleft = pos[0], pos[1]
 		
-		# fields for detecting collision
+		# bounds of thing onscreen
 		self.rightEdge = pos[0] + self.rect.width
 		self.bottomEdge = pos[1] + self.rect.height
 	
@@ -52,7 +55,7 @@ class Thing( pygame.sprite.Sprite ):
 	def getRect( self ):
 		return self.rect
 	
-	# returns a tuple: top edge y, left edge x, bottom edge y, right edge x
+	# returns a tuple for onscreen bounds: top edge y, left edge x, bottom edge y, right edge x
 	def getBounds( self ):
 		return ( self.pos[1], self.pos[0], self.bottomEdge, self.rightEdge )
 	
@@ -100,14 +103,16 @@ class Character( Thing ):
 	# fields: name, totalHP, HP, showHP, rects for displaying HP bar
 	
 	# creates a new Character at the given position with the given image and name
-	def __init__( self, pos, img, name, hp = 700 ):
+	def __init__( self, pos, img, name ):
 		Thing.__init__( self, pos, img ) # call parent constructor
 		
 		self.name = name
-		self.totalHP = hp
-		self.hp = hp
+		self.totalHP = 400
+		self.hp = self.totalHP
 		self.showHP = False
 		self.level = 1
+		
+		self.attacks=[]
 		
 		# rects for drawing health bar
 		self.hpbarWidth = 70
@@ -115,6 +120,8 @@ class Character( Thing ):
 		self.hpbarBG = pygame.Rect( ( pos[0], pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
 		self.hpbarFG = pygame.Rect( ( pos[0] + 1, pos[1] + self.rect.height + 1 ),
 			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
+		
+		self.selected = False
 	
 	# returns whether this Character has died, i.e. has 0 HP
 	def isDead( self ):
@@ -128,6 +135,8 @@ class Character( Thing ):
 		self.hpbarBG.topleft = newx, newy + self.rect.height
 		self.hpbarFG.topleft = newx + 1, newy + self.rect.height + 1
 		
+		#print self.name, 'hp bar moved to', self.hpbarBG
+		
 	
 	# change the position of the Character by the given amounts in the x and y directions
 	def move( self, dx, dy ):
@@ -137,6 +146,14 @@ class Character( Thing ):
 		self.hpbarBG = self.hpbarBG.move( dx, dy )
 		self.hpbarFG = self.hpbarFG.move( dx, dy )
 	
+	# sets this Character to be selected
+	def select( self ):
+		self.selected = True
+	
+	# sets this Character to be unselected
+	def deselect( self ):
+		self.selected = False
+	
 	# reduces the Character's HP by the given amount
 	def takeDamage( self, amt ):
 		self.hp -= amt
@@ -144,15 +161,18 @@ class Character( Thing ):
 		if self.hp < 0: # if the damage would make the HP negative, just make it 0
 			self.hp = 0
 	
+	# increases the Character's HP by the given percentage (0 <= perc < 1)
+	def takeHealth( self, perc ):
+		self.hp += perc*self.totalHP
+		
+		if self.hp > totalHP:
+			self.hp = totalHP
+	
 	# attacks the given Character target and does the given amount of damage
 	def attack( self, target, dmg ):
-		target.takeDamage( dmg )
+		target.takeDamage(dmg)
 	
-	# 
-	#def die( self ):
-	'''I'm not quite sure what this does'''
-	
-	# draws the Enemy with a health bar at its current position on the given Surface
+	# draws the Character with a health bar at its current position on the given Surface
 	def draw( self, screen ):
 		screen.blit( self.image, self.rect )
 		
@@ -160,7 +180,7 @@ class Character( Thing ):
 		if self.showHP:
 			# draw health bar background (in black)
 			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
-		
+			
 			# draw health bar foreground based on current HP left (if there is any)
 			if self.hp != 0:
 				fraction = float( self.hp ) / self.totalHP
@@ -172,6 +192,25 @@ class Character( Thing ):
 					pygame.draw.rect( screen, green, self.hpbarFG )
 				else:
 					pygame.draw.rect( screen, red, self.hpbarFG )
+		
+		# draw pointer if selected
+		if self.selected:
+			#print "should draw cursor for " + self.name
+			radius = 10
+			arrowPos = ( self.rightEdge - radius, self.bottomEdge - radius )
+			arrowBottom = ( self.rightEdge - radius, self.bottomEdge + radius + 1 )
+			arrowRight = ( self.rightEdge + radius + 1, self.bottomEdge - radius )
+			points = [ arrowPos, arrowBottom, arrowRight ]
+			
+			pygame.draw.polygon( screen, black, points )
+			
+			inRadius = 9
+			innerPos = ( self.rightEdge - inRadius, self.bottomEdge - inRadius )
+			innerBottom = ( self.rightEdge - inRadius, self.bottomEdge + inRadius )
+			innerRight = ( self.rightEdge + inRadius, self.bottomEdge - inRadius )
+			innerPoints = [ innerPos, innerBottom, innerRight ]
+			
+			pygame.draw.polygon( screen, bluegreen, innerPoints )
 	
 	# returns a string reporting the name and current HP of the Character
 	def toString( self ):
@@ -188,17 +227,23 @@ class Enemy( Character ):
 	
 	# creates a new Enemy at the given position with the given image, name,
 	# and starting amount of HP
-	# all stats are given a default value of 700
-	def __init__( self, pos, img, name, level, hp = 700 ):
+	def __init__( self, pos, img, name, level ):
 		Character.__init__( self, pos, img, name ) # call parent constructor
 		self.showHP = True # Enemies only appear in battle, so always show HP
 		self.level = level
 		
-		# initialize stats
-		self.atk = 700
-		self.dfn = 700
-		self.spd = 700
-		self.acc = 700
+		# initialize stats by taking level 1 value and adding randomly generated level-ups
+		# to it based on the Enemy's level
+		factor = level - 1 # how levels to increase stats by
+		self.hp = 400 + int( random.random() * 50 * factor )
+		self.atk = 50 + int( random.random() * 5 * factor )
+		self.dfn = 50 + int( random.random() * 5 * factor )
+		self.spd = 50 + int( random.random() * 5 * factor )
+		self.acc = 50 + int( random.random() * 5 * factor )
+	
+	# returns a string indicating the type of Character
+	def getType( self ):
+		return 'Enemy'
 	
 	# returns a string reporting the name and current HP of the Enemy
 	def toString( self ):
@@ -215,36 +260,55 @@ class PlayableCharacter( Character ):
 	# fields: stats, growth rates, sprite images & status portrait, attacks
 	
 	# creates a new PlayableCharacter with the given position, images, and name
-	# images should be given in the following order: front, back, left, right, status
-	# all images besides status portrait should be the same size
-	# all stats and growth rates are given a default value
-	def __init__( self, pos, battlePos, imglist, name ):
-		Character.__init__( self, pos, imglist[0], name ) # call parent constructor
+	# the given image list should contain six lists: standing, walking, battle, attacking, dying, and other
+	# the standing list contains the standing images in the order: front, back, left, right
+	# the walking, attacking, and dying lists are animation frames in orders
+	# the battle list contains two frames for idle, and two frames for taking damage
+	# the other list contains: status, conversation heads
+	# all images for an animation should be the same size
+	# all stats and growth rates are given a default value, use setAllStats and setAllGR to specialize
+	def __init__( self, pos, battlePos, imglist, name, namePos, stagePos = None ):
+		Character.__init__( self, pos, imglist[2], name ) # call parent constructor
 		
-		self.battlePos = [ battlePos[0], battlePos[1] ] # separate from the exploring pos, which is self.explorePos
+		# self.pos is location on screen
+		self.battlePos = [ battlePos[0], battlePos[1] ] # location on screen when in battle mode
 		self.explorePos = [ pos[0], pos[1] ] # stores last exploring position when character goes into battle mode
+		if stagePos == None:
+			self.stagePos = [ pos[0], pos[1] ]
+		else:
+			self.stagePos = [ stagePos[0], stagePos[1] ]
+		self.namePos = namePos
 		
 		# initialize stats
-		self.atk = 700
-		self.dfn = 700
-		self.spd = 700
-		self.acc = 700
-		self.time = 5
+		self.time = 6
+		self.atk = 50
+		self.dfn = 50
+		self.spd = 50
+		self.acc = 50
 		self.xp = 0
 		
 		# initialize growth rates
-		self.hpGR = 100
-		self.atkGR = 100
-		self.dfnGR = 100
-		self.spdGR = 100
-		self.accGR = 100
+		self.hpGR = 0.8
+		self.atkGR = 0.8
+		self.dfnGR = 0.8
+		self.spdGR = 0.8
+		self.accGR = 0.8
+		self.statStep = 5 # how much a stat can increase in one level-up
+		self.hpStep = 55 # how much HP can increase in one level-up
 		
-		# initialize attack list as empty
-		self.attacks = [] # all attacks the character is capable of
-		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
+		# initialize level 1 attacks
+		self.attacks = [
+				AskSomeone(),
+				TakeBreak(),
+				ReadProject(),
+				PrintStatements()
+			]
+		self.attacking = False # whether it is this character's turn to attack
 		
 		# variables for current player state
 		self.orientation = front
+		self.turns = 0
+		self.tempStats = {}
 		
 		# variables for player movement
 		self.movement = [ 0, 0 ] # current stored movement to follow: direction, distance left to go
@@ -256,59 +320,181 @@ class PlayableCharacter( Character ):
 		self.resetGhost()
 		
 		# sprite images
-		self.imgFront = imglist[0]
-		self.imgBack = imglist[1]
-		self.imgLeft = imglist[2]
-		self.imgRight = imglist[3]
-		self.imgStatus = imglist[4]
+		standing = imglist[0]
+		if standing != None:
+			self.imgFront = standing[0]
+			self.imgBack = standing[1]
+			self.imgLeft = standing[2]
+			self.imgRight = standing[3]
+		
+		walking = imglist[1]
+		if walking != None:
+			walkingF = walking[0]
+			walkingFList = []
+			for i in range( 6 ):
+				walkingFList.append( ( walkingF + str( i ) + '.png', 0.1 ) )
+			self.walkingForward = pyganim.PygAnimation( walkingFList )
+			
+			walkingB = walking[1]
+			walkingBList = []
+			for i in range( 6 ):
+				walkingBList.append( ( walkingB + str( i ) + '.png', 0.1 ) )
+			self.walkingBackward = pyganim.PygAnimation( walkingBList )
+			
+			walkingL = walking[2]
+			walkingLList = []
+			for i in range( 6 ):
+				walkingLList.append( ( walkingL + str( i ) + '.png', 0.1 ) )
+			self.walkingLeft = pyganim.PygAnimation( walkingLList )
+			
+			walkingR = walking[3]
+			walkingRList = []
+			for i in range( 6 ):
+				walkingRList.append( ( walkingR + str( i ) + '.png', 0.1 ) )
+			self.walkingRight = pyganim.PygAnimation( walkingRList )
+			
+			self.walkingAnim = self.walkingForward
+		
+		battle = imglist[2]
+		if battle != None:
+			self.imgBattle = battle # TEMPORARY
+# 				battleReady = battle[0:2] # first two images are for idle
+# 				'''make pyganim'''
+# 				battleDamage = battle[2:] # last two images are for taking damage
+		
+		attacking = imglist[3]
+		if attacking != None:
+			pass
+			'''make pyganim'''
+		
+		dying = imglist[4]
+		if dying != None:
+			pass
+			'''make pyganim'''
+		
+		# THESE IMAGES MUST BE PROVIDED
+		other = imglist[5]
+		self.imgStatus = other[0]
+		self.imgConvo = other[1]
+	
+	# adds a temporary stat
+	def addTempStat( self, stat, value, expir ):
+		if stat == 'acc':
+			self.acc += value
+		elif stat == 'atk':
+			self.atk += value
+		elif stat == 'spd':
+			self.spd += value
+		elif stat == 'dfn':
+			self.dfn += value
+		self.tempStats.update( { stat: (value, self.turns + expir) } )
+	
+	# returns the current position onstage of the character
+	def getStagePos( self ):
+		return self.stagePos[:]
+	
+	# returns a tuple of this character's stats, in the following order:
+	# time, hp, attack, defense, speed, accuracy, xp, level
+	def getStats( self ):
+		return ( self.time, self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp, self.level )
+	
+	# returns the status image for this character
+	def getStatusIMG( self ):
+		return self.imgStatus
+	
+	# returns the dialogue image for this character
+	def getConvoIMG( self ):
+		return self.imgConvo
+	
+	# returns a string indicating the type of Character
+	def getType( self ):
+		return 'PlayableCharacter'
 	
 	# puts the ghost directly on top of the character's current position
 	def resetGhost( self ):
-		newx = self.pos[0]
-		newy = self.pos[1] + 2 * self.ghostSide
+		newx = self.stagePos[0]
+		newy = self.stagePos[1] + 2 * self.ghostSide
 		self.ghost.topleft = newx, newy
 	
-	# change the position of the PlayableCharacter to the given coordinates
-	def setPosition( self, newx, newy ):
+	# change the screen position of the PlayableCharacter to the given coordinates
+	def setScreenPos( self, newx, newy ):
 		Character.setPosition( self, newx, newy ) # call parent method
-		
-		self.resetGhost()
 	
-	# change the position of the PlayableCharacter by the given amounts in the x and y directions
+	# change the stage position of the PlayableCharacter to the given coordinates
+	def setStagePos( self, newx, newy ):
+		self.stagePos = [ newx, newy ]
+	
+	# change the stage position of the PlayableCharacter by the given amounts in the x and y directions
 	def move( self, dx, dy ):
-		Character.move( self, dx, dy ) # call parent method
+		self.stagePos[0] += dx
+		self.stagePos[1] += dy
 	
 	# send the character towards the left, updating orientation
 	# tile size should be a multiple of the player step size
 	def goLeft( self, tileSize ):
 		self.movement[0] = left
 		self.movement[1] = tileSize
-		self.orientation = left
+		
+		self.resetGhost()
 		self.ghost = self.ghost.move( -self.step, 0 )
+		
+		self.orientation = left
+		self.walkingAnim = self.walkingLeft
+		self.walkingAnim.play()
 	
 	# send the character towards the right
 	# tile size should be a multiple of the player step size
 	def goRight( self, tileSize ):
 		self.movement[0] = right
 		self.movement[1] = tileSize
-		self.orientation = right
+		
+		self.resetGhost()
 		self.ghost = self.ghost.move( self.step, 0 )
+		
+		self.orientation = right
+		self.walkingAnim = self.walkingRight
+		self.walkingAnim.play()
 	
 	# send the character towards the front
 	# tile size should be a multiple of the player step size
 	def goForward( self, tileSize ):
 		self.movement[0] = front
 		self.movement[1] = tileSize
-		self.orientation = front
+		
+		self.resetGhost()
 		self.ghost = self.ghost.move( 0, self.step )
+		
+		self.orientation = front
+		self.walkingAnim = self.walkingForward
+		self.walkingAnim.play()
 	
 	# send the character towards the back
 	# tile size should be a multiple of the player step size
 	def goBackward( self, tileSize ):
 		self.movement[0] = back
 		self.movement[1] = tileSize
-		self.orientation = back
+		
+		self.resetGhost()
 		self.ghost = self.ghost.move( 0, -self.step )
+		
+		self.orientation = back
+		self.walkingAnim = self.walkingBackward
+		self.walkingAnim.play()
+	
+	# updates temporary stats
+	def updateStats( self ):
+		for i in ['acc','atk','spd','def']:
+			if i in self.tempStats and self.turns >= self.tempStats[i][1]:
+				value = self.tempStats[i][0]
+				if i == 'acc':
+					self.acc -= value
+				elif i == 'atk':
+					self.atk -= value
+				elif i == 'spd':
+					self.spd -= value
+				elif i == 'dfn':
+					self.dfn -= value
+				del self.tempStats[i]
 	
 	# updates the character's position to move along its current trajectory
 	# returns whether the character moved
@@ -343,6 +529,8 @@ class PlayableCharacter( Character ):
 					self.ghost = self.ghost.move( -self.step, 0 )
 				elif self.movement[0] == right:
 					self.ghost = self.ghost.move( self.step, 0 )
+			else: # otherwise stop walk animation
+				self.walkingAnim.stop()
 			
 			return True
 		else:
@@ -378,6 +566,12 @@ class PlayableCharacter( Character ):
 					return True
 			else:
 				return False
+	
+	# raise HP by percentage (value between 0 & 1)
+	def raiseHP( self, perc ):
+		self.hp += self.hp * perc
+		if self.hp > self.totalHP:
+			self.hp = self.totalHP
 	
 	# setter for total HP
 	def setTotalHP( self, h ):
@@ -451,26 +645,59 @@ class PlayableCharacter( Character ):
 		self.spdGR = ratelist[3]
 		self.accGR = ratelist[4]
 	
+	# decreases time stat by specified amount
+	def takeTime( self, amt ):
+		self.time -= amt
+		if self.time < 0:
+			self.time = 0
+	
 	# add a given DebuggingMethod to this character's repertoire of attacks
 	def addAttack( self, aaa ):
 		self.attacks.append( aaa )
 	
-	# level up the character, increasing all stats by the growth rate
-	def levelUp( self ):
+	# level up the character, using growth rates to determine which stats
+	# will be leveled up
+	# HP increases by 55 at a time, all others by 5
+	def levelUp( self, game ):
 		self.level += 1
 		
-		# increase stats
-		self.totalHP += self.hpGR
-		self.atk += self.atkGR
-		self.dfn += self.dfnGR
-		self.spd += self.spdGR
-		self.acc += self.accGR
+		# increase stats based on growth rates
+		if random.random() < self.hpGR:
+			self.totalHP += self.hpStep
+		
+		if random.random() < self.atkGR:
+			self.atk += self.statStep
+		
+		if random.random() < self.dfnGR:
+			self.dfn += self.statStep
+		
+		if random.random() < self.spdGR:
+			self.spd += self.statStep
+		
+		if random.random() < self.accGR:
+			self.acc += self.statStep
+			
+		# add new attack
+		if self.level == 2:
+			newatk = ReferNotes()
+		elif self.level == 3:
+			newatk = ReadCode()
+		elif self.level == 4:
+			newatk = ShareCode(game)
+		elif self.level == 5:
+			newatk = LookTime()
+		elif self.level == 6:
+			newatk = UseInternet()
+		elif self.level == 7:
+			newatk = CommentLines()
+			
+		self.addAttack(newatk)
 	
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view
 	def enterBattle( self ):
 		self.showHP = True
-		self.orientation = left
+		self.image = self.imgBattle
 		
 		# store exploring position, switch to battle position
 		self.explorePos= self.pos[:]
@@ -489,19 +716,28 @@ class PlayableCharacter( Character ):
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar
 	def draw( self, screen ):
-		# determine which image to use based on current orientation
-		if self.orientation == front:
-			self.image = self.imgFront
-		elif self.orientation == back:
-			self.image = self.imgBack
-		elif self.orientation == left:
-			self.image = self.imgLeft
-		elif self.orientation == right:
-			self.image = self.imgRight
+		# determine which image to use based on current orientation (only in exploration mode)
+		if not self.showHP:
+			if self.movement[1] > 0: # if the character is currently moving
+				self.walkingAnim.blit( screen, self.pos )
+			
+			else: # otherwise show standing image
+				if self.orientation == front:
+					self.image = self.imgFront
+				elif self.orientation == back:
+					self.image = self.imgBack
+				elif self.orientation == left:
+					self.image = self.imgLeft
+				elif self.orientation == right:
+					self.image = self.imgRight
+				
+				Character.draw( self, screen )
+		else: # draw in battle mode
+			Character.draw( self, screen )
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
-		Character.draw( self, screen )
+		#Character.draw( self, screen )
 	
 	# returns a string reporting all attacks the character has
 	def listAttacks( self ):
@@ -536,220 +772,26 @@ class PlayableCharacter( Character ):
 	
 	# returns a string reporting the name and location of the character
 	def toString( self ):
-		return 'playable character ' + self.name + ' at (' + str( self.pos[0] ) + ', ' + str( self.pos[1] ) + ')'	
+		return 'playable character ' + self.name + ' at (' + str( self.pos[0] ) + ', ' + str( self.pos[1] ) + ')'
 
-'''main function for testing'''
-def main():
+'''
+This class represents a doorway from one stage to another in the game.
+'''
+class Door:
 	
-	# ---------copied from tutorial for initializing pyGame, making a screen
+	# creates a new Door with the given position and dimensions, and the given name of a Stage to lead to
+	def __init__( self, pos, dim, room ):
+		self.rect = pygame.Rect( pos[:], dim[:] )
+		self.room = room
 	
-	# initialize pygame
-	pygame.init()
+	# returns the Rect representing this door
+	def getRect( self ):
+		return self.rect
+		
+		
 
-	# initialize the fonts
-	try:
-		pygame.font.init()
-	except:
-		print "Fonts unavailable"
-		sys.exit()
-	
-	# create a screen (width, height)
-	screenSize = (800, 600)
-	screen = pygame.display.set_mode( screenSize )
-	
-	pygame.display.set_caption( "shalala ... la de da" )
-	
-	print 'init screen'
-	
-	# ----------test code
-	
-	pos = [ 0, 0 ]
-	wump = pygame.image.load( "wumpus.png" ).convert_alpha() # has to be called after pygame is initialized
-	hunterL = pygame.image.load( "hunterL.png" ).convert_alpha()
-	hunterR = pygame.image.load( "hunterR.png" ).convert_alpha()
-	hunterF = pygame.image.load( "hunterF.png" ).convert_alpha()
-	hunterB = pygame.image.load( "hunterB.png" ).convert_alpha()
-	
-	# section of code to test Thing class
-	
-	'''
-	agnes = Thing( pos, wump )
-	print agnes.toString()
-	print 'agnes is at', agnes.getPosition()
-	agnes.setPosition( 300, 200 )
-	print 'agnes moves to', agnes.getPosition()
-	
-	screen.fill( (255, 255, 255) )
-	agnes.draw( screen )
-	pygame.display.update()
-	
-	raw_input( 'show next pos? type anything\n' )
-	
-	screen.fill( (255, 255, 255) )
-	agnes.move( 100, -100 )
-	agnes.draw( screen )
-	pygame.display.update()
-	'''
-	
-	# section of code to test Character class
-	'''
-	edna = Character( pos, wump, 'edna' )
-	print edna.toString()
-	print 'edna is at', edna.getPosition()
-	edna.setPosition( 100, 200 )
-	print 'edna moves to', edna.getPosition()
-	
-	screen.fill( (255, 255, 255) )
-	edna.draw( screen )
-	pygame.display.update()
-	
-	raw_input( 'give damage? type anything\n' )
-	
-	edna.takeDamage( 500 )
-	print 'after an attack, edna is', edna.toString()
-	
-	screen.fill( (255, 255, 255) )
-	edna.draw( screen )
-	pygame.display.update()
-	'''
-	
-	# section of code to test Enemy class
-	'''
-	edna = Enemy( pos, wump, 'edna' )
-	print edna.toString()
-	print 'edna is at', edna.getPosition()
-	edna.setPosition( 100, 200 )
-	print 'edna moves to', edna.getPosition()
-	
-	screen.fill( (255, 255, 255) )
-	edna.draw( screen )
-	pygame.display.update()
-	
-	raw_input( 'give damage? type anything\n' )
-	
-	edna.takeDamage( 500 )
-	print 'after an attack, edna is', edna.toString()
-	
-	screen.fill( (255, 255, 255) )
-	edna.draw( screen )
-	pygame.display.update()
-	'''
-	
-	# section of code to test PlayableCharacter class
-	
-	tempRect = pygame.Surface( ( 200, 200 ) )
-	tempRect.fill( ( 255, 200, 255 ) )
-	edna = Enemy( pos, tempRect, 'edna' )
-	edna.setPosition( 100, 200 )
-	
-	# make image list
-	imglist = [ hunterF, hunterB, hunterL, hunterR, hunterL ]
-	priya = PlayableCharacter( pos, ( 0, 0 ), imglist, 'priya' )
-	print 'priya bounds', priya.getBounds()
-	'''
-	print priya.toString()
-	print 'initial', priya.reportStats()
-	print 'initial', priya.reportGrowthRates()
-	
-	print '\nmodifying stats'
-	priya.setTotalHP( 800 )
-	priya.setCurrentHP( 500 )
-	priya.setATK( 600 )
-	priya.setDFN( 750 )
-	priya.setSPD( 5 )
-	priya.setACC( 9001 )
-	priya.setTime( 24 )
-	print 'becomes', priya.reportStats()
-	
-	print '\nmodifying stats to step up by 100s'
-	priya.setAllStats( ( 100, 200, 300, 400, 500, 600 ) )
-	print 'becomes', priya.reportStats()
-	
-	print '\nmodifying growth rates'
-	priya.setHPGR( 50 )
-	priya.setATKGR( 87 ) # Charles
-	priya.setDFNGR( 63 ) # Zena
-	priya.setSPDGR( 27 ) # Fatimah
-	priya.setACCGR( 44 ) # Melody
-	print 'becomes', priya.reportGrowthRates()
-	
-	print '\nmodifying growth rates to step up by 10s'
-	priya.setAllGR( ( 10, 20, 30, 40, 50 ) )
-	print 'becomes', priya.reportGrowthRates()
-	
-	priya.levelUp()
-	print '\nafter leveling up,', priya.reportStats()
-	'''
-	# testing graphics for PlayableCharacter
-	
-	priya.move( 20, 40 )
-	print 'new priya bounds', priya.getBounds()
-	
-	priya.setPosition( 400, 200 )
-	print 'new priya bounds', priya.getBounds()
-	
-	screen.fill( (255, 255, 255) )
-	edna.draw( screen )
-	priya.draw( screen )
-	pygame.display.update()
-	
-	# # # TEST ADDATTACK AFTER WRITING DEBUGGINGMETHOD
-	
-	# ----------main loop for window
-	
-	print 'enter main loop'
-	
-	battleMode = False
-	tileSize = 50
-	
-	while 1:
-		for event in pygame.event.get(): # does not account for holding down keys
-			if event.type == pygame.KEYDOWN:
-				if not battleMode:
-					if event.key == pygame.K_UP:
-						priya.goBackward( tileSize )
-					elif event.key == pygame.K_DOWN:
-						priya.goForward( tileSize )
-					elif event.key == pygame.K_LEFT:
-						priya.goLeft( tileSize )
-					elif event.key == pygame.K_RIGHT:
-						priya.goRight( tileSize )
-				
-				if event.key == pygame.K_b:
-					if battleMode:
-						battleMode = False
-						priya.leaveBattle()
-					else:
-						battleMode = True
-						priya.enterBattle()
-				elif event.key == pygame.K_a:
-					if battleMode:
-						priya.attack( edna, 50 )
-						#print 'attack! edna health', edna.hp
-				elif event.key == pygame.K_z:
-					if battleMode:
-						edna.attack( priya, 50 )
-						#print 'attack! priya health', priya.hp
-			if event.type == pygame.QUIT:
-				sys.exit()
-		
-		priya.collide( edna ) # test for collision with edna
-		priya.update()
-		
-		screen.fill( (255, 255, 255) )
-		edna.draw( screen )
-		priya.draw( screen )
-		pygame.display.update()
-		
-		
-	
-	
-# 	while 1:
-# 		for event in pygame.event.get():
-# 			if event.type == pygame.QUIT:
-# 				sys.exit()
 
-if __name__ == '__main__':
-	main()
+
+
 
 
