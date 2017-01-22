@@ -357,7 +357,7 @@ class Game:
 		
 		# create doors
 		
-		doorToRoboLab = agents.Door( ( 0, 1365 * scale ), ( 10, 60 / scale ), 'robotics lab' )
+		doorToRoboLab = agents.Door( ( 0, 1365 * scale ), ( 10, 40 / scale ), 'robotics lab' )
 		self.hallwayStage.addDoor( doorToRoboLab )
 		
 		# create walls
@@ -563,15 +563,23 @@ class Game:
 		rTable.set_alpha( 0 ) # set image transparency
 		rightTable = agents.Thing( rTablePos, rTable )
 		self.roboLabStage.addThing( rightTable )
-	
-		iboardDim = ( int( 380 * scale ), int( 1100 * scale ) )
-		iboardPos = ( int( 100 * scale ), int( 2100 * scale ) )
-		iboard = pygame.Surface( iboardDim )
-		#iboard.fill( ( 100, 100, 50 ) )
-		iboard.set_alpha( 0 ) # set image transparency
-		board = agents.Thing( iboardPos, iboard )
+		
+		rboardDim = ( int( 210 * scale ), int( 710 * scale ) )
+		rboardPos = ( int( 265 * scale ), int( 2100 * scale ) )
+		rboard = pygame.Surface( rboardDim )
+		#rboard.fill( ( 100, 100, 50 ) )
+		rboard.set_alpha( 0 ) # set image transparency
+		board = agents.Thing( rboardPos, rboard )
 		self.roboLabStage.addThing( board )
-	
+		
+		lboardDim = ( int( 210 * scale ), int( 980 * scale ) )
+		lboardPos = ( int( 30 * scale ), int( 2250 * scale ) )
+		lboard = pygame.Surface( lboardDim )
+		#lboard.fill( ( 100, 100, 50 ) )
+		lboard.set_alpha( 0 ) # set image transparency
+		otherboard = agents.Thing( lboardPos, lboard )
+		self.roboLabStage.addThing( otherboard )
+		
 		bTableDim = ( int( 790 * scale ), int( 485 * scale ) )
 		bTablePos = ( int( 925 * scale ), int( 3085 * scale ) )
 		bTable = pygame.Surface( bTableDim )
