@@ -936,6 +936,9 @@ class Game:
 		target = random.choice( self.livePlayers )
 		self.battleParticipants[self.currentBattleTurn].attack( target, 50 ) # to always win
 		
+		# play attack sound
+		self.sound.play('zong')
+		
 		if not target.isDead(): # if the target is still alive, pass on turn index
 			self.passOnTurn()
 		
@@ -1078,6 +1081,9 @@ class Game:
 						
 						attacker.attacking = False # make box disappear
 						self.passOnTurn()
+						
+						# play attack sound
+						self.sound.play('pew')
 						
 						# if attack killed target
 						if target.isDead():
