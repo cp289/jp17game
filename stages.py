@@ -332,7 +332,8 @@ class Game:
 	def placePlayerOnScreen( self ):
 		pos = self.player.getStagePos()
 		
-		prevRect = self.player.rect.copy()
+		#prevRect = self.player.rect.copy()
+		prevRect = self.player.eraseRect
 		
 		screenPos = ( pos[0] - self.camera.topleft[0], pos[1] - self.camera.topleft[1] )
 		self.player.setScreenPos( screenPos[0], screenPos[1] )
