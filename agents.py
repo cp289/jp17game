@@ -180,13 +180,11 @@ class Character( Thing ):
 		if self.showHP:
 			# draw health bar background (in black)
 			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
-			
 			# draw health bar foreground based on current HP left (if there is any)
 			if self.hp != 0:
 				fraction = float( self.hp ) / self.totalHP
 				newWidth = int( ( self.hpbarWidth - 2 ) * self.hp / self.totalHP )
 				self.hpbarFG.width = newWidth
-				#pygame.draw.rect( screen, green, self.hpbarFG )
 			
 				if fraction > 0.3:
 					pygame.draw.rect( screen, green, self.hpbarFG )
