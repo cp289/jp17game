@@ -74,6 +74,12 @@ class PrintStatements(DebuggingMethod):
 	def __init__(self):
 		DebuggingMethod.__init__(self,"Use Print Statements", 3, 300)
 		
+	def actions(self, e, c):
+		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
+			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+		else:
+			print "Attack Missed."
+		
 class TakeBreak(DebuggingMethod):
 	def __init__(self):
 		DebuggingMethod.__init__(self,"Take a Break", 3, 0)
@@ -120,14 +126,16 @@ class ShareCode(DebuggingMethod):
 	def __init__(self, game):
 		DebuggingMethod.__init__(self, "Share Code", 3, 0) # damage?? 
 		self.game = game
-		self.oldArray = self.game.enemies
-		self.newArray = self.game.livePlayers
 		
 	def actions(self, e, c):
 		# boosts chosen partner's hp by 40%
 		e.raiseHP(0.4)
+		self.oldCursor()
 		
 	def newCursor(self):
+		self.oldArray = self.game.enemies
+		self.newArray = self.game.livePlayers
+		
 		self.game.enemies = self.newArray
 
 		prev = self.game.enemies[self.game.selectedEnemyIDX]
@@ -149,6 +157,7 @@ class ShareCode(DebuggingMethod):
 								   ( 2 * rad + 2, 2 * rad + 2 ) )
 		self.game.stage.fillBattleBG( self.game.screen, eraseRect )
 		self.game.enemies = self.oldArray
+		self.game.selectedEnemyIDX = 0
 		
 # Level 5
 class LookTime(DebuggingMethod):

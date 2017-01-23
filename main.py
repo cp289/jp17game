@@ -8,6 +8,7 @@
 import pygame
 import stages
 import sys
+from sound import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -46,7 +47,7 @@ def showStartScreen( screen, buttons ):
 	startScreen = pygame.image.load( 'images/Debug Davis Start Screen.png' ).convert_alpha()
 	#bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
 	#startText = bigFont.render( 'press s to start', True, white )
-
+	
 	screen.blit( startScreen, ( 0, 0 ) )
 	pygame.draw.rect( screen, black, pygame.Rect( ( 100, 250 ), ( 600, 300 ) ) )
 	#screen.blit( startText, ( screen.get_width() / 3, screen.get_height() / 2 ) )
@@ -88,6 +89,12 @@ def main():
 	buttons = [ startButton, instrButton ]
 	showStartScreen( screen, buttons )
 	
+	# initialize sounds
+	sound = Sound()
+	
+	# play start screen music
+	sound.play("start")
+	
 	print 'start screen'
 	
 	# run a loop for start screen
@@ -110,11 +117,15 @@ def main():
 		instrButton.draw( screen )
 		pygame.display.update()
 	
-	game = stages.Game( screen )
+	game = stages.Game( screen, sound )
 	game.loadHallwayStage() # possibly do this in Game constructor later
 	game.loadRoboLabStage()
 	
+	# stop start screen music
+	sound.stop("start")
+	
 	game.enterHallwayStageRight()
+	
 	
 	'''
 	just load all stages to begin with (probably put a loading screen on while that's going)
