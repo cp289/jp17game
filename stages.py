@@ -338,7 +338,7 @@ class Game:
 		self.bruEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce?', namePos )
 
 		#initialize NPE
-		playerC = pygame.image.load( "images/Bugs/BossBugSilhouette.png" ).convert_alpha()
+		playerC = pygame.image.load( "images/bugs/BossBugSilhouette.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 44, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
