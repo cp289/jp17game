@@ -764,6 +764,8 @@ class Game:
 # 		for chara in self.livePlayers:
 # 			print 'drew', chara.name, 'hp bar at', chara.hpbarBG
 	
+		self.refresh.append( self.screen.get_rect() ) # possible fix for health bar issues?
+	
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
 		# stop battle music
