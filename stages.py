@@ -1065,6 +1065,8 @@ class Game:
 			if self.stage == self.hallwayStage:
 				if not self.hallwaySafe:
 					self.enterDialogue() # convo 2 upon entering hallway, enters battle when done
+			elif self.stage == self.roboLabStage and self.stage.battlesCompleted == 0:
+				self.enterDialogue() # convo 4 upon entering robotics lab for the first time
 			else:
 				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
 				if random.random() < probBattle:
@@ -1333,7 +1335,7 @@ class Game:
 			self.player.draw( self.screen )
 			self.refresh.append( self.player.getRect() )
 			
-			if self.convoNum == 2:
+			if self.convoNum == 2 or self.convoNum == 4:
 				self.enterBattle()
 			
 			self.convoNum += 1
