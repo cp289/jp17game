@@ -12,7 +12,6 @@ import random
 from attackChooser import *
 from sound import *
 import conversation
-from sound import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -156,7 +155,7 @@ class Game:
 	# fields: current stage, whether in battle mode, whether in dialogue, enemies
 	
 	# start a new Game
-	def __init__( self, screen ):
+	def __init__( self, screen, sound ):
 		# create a screen (width, height)
 		self.screenSize = ( screen.get_width(), screen.get_height() )
 		self.screen = screen
@@ -215,7 +214,7 @@ class Game:
 		self.convoFont = pygame.font.SysFont( "Helvetica", 28, bold=True )
 		
 		# load sound object
-		self.sound = Sound()
+		self.sound = sound
 		
 		# init Conversation object
 		self.initConvo()
