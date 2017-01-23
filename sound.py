@@ -23,8 +23,8 @@ class Sound:
 			"battleMusic.ogg",
 			"enemyMusic.ogg",
 			"explora.wav",
-			"bonk.wav",
-			"zong.wav",
+			"bonk.ogg",
+			"zong.ogg",
 			"pew.ogg"
 		])
 	
