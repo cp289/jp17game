@@ -8,6 +8,7 @@
 import pygame
 import stages
 import sys
+import os
 from sound import *
 
 # some useful variables for the rest of this file
@@ -56,6 +57,14 @@ def showStartScreen( screen, buttons ):
 		button.draw( screen )
 	
 	pygame.display.update()
+
+def cleanup():
+	print('cleaning up...')
+	d = os.path.dirname(os.path.realpath(__file__))
+	files = [ file for file in os.listdir(d) if file.endswith(".pyc") ]
+	for file in files:
+		os.remove(file)
+	
 
 # runs main game code
 def main():
@@ -111,6 +120,7 @@ def main():
 						moveOn = True
 						break
 			if event.type == pygame.QUIT:
+				cleanup()
 				sys.exit()
 		
 		startButton.draw( screen )
@@ -157,6 +167,7 @@ def main():
 	while 2:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
+				cleanup()
 				sys.exit()
 
 if __name__ == '__main__':
