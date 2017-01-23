@@ -62,7 +62,7 @@ class Google(DebuggingMethod):
 # level 1 attacks
 class AskSomeone(DebuggingMethod):
 	def __init__(self):
-		DebuggingMethod.__init__(self,"Ask Someone", 4, 500) # affects all bugs?? No. Why would we select a single one?
+		DebuggingMethod.__init__(self,"Ask Someone", 4, 100) # affects all bugs?? No. Why would we select a single one?
 		
 	def actions(self, e, c):
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
