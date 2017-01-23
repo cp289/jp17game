@@ -843,6 +843,7 @@ class Game:
 		# if we're leaving the hallway battle, now make the hallway safe
 		if self.stage == self.hallwayStage:
 			self.hallwaySafe = True
+			self.enterDialogue() # enter convo 3
 		
 		print 'leave battle'
 	
@@ -1063,7 +1064,7 @@ class Game:
  		else: # otherwise, player did not move at all, can trigger battle
 			if self.stage == self.hallwayStage:
 				if not self.hallwaySafe:
-					self.enterDialogue() # convo 2 upon entering hallway
+					self.enterDialogue() # convo 2 upon entering hallway, enters battle when done
 			else:
 				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
 				if random.random() < probBattle:
