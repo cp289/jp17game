@@ -8,8 +8,6 @@
 # The position of an Thing is the upper left corner of its image/rect.
 # Playable Characters increase their stats with every level-up.
 
-# test code is now obsolete
-
 import pygame
 import sys
 import random
@@ -377,10 +375,15 @@ class PlayableCharacter( Character ):
 			pass
 			'''make pyganim'''
 		
-		# THESE IMAGES MUST BE PROVIDED
 		other = imglist[5]
-		self.imgStatus = other[0]
-		self.imgConvo = other[1]
+		if other[0] != None:
+			self.imgStatus = other[0]
+			
+		self.hasimgConvo = False
+		if other[1] != None:
+			self.imgConvo = other[1]
+			self.hasimgConvo = True
+
 	
 	# adds a temporary stat
 	def addTempStat( self, stat, value, expir ):

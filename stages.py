@@ -307,6 +307,63 @@ class Game:
 		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 7 ) )
 		self.cha.setAllGR( ( 0.75, 0.7, 0.8, 0.9, 0.85 ) )
 		
+		"""
+		Initialize non-playable characters who just take part in convos
+		"""
+		playerS = None
+		otherlist = (playerS, playerC)
+		battlePos = ( 0, 0 ) # doesn't matter anyways
+		fillerImg = battlelist
+		battlelist = fillerImg # needs image but never battles anyways
+
+		#initalize chaEvil
+		playerC = pygame.image.load( "images/Charles/PossessedCharles.png" ).convert_alpha()
+		otherlist = ( playerS, playerC )
+		namePos = ( 9, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.chaEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles?', namePos )
+
+		#initialize bru
+		playerC = pygame.image.load( "images/Bruce/BruceHead.png" ).convert_alpha()
+		otherlist = ( playerS, playerC )
+		namePos = ( 33, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.bru = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce', namePos )
+
+		#initialize bruEvil
+		playerC = pygame.image.load( "images/Bruce/BruceHeadEvil.png" ).convert_alpha()
+		otherlist = ( playerS, playerC )
+		namePos = ( 24, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.bruEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce?', namePos )
+
+		#initialize NPE
+		playerC = pygame.image.load( "images/Bugs/BossBugSilhouette.png" ).convert_alpha()
+		otherlist = ( playerS, playerC )
+		namePos = ( 44, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.NPE = agents.PlayableCharacter( initpos, battlePos, imglist, 'NPE', namePos )
+
+		playerC = None 
+
+		#initialize stu1
+		otherlist = ( playerS, playerC )
+		namePos = ( 1, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.stu1 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_1', namePos )
+
+		#initialize stu2
+		otherlist = ( playerS, playerC )
+		namePos = ( 1, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.stu2 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_2', namePos )
+
+		#initialize CSC
+		otherlist = ( playerS, playerC )
+		namePos = ( 15, 0 )
+		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
+		self.CSC = agents.PlayableCharacter( initpos, battlePos, imglist, 'CS_Child', namePos )
+		
 		print 'initialized playable characters'
 	
 	#loads textbox images and makes a Conversation object
@@ -323,9 +380,9 @@ class Game:
 
 		# list of all people who will need textboxes
 		# these are PlayableCharacter objects
-		talkingCharList = [self.mel, self.fa, self.zen, self.cha ]
+		talkingCharList = [self.mel, self.fa, self.zen, self.cha, self.chaEvil, self.bru, self.bruEvil, self.NPE, self.stu1, self.stu2, self.CSC ]
 
-		dialogueFile = "dialogue.txt"
+		dialogueFile = "Script.txt"
 
 		self.gameConvo = conversation.Conversation(textbox, textboxCoord, cursor, self.screen, talkingCharList, self.convoFont, self.nameFont, dialogueFile)
 
