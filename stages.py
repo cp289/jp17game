@@ -9,6 +9,8 @@ import pygame
 import sys
 import agents
 import random
+from attackChooser import *
+from sound import *
 import conversation
 from sound import *
 
@@ -218,6 +220,9 @@ class Game:
 		# init Conversation object
 		self.initConvo()
 		self.convoNum = 0
+		
+		# load sound object
+		self.sound = Sound()
 		
 		# mostly for testing
 		self.timeStep = 0
@@ -681,6 +686,13 @@ class Game:
 		self.spawnEnemies( 3, 1 ) # number, level
 		self.enemies[0].select()
 		self.selectedEnemyIDX = 0
+		
+		
+		# create dashboard
+		self.dashboard = AttackChooser(self.screen)
+		self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
+		self.dashboard.draw()
+		
 		print 'enter battle'
 		
 		# reset stored points for new battle
@@ -978,6 +990,17 @@ class Game:
 		if self.currentBattleTurn > len( self.battleParticipants ) - 1: # wrap around to front of list
 			self.currentBattleTurn = 0
 		
+		if self.battleParticipants[self.currentBattleTurn].getType() == 'PlayableCharacter':
+			# increment character's turn count
+			self.battleParticipants[self.currentBattleTurn].turns += 1
+			
+			# update character's temp stats
+			self.battleParticipants[self.currentBattleTurn].updateStats()
+			
+			# reconfigure dashboard
+			self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
+			self.dashboard.draw() # is this necessary?
+		
 # 		next = self.battleParticipants[self.currentBattleTurn]
 # 		if next.getType() == 'PlayableCharacter':
 # 			next.attacking = True
@@ -992,7 +1015,7 @@ class Game:
 			
 			# check for leveling up
 			if chara.xp >= chara.level * 100:
-				chara.levelUp()
+				chara.levelUp(self)
 				print 'leveled up', chara.name, 'to level', chara.level
 	
 	# parses keyboard input for battle mode and updates screen contents
@@ -1073,11 +1096,19 @@ class Game:
 						
 							self.selectedEnemyIDX = 0
 							self.enemies[self.selectedEnemyIDX].select()
-				
+					elif event.key == pygame.K_LEFT:
+						self.dashboard.switchAtk(-1)
+						self.dashboard.draw()
+					elif event.key == pygame.K_RIGHT:
+						self.dashboard.switchAtk(1)
+						self.dashboard.draw()
+					
+					
 					# attack currently selected enemy
 					elif event.key == pygame.K_a:
 						target = self.enemies[self.selectedEnemyIDX]
-						attacker.attack( target, 50 )
+						
+						self.dashboard.attack().attack(target, self.battleParticipants[self.currentBattleTurn])
 						
 						attacker.attacking = False # make box disappear
 						self.passOnTurn()
@@ -1145,6 +1176,7 @@ class Game:
 					if self.inBattle: # redraw battle screen
 						self.stage.fillBattleBG( self.screen, self.statBGRect )
 						self.refresh.append( self.statBGRect )
+						self.dashboard.draw()
 					else: # redraw stage
 						self.stage.fillBG( self.screen, self.refresh, self.statBGRect, self.camera)
 						self.player.draw( self.screen )

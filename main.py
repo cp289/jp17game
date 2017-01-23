@@ -1,4 +1,4 @@
-# Melody Mao
+ # Melody Mao
 # CS269, January 2017
 # Debug Davis
 
@@ -150,7 +150,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-
-
-

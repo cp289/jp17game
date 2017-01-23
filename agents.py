@@ -13,6 +13,7 @@
 import pygame
 import sys
 import random
+from debuggingMethod import *
 import pyganim
 
 # some useful variables for the rest of this file
@@ -111,6 +112,8 @@ class Character( Thing ):
 		self.showHP = False
 		self.level = 1
 		
+		self.attacks=[]
+		
 		# rects for drawing health bar
 		self.hpbarWidth = 70
 		self.hpbarHeight = 10
@@ -158,9 +161,16 @@ class Character( Thing ):
 		if self.hp < 0: # if the damage would make the HP negative, just make it 0
 			self.hp = 0
 	
+	# increases the Character's HP by the given percentage (0 <= perc < 1)
+	def takeHealth( self, perc ):
+		self.hp += perc*self.totalHP
+		
+		if self.hp > totalHP:
+			self.hp = totalHP
+	
 	# attacks the given Character target and does the given amount of damage
 	def attack( self, target, dmg ):
-		target.takeDamage( dmg )
+		target.takeDamage(dmg)
 	
 	# draws the Character with a health bar at its current position on the given Surface
 	def draw( self, screen ):
@@ -185,6 +195,7 @@ class Character( Thing ):
 		
 		# draw pointer if selected
 		if self.selected:
+			#print "should draw cursor for " + self.name
 			radius = 10
 			arrowPos = ( self.rightEdge - radius, self.bottomEdge - radius )
 			arrowBottom = ( self.rightEdge - radius, self.bottomEdge + radius + 1 )
@@ -290,13 +301,19 @@ class PlayableCharacter( Character ):
 		self.statStep = 5 # how much a stat can increase in one level-up
 		self.hpStep = 55 # how much HP can increase in one level-up
 		
-		# initialize attack list as empty
-		self.attacks = [] # all attacks the character is capable of
-		self.currentAttacks = [] # attacks the character can currently choose from (a subset of self.attacks)
-		self.attacking = False
+		# initialize level 1 attacks
+		self.attacks = [
+				AskSomeone(),
+				TakeBreak(),
+				ReadProject(),
+				PrintStatements()
+			]
+		self.attacking = False # whether it is this character's turn to attack
 		
 		# variables for current player state
 		self.orientation = front
+		self.turns = 0
+		self.tempStats = {}
 		
 		# variables for player movement
 		self.movement = [ 0, 0 ] # current stored movement to follow: direction, distance left to go
@@ -364,6 +381,18 @@ class PlayableCharacter( Character ):
 		other = imglist[5]
 		self.imgStatus = other[0]
 		self.imgConvo = other[1]
+	
+	# adds a temporary stat
+	def addTempStat( self, stat, value, expir ):
+		if stat == 'acc':
+			self.acc += value
+		elif stat == 'atk':
+			self.atk += value
+		elif stat == 'spd':
+			self.spd += value
+		elif stat == 'dfn':
+			self.dfn += value
+		self.tempStats.update( { stat: (value, self.turns + expir) } )
 	
 	# returns the current position onstage of the character
 	def getStagePos( self ):
@@ -460,6 +489,21 @@ class PlayableCharacter( Character ):
 		self.walkingAnim = self.walkingBackward
 		self.walkingAnim.play()
 	
+	# updates temporary stats
+	def updateStats( self ):
+		for i in ['acc','atk','spd','def']:
+			if i in self.tempStats and self.turns >= self.tempStats[i][1]:
+				value = self.tempStats[i][0]
+				if i == 'acc':
+					self.acc -= value
+				elif i == 'atk':
+					self.atk -= value
+				elif i == 'spd':
+					self.spd -= value
+				elif i == 'dfn':
+					self.dfn -= value
+				del self.tempStats[i]
+	
 	# updates the character's position to move along its current trajectory
 	# returns whether the character moved
 	def update( self ):
@@ -530,6 +574,12 @@ class PlayableCharacter( Character ):
 					return True
 			else:
 				return False
+	
+	# raise HP by percentage (value between 0 & 1)
+	def raiseHP( self, perc ):
+		self.hp += self.hp * perc
+		if self.hp > self.totalHP:
+			self.hp = self.totalHP
 	
 	# setter for total HP
 	def setTotalHP( self, h ):
@@ -603,6 +653,12 @@ class PlayableCharacter( Character ):
 		self.spdGR = ratelist[3]
 		self.accGR = ratelist[4]
 	
+	# decreases time stat by specified amount
+	def takeTime( self, amt ):
+		self.time -= amt
+		if self.time < 0:
+			self.time = 0
+	
 	# add a given DebuggingMethod to this character's repertoire of attacks
 	def addAttack( self, aaa ):
 		self.attacks.append( aaa )
@@ -610,7 +666,7 @@ class PlayableCharacter( Character ):
 	# level up the character, using growth rates to determine which stats
 	# will be leveled up
 	# HP increases by 55 at a time, all others by 5
-	def levelUp( self ):
+	def levelUp( self, game ):
 		self.level += 1
 		
 		# increase stats based on growth rates
@@ -628,6 +684,22 @@ class PlayableCharacter( Character ):
 		
 		if random.random() < self.accGR:
 			self.acc += self.statStep
+			
+		# add new attack
+		if self.level == 2:
+			newatk = ReferNotes()
+		elif self.level == 3:
+			newatk = ReadCode()
+		elif self.level == 4:
+			newatk = ShareCode(game)
+		elif self.level == 5:
+			newatk = LookTime()
+		elif self.level == 6:
+			newatk = UseInternet()
+		elif self.level == 7:
+			newatk = CommentLines()
+			
+		self.addAttack(newatk)
 	
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view
