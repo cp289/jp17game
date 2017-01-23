@@ -1,18 +1,6 @@
 # File: attackChooser.py
 # Author: Charles Parham
 # 
-# Notes:
-# 	background needed? (currently gray)
-#
-# Issues:
-#	need to make the dashboard more visually apealing
-# 	rename this file to 'dashboard'
-#
-# Bugs:
-# 	Index out of bounds error occasionally when toggling target enemies
-#	Cursor remains on characters after switching attack type from "share code"
-#	  potentially related: characters die twice causing a list remove error.
-
 
 import pygame, sys, agents, random
 
