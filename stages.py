@@ -12,10 +12,6 @@ import random
 from attackChooser import *
 from sound import *
 import conversation
-<<<<<<< HEAD
-=======
-from sound import *
->>>>>>> ztemp
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -159,11 +155,7 @@ class Game:
 	# fields: current stage, whether in battle mode, whether in dialogue, enemies
 	
 	# start a new Game
-<<<<<<< HEAD
 	def __init__( self, screen, sound ):
-=======
-	def __init__( self, screen ):
->>>>>>> ztemp
 		# create a screen (width, height)
 		self.screenSize = ( screen.get_width(), screen.get_height() )
 		self.screen = screen
@@ -175,11 +167,8 @@ class Game:
 		self.gameClock = pygame.time.Clock()
 		
 		# boolean fields for game state
-<<<<<<< HEAD
 		self.inIntro = False
 		self.hallwaySafe = False
-=======
->>>>>>> ztemp
 		self.inBattle = False
 		self.inDialogue = False
 		self.onStatScreen = False
@@ -211,7 +200,6 @@ class Game:
 		self.statBG = pygame.transform.scale( statBGorig, self.screenSize ) # force it to be square for now
 		self.statBGRect = pygame.Rect( ( 20, 20 ), ( self.screenSize[0] - 40, self.screenSize[1] - 40 ) )
 		
-<<<<<<< HEAD
 		scale = 0.5
 		bgOrig = pygame.image.load( 'images/backgrounds/Davis Hallway.png' ).convert_alpha()
 		newDim = ( int( bgOrig.get_width() * scale ), int( bgOrig.get_height() * scale ) )
@@ -223,8 +211,6 @@ class Game:
 		adjustedHeight = int( melRoomBGorig.get_height() * ratio )
 		self.melRoomBG = pygame.transform.scale( melRoomBGorig, ( self.screenSize[0], adjustedHeight ) )
 		
-=======
->>>>>>> ztemp
 		# makes boxes for the characters on the stat screen
 		offset = 20
 		boxWidth = ( self.statBGRect.width - 3 * offset ) / 2
@@ -241,11 +227,7 @@ class Game:
 		self.convoFont = pygame.font.SysFont( "Helvetica", 28, bold=True )
 		
 		# load sound object
-<<<<<<< HEAD
 		self.sound = sound
-=======
-		self.sound = Sound()
->>>>>>> ztemp
 		
 		# init Conversation object
 		self.initConvo()
@@ -305,16 +287,6 @@ class Game:
 		playerC = pygame.image.load( "images/Fatimah/FatimahHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		
-<<<<<<< HEAD
-		# debugging
-		self.mel.levelUp(self)
-		self.mel.levelUp(self)
-		self.mel.levelUp(self)
-		self.mel.levelUp(self)
-		self.mel.levelUp(self)
-		
-=======
->>>>>>> ztemp
 		#initialize fa
 		battlePos = ( 600, 178 )
 		namePos = ( 15, 0 )
@@ -347,7 +319,6 @@ class Game:
 		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 7 ) )
 		self.cha.setAllGR( ( 0.75, 0.7, 0.8, 0.9, 0.85 ) )
 		
-<<<<<<< HEAD
 		"""
 		Initialize non-playable characters who just take part in convos
 		"""
@@ -405,8 +376,6 @@ class Game:
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.CSC = agents.PlayableCharacter( initpos, battlePos, imglist, 'CS_Child', namePos )
 		
-=======
->>>>>>> ztemp
 		print 'initialized playable characters'
 	
 	#loads textbox images and makes a Conversation object
@@ -423,15 +392,9 @@ class Game:
 
 		# list of all people who will need textboxes
 		# these are PlayableCharacter objects
-<<<<<<< HEAD
 		talkingCharList = [self.mel, self.fa, self.zen, self.cha, self.chaEvil, self.bru, self.bruEvil, self.NPE, self.stu1, self.stu2, self.CSC ]
 
 		dialogueFile = "Script.txt"
-=======
-		talkingCharList = [self.mel, self.fa, self.zen, self.cha ]
-
-		dialogueFile = "dialogue.txt"
->>>>>>> ztemp
 
 		self.gameConvo = conversation.Conversation(textbox, textboxCoord, cursor, self.screen, talkingCharList, self.convoFont, self.nameFont, dialogueFile)
 
@@ -455,13 +418,7 @@ class Game:
 	def loadHallwayStage( self ):
 		scale = 0.5
 		
-<<<<<<< HEAD
 		# hallway bg is now initialized in constructor
-=======
-		bgOrig = pygame.image.load( 'images/backgrounds/Davis Hallway.png' ).convert_alpha()
-		newDim = ( int( bgOrig.get_width() * scale ), int( bgOrig.get_height() * scale ) )
-		bg = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
->>>>>>> ztemp
 		
 		battleBGorig = pygame.image.load( 'images/backgrounds/Hallway Battle.png' ).convert_alpha()
 		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
@@ -473,11 +430,7 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 100.png' ).convert_alpha()
 						]
 		
-<<<<<<< HEAD
 		self.hallwayStage = Stage( 'hallway', 1, scale, self.hallwayBG, battleBG, bugImgs )
-=======
-		self.hallwayStage = Stage( 'hallway', 1, scale, bg, battleBG, bugImgs )
->>>>>>> ztemp
 		
 		# create doors
 		
@@ -763,7 +716,6 @@ class Game:
 	def enterMacLabStage( self ):
 		pass
 	
-<<<<<<< HEAD
 	# fills the given rectangle (or the entire screen) with the current intro background
 	def fillIntroBG( self, rect = None ):
 		if rect == None:
@@ -811,8 +763,6 @@ class Game:
 		# otherwise enterDialogue
 		# update screen
 	
-=======
->>>>>>> ztemp
 	# creates the given number of Enemies, of the given level
 	def spawnEnemies( self, num, level ):
 		for i in range( num ):
@@ -871,11 +821,8 @@ class Game:
 # 		for chara in self.livePlayers:
 # 			print 'drew', chara.name, 'hp bar at', chara.hpbarBG
 	
-<<<<<<< HEAD
 		self.refresh.append( self.screen.get_rect() ) # possible fix for health bar issues?
 	
-=======
->>>>>>> ztemp
 	# changes game state back to exploration mode
 	def leaveBattle( self ):
 		# stop battle music
@@ -891,15 +838,12 @@ class Game:
 		self.enemies = [] # empty enemies list
 		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
-<<<<<<< HEAD
 		
 		# if we're leaving the hallway battle, now make the hallway safe
 		if self.stage == self.hallwayStage:
 			self.hallwaySafe = True
 			self.enterDialogue() # enter convo 3
 		
-=======
->>>>>>> ztemp
 		print 'leave battle'
 	
 	# displays the given PlayableCharacter's stats at the given position on the stat screen
@@ -953,25 +897,17 @@ class Game:
 		
 		self.refresh.append( self.statBGRect )
 	
-<<<<<<< HEAD
 	# sends the game into dialogue mode for the next stored dialogue
-=======
->>>>>>> ztemp
 	def enterDialogue(self):
 		#move to next convo every time enterDialogue is called
 		#so that story moves sequentially
 		self.inDialogue = True  
-<<<<<<< HEAD
-		
+
 		if self.inIntro:
 			self.fillIntroBG()
 		else:
 			self.stage.moveCamView( self.screen, self.refresh, self.camera )
 		
-=======
-		#self.stage.fillBG( self.screen, self.refresh ) # for code without scrolling
-		self.stage.moveCamView( self.screen, self.refresh, self.camera )
->>>>>>> ztemp
 		self.player.draw( self.screen )
 		self.gameConvo.displayText( self.convoNum )
 		print "ENTERED DIALOGUE"
@@ -1033,7 +969,6 @@ class Game:
 					keydown = True
 					break
 				
-<<<<<<< HEAD
 # 				elif event.key == pygame.K_b: # temporary easy trigger for battle
 # 					self.enterBattle()
 # 					keydown = True
@@ -1041,15 +976,6 @@ class Game:
 # 				elif event.key == pygame.K_c: # temporary easy trigger for dialogue
 # 					self.enterDialogue()
 # 					return
-=======
-				elif event.key == pygame.K_b: # temporary easy trigger for battle
-					self.enterBattle()
-					keydown = True
-					break
-				elif event.key == pygame.K_c: # temporary easy trigger for dialogue
-					self.enterDialogue()
-					return
->>>>>>> ztemp
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
@@ -1134,7 +1060,6 @@ class Game:
 			self.stage.fillBG( self.screen, self.refresh, eraseRect, self.camera )
 			self.refresh.append( self.player.getRect() )
 		
-<<<<<<< HEAD
  		else: # otherwise, player did not move at all, can trigger battle
 			if self.stage == self.hallwayStage:
 				if not self.hallwaySafe:
@@ -1145,12 +1070,6 @@ class Game:
 				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
 				if random.random() < probBattle:
 					self.enterBattle()
-=======
-# 		else: # otherwise, player did not move at all, can trigger battle
-# 			probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
-# 			if random.random() < probBattle:
-# 				self.enterBattle()
->>>>>>> ztemp
 		
 		self.player.draw( self.screen )
 		self.refresh.append( self.player.getRect() )
@@ -1403,7 +1322,6 @@ class Game:
 	def updateDialogue(self):
 		#print "IN UPDATE DIALOGUE"
 		if self.gameConvo.convoOver == True:
-<<<<<<< HEAD
 			
 			#print "EXITING DIALOGUE"
 			self.inDialogue = False
@@ -1419,14 +1337,6 @@ class Game:
 			if self.convoNum == 2 or self.convoNum == 4:
 				self.enterBattle()
 			
-=======
-			#print "EXITING DIALOGUE"
-			self.inDialogue = False
-			#self.stage.fillBG( self.screen, self.refresh) # for code without scrolling
-			self.stage.moveCamView( self.screen, self.refresh, self.camera )
-			self.player.draw( self.screen )
-			self.refresh.append( self.player.getRect() )
->>>>>>> ztemp
 			self.convoNum += 1
 		else:
 			for event in pygame.event.get():
@@ -1436,16 +1346,11 @@ class Game:
 						if self.gameConvo.convoOver != True:
 							#print "STILL MORE TEXT"
 							#draw BG again first
-<<<<<<< HEAD
 							if self.inIntro:
 								self.fillIntroBG()
 							else:
 								self.stage.moveCamView( self.screen, self.refresh, self.camera )
 							
-=======
-							#self.stage.fillBG( self.screen, self.refresh) # for code without scrolling
-							self.stage.moveCamView( self.screen, self.refresh, self.camera )
->>>>>>> ztemp
 							self.player.draw( self.screen )
 
 							self.gameConvo.advanceText()
