@@ -12,6 +12,7 @@ import random
 from attackChooser import *
 from sound import *
 import conversation
+from main import exitGame
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -978,7 +979,7 @@ class Game:
 # 					return
 			
 			if event.type == pygame.QUIT:
-				sys.exit()
+				exitGame()
 		
 		# for when the key is held down
 		if not keydown: # only check if there isn't a new button down
@@ -1279,7 +1280,7 @@ class Game:
 									print 'this stage has been completed'
 			
 			if event.type == pygame.QUIT:
-				sys.exit()
+				exitGame()
 		
 		# if it's an enemy's turn, have it attack
 		if not playerTurn:
@@ -1316,7 +1317,7 @@ class Game:
 						self.refresh.append( self.player.getRect() )
 			
 			if event.type == pygame.QUIT:
-				sys.exit()
+				exitGame()
 	
 	#continues to next box in dialogue	
 	def updateDialogue(self):
@@ -1356,7 +1357,7 @@ class Game:
 							self.gameConvo.advanceText()
 						
 				if event.type == pygame.QUIT:
-					sys.exit()
+					exitGame()
 
 
 
