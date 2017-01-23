@@ -14,7 +14,7 @@
 #	  potentially related: characters die twice causing a list remove error.
 
 
-import pygame, sys, agents
+import pygame, sys, agents, random
 
 class AttackChooser:
 	def __init__(self, parSurface):
@@ -50,7 +50,9 @@ class AttackChooser:
 	def config(self, chara):
 		# setup text elements
 		self.chara = chara
-		self.attacks = chara.attacks
+
+		self.attacks = chara.attacks #random 4 from them if you want
+
 		self.atkIndex = 0
 		
 		self.atkText = self.font.render(self.attack().name, True, (255,255,255))
@@ -75,7 +77,6 @@ class AttackChooser:
 		
 	def switchAtk(self, num):
 		if self.attack().name == "Share Code":
-			print "switchAtk case start"
 			self.attack().oldCursor()
 		
 		# update attack index
@@ -98,7 +99,6 @@ class AttackChooser:
 		pygame.display.update(oldRect if oldRect.w > self.atkRect.w else self.atkRect)
 		
 		if self.attack().name == "Share Code":
-			print "switchAtk case end"
 			self.attack().newCursor()
 
 

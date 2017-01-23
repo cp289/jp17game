@@ -44,7 +44,6 @@ class Conversation():
 		self.allConvos = self.makeConvos(textFile)
 
 	def displayText(self, convoNum):
-		#print "CALLING DISPLAYTEXT"
 		self.convoNum = convoNum
 		self.convoOver = False
 		# no more convo to display, meaning last box is being 
@@ -59,7 +58,6 @@ class Conversation():
 			currentText = self.allConvos[self.convoNum][(self.currentBoxIdx*2)+1]
 			#print "CONVONUM: ", convoNum
 			#print "CURRENTTEXT: %s" % currentText
-
 
 			#search for char portrait that will display when talking
 			#and the coords of the name when placed in the textbox
@@ -175,6 +173,7 @@ class Conversation():
 
 		#divide all text into boxes to display
 		maxLineWidth = self.boxWidth - 80 -self.cursor.get_width()
+
 		boxesList = [] #holds lists of strings indicating dialogue strings per box
 					   #and also holds the person speaking before it
 		returnList = [] #list of convos (list of boxesLists)

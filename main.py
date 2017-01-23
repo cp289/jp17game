@@ -48,7 +48,7 @@ def showStartScreen( screen, buttons ):
 	startScreen = pygame.image.load( 'images/Debug Davis Start Screen.png' ).convert_alpha()
 	#bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
 	#startText = bigFont.render( 'press s to start', True, white )
-	
+
 	screen.blit( startScreen, ( 0, 0 ) )
 	pygame.draw.rect( screen, black, pygame.Rect( ( 100, 250 ), ( 600, 300 ) ) )
 	#screen.blit( startText, ( screen.get_width() / 3, screen.get_height() / 2 ) )
@@ -65,7 +65,6 @@ def cleanup():
 	for file in files:
 		os.remove(file)
 	
-
 # runs main game code
 def main():
 	# initialize pygame
@@ -103,7 +102,7 @@ def main():
 	
 	# play start screen music
 	sound.play("start")
-	
+
 	print 'start screen'
 	
 	# run a loop for start screen
@@ -143,7 +142,6 @@ def main():
 	
 	game.enterHallwayStageRight()
 	
-	
 	'''
 	just load all stages to begin with (probably put a loading screen on while that's going)
 	
@@ -163,6 +161,10 @@ def main():
 	while 1:
 		game.update()
 	'''put the above loop inside another loop for while the stage is not finished'''
+	
+	# when that loop is done, load stage 2
+	
+	# etc
 	
 	# exit option for end screen?
 	
