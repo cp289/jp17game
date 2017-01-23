@@ -1,4 +1,4 @@
-Convo 1: (Opening Scene) (Possibly in hallway, near couches)
+Convo 0: (Opening Scene) (Possibly in hallway, near couches)
 
 Student_1: Hey guys, I didn't get any errors this time!
 \I think it might actually work now!
@@ -9,7 +9,7 @@ Student_1: No no no no no, this wasn't supposed to happen!
 \Get away from me, you...thing! No...NOOOOOOOOO!
 [END]
 
-Convo 2: (Melody's Room)
+Convo 1: (Melody's Room)
 
 Zena: Uggh! My code is taking so long to compile!
 \Why can't it just work?!
@@ -40,7 +40,7 @@ Melody: I can finally watch Stewart Galaxy and go to bed!
 \Let's do it!
 [END]
 
-Convo 3: (Entering Davis)
+Convo 2: (Entering Davis)
 
 Melody: It's so eerie and quiet...
 Fatimah: Wait, did you guys just hear something??
@@ -55,7 +55,7 @@ Melody: But I haven't read the documentation yet!
 Zena: We can review real quick.
 [END]
 
-Convo 4: (Hallway)
+Convo 3: (Hallway)
 
 Melody: There we go.
 Zena: We did it! Nice job, you two.
@@ -65,7 +65,7 @@ Melody: Well, we could try the doors. Bruce isn't in his office
 \Let's check the robotics lab. 
 [END]
 
-Convo 5: (Robotics Lab) (Before first battle)
+Convo 4: (Robotics Lab) (Before first battle)
 
 Zena: Whoa, they were waiting for us...
 Fatimah: Pfft, we can take these guys out with our algo-rhythm!
@@ -77,7 +77,7 @@ Melody: Let's get to work.
 Fatimah: Okie.
 [END]
 
-Convo 6: (Robotics Lab) (After fighting required number of battles)
+Convo 5: (Robotics Lab) (After fighting required number of battles)
 
 Charles?: GAH!
 Fatimah: Is that...Charles?
@@ -99,7 +99,7 @@ Charles?: You think you can laugh at me?! I'll show you!
 Melody: Here we go!
 [END]
 
-Convo 7: (Robotics Lab) (Post-Saving Charles)
+Convo 6: (Robotics Lab) (Post-Saving Charles)
 
 Melody: Mission accomplished.
 Charles: Ugh...my head...Thanks so much, you guys!  My bugs took me captive and gave
@@ -126,7 +126,7 @@ Zena: Let's do this!
 Charles: Right!
 [END]
 
-Convo 8: (Entrance/Hallway PreBattles)
+Convo 7: (Entrance/Hallway PreBattles)
 
 Zena: Okay, I think we can cover more ground if we split up.
 Fatimah: Splitting up won't work!
@@ -138,14 +138,14 @@ Fatimah: We'll be better off if we don't split up. Going into battle
 Melody: Alright then, here we go.
 [END]
 
-Convo 9: (Mac/CS151 Lab) (Pre-first battle)
+Convo 8: (Mac/CS151 Lab) (Pre-first battle)
 
 Melody: CS Children, we're here to save you from your bugs!
 CS_Child: I don't need saving! Bug minions, take them out!
 Zena: Byte me!
 [END]
 
-Convo 10: (Mac/CS151 Lab) (Post-Battle)
+Convo 9: (Mac/CS151 Lab) (Post-Battle)
 
 Charles: Take that, exception scum.
 CS_Child: Thanks so much!
@@ -156,13 +156,13 @@ Melody: Okay, let's move onward and debug as much
 Zena: Yeah.
 [END]
 
-Convo 11: (Mac/CS151 Lab) (Post-required number of battles)
+Convo 10: (Mac/CS151 Lab) (Post-required number of battles)
 
 Fatimah: I HEARD A BUG SAY A CHUCK NORRIS LINE!!
 Melody: ...Chuck Norris?
 [END]
 
-Convo 12: (Mac/CS151 Lab) (Post-Chuck Norris bug battle)
+Convo 11: (Mac/CS151 Lab) (Post-Chuck Norris bug battle)
 
 Fatimah: Haha! Look at that! It didn't stand a chance, faced with our awesomeness.
 Melody: Well, it was just a matter of searching Hack Overfull and--
@@ -170,7 +170,7 @@ Zena: Okay, let's get that code.
 Charles: Now we just have to give them back to Bruce.
 [END]
 
-Convo 13: Entrance/Hallway (Post-Battles, Pre-Boss)
+Convo 12: Entrance/Hallway (Post-Battles, Pre-Boss)
 
 Melody: Bruce! We found both of the codes.
 Zena: Here you go!
@@ -205,7 +205,7 @@ Charles: Sounds like a plan.
 Melody: Well then, let's do this.
 [END]
 
-Convo 14: Final Battle Arena (Neg. Version of Entrance/Hallway or Mel's Room)
+Convo 13: Final Battle Arena (Neg. Version of Entrance/Hallway or Mel's Room)
 
 Fatimah: There it is! The Null Pointer Exception!
 NPE: Ugh, I can't believe you insignificant specks have
@@ -237,7 +237,7 @@ Fatimah: Yaaaaah!!!
 Melody: Get your Error Scramblers out! We're starting!
 [END]
 
-Convo 15: Final Battle Arena [Neg. Entrance/Hallway or Melody's Room (Post-Boss)]
+Convo 14: Final Battle Arena [Neg. Entrance/Hallway or Melody's Room (Post-Boss)]
 
 NPE: NOOOOOOOOOOOOOO!!! MY KINGDOM!!! MY MINIONS!!! AAAHHHHHH.... 
 NPE: ...aahhhh...

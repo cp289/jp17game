@@ -44,7 +44,7 @@ class Conversation():
 		self.allConvos = self.makeConvos(textFile)
 
 	def displayText(self, convoNum):
-		print "CALLING DISPLAYTEXT"
+		#print "CALLING DISPLAYTEXT"
 		self.convoNum = convoNum
 		self.convoOver = False
 		# no more convo to display, meaning last box is being 
@@ -57,8 +57,8 @@ class Conversation():
 			# draw new dialogue box
 			name = self.allConvos[self.convoNum][self.currentBoxIdx*2][:-1] # exclude ":"
 			currentText = self.allConvos[self.convoNum][(self.currentBoxIdx*2)+1]
-			print "CONVONUM: ", convoNum
-			print "CURRENTTEXT: %s" % currentText
+			#print "CONVONUM: ", convoNum
+			#print "CURRENTTEXT: %s" % currentText
 
 
 			#search for char portrait that will display when talking

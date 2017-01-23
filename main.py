@@ -133,6 +133,13 @@ def main():
 	
 	# stop start screen music
 	sound.stop("start")
+	game.start()
+	
+	# loop for intro (hallway scene with unspecified students, conversation in my room)
+	introDone = False
+	while not introDone:
+		if game.updateIntro():
+			introDone = True
 	
 	game.enterHallwayStageRight()
 	
@@ -156,10 +163,6 @@ def main():
 	while 1:
 		game.update()
 	'''put the above loop inside another loop for while the stage is not finished'''
-	
-	# when that loop is done, load stage 2
-	
-	# etc
 	
 	# exit option for end screen?
 	

@@ -167,6 +167,8 @@ class Game:
 		self.gameClock = pygame.time.Clock()
 		
 		# boolean fields for game state
+		self.inIntro = False
+		self.hallwaySafe = False
 		self.inBattle = False
 		self.inDialogue = False
 		self.onStatScreen = False
@@ -197,6 +199,17 @@ class Game:
 		statBGorig = pygame.image.load( 'images/backgrounds/statScreenBG.png' ).convert_alpha()
 		self.statBG = pygame.transform.scale( statBGorig, self.screenSize ) # force it to be square for now
 		self.statBGRect = pygame.Rect( ( 20, 20 ), ( self.screenSize[0] - 40, self.screenSize[1] - 40 ) )
+		
+		scale = 0.5
+		bgOrig = pygame.image.load( 'images/backgrounds/Davis Hallway.png' ).convert_alpha()
+		newDim = ( int( bgOrig.get_width() * scale ), int( bgOrig.get_height() * scale ) )
+		self.hallwayBG = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
+		self.introBG = self.hallwayBG
+		
+		melRoomBGorig = pygame.image.load( 'images/backgrounds/Melody\'s Room.png' ).convert_alpha()
+		ratio = float( self.screenSize[0] ) / melRoomBGorig.get_width()
+		adjustedHeight = int( melRoomBGorig.get_height() * ratio )
+		self.melRoomBG = pygame.transform.scale( melRoomBGorig, ( self.screenSize[0], adjustedHeight ) )
 		
 		# makes boxes for the characters on the stat screen
 		offset = 20
@@ -321,49 +334,49 @@ class Game:
 		battlePos = ( 0, 0 ) # doesn't matter anyways
 		fillerImg = battlelist
 		battlelist = fillerImg # needs image but never battles anyways
-
+		
 		#initalize chaEvil
 		playerC = pygame.image.load( "images/Charles/PossessedCharles.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 9, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.chaEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles?', namePos )
-
+		
 		#initialize bru
 		playerC = pygame.image.load( "images/Bruce/BruceHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 33, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.bru = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce', namePos )
-
+		
 		#initialize bruEvil
 		playerC = pygame.image.load( "images/Bruce/BruceHeadEvil.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 24, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.bruEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce?', namePos )
-
+		
 		#initialize NPE
-		playerC = pygame.image.load( "images/Bugs/BossBugSilhouette.png" ).convert_alpha()
+		playerC = pygame.image.load( "images/bugs/BossBugSilhouette.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 44, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.NPE = agents.PlayableCharacter( initpos, battlePos, imglist, 'NPE', namePos )
-
+		
 		playerC = None 
-
+		
 		#initialize stu1
 		otherlist = ( playerS, playerC )
 		namePos = ( 1, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.stu1 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_1', namePos )
-
+		
 		#initialize stu2
 		otherlist = ( playerS, playerC )
 		namePos = ( 1, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.stu2 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_2', namePos )
-
+		
 		#initialize CSC
 		otherlist = ( playerS, playerC )
 		namePos = ( 15, 0 )
@@ -412,9 +425,7 @@ class Game:
 	def loadHallwayStage( self ):
 		scale = 0.5
 		
-		bgOrig = pygame.image.load( 'images/backgrounds/Davis Hallway.png' ).convert_alpha()
-		newDim = ( int( bgOrig.get_width() * scale ), int( bgOrig.get_height() * scale ) )
-		bg = pygame.transform.scale( bgOrig, newDim ) # rescales the background image
+		# hallway bg is now initialized in constructor
 		
 		battleBGorig = pygame.image.load( 'images/backgrounds/Hallway Battle.png' ).convert_alpha()
 		battleBG = pygame.transform.scale( battleBGorig, self.screenSize )
@@ -426,7 +437,7 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 100.png' ).convert_alpha()
 						]
 		
-		self.hallwayStage = Stage( 'hallway', 1, scale, bg, battleBG, bugImgs )
+		self.hallwayStage = Stage( 'hallway', 1, scale, self.hallwayBG, battleBG, bugImgs )
 		
 		# create doors
 		
@@ -712,6 +723,53 @@ class Game:
 	def enterMacLabStage( self ):
 		pass
 	
+	# fills the given rectangle (or the entire screen) with the current intro background
+	def fillIntroBG( self, rect = None ):
+		if rect == None:
+			self.screen.blit( self.introBG, ( 0, 0 ) )
+			self.refresh.append( self.screen.get_rect() )
+		else:
+			self.screen.blit( self.introBG, rect, rect )
+			self.refresh.append( rect )
+	
+	# enters intro
+	def start( self ):
+		self.inIntro = True
+		self.fillIntroBG()
+		self.enterDialogue()
+		
+		pygame.display.update()
+		
+		print 'start intro'
+	
+	# updates intro, returns whether intro is complete
+	def updateIntro( self ):
+		if not self.inDialogue:
+			if self.convoNum == 1: # finished hallway conversation, move to my room
+				self.screen.blit( self.melRoomBG, ( 0, 0 ) )
+				self.introBG = self.melRoomBG
+				self.enterDialogue()
+			elif self.convoNum == 2: # completed both conversations
+				self.inIntro = False
+				return True
+		else:
+			self.updateDialogue()
+		
+		pygame.display.update( self.refresh )
+		
+		# clear out the refresh rects
+		self.refresh = []
+		
+		# throttle the game speed to 30fps
+		self.gameClock.tick(30)
+		
+		return False
+		
+		# if not in convo
+		# if convo num is 1, return true
+		# otherwise enterDialogue
+		# update screen
+	
 	# creates the given number of Enemies, of the given level
 	def spawnEnemies( self, num, level ):
 		for i in range( num ):
@@ -787,6 +845,12 @@ class Game:
 		self.enemies = [] # empty enemies list
 		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
+		
+		# if we're leaving the hallway battle, now make the hallway safe
+		if self.stage == self.hallwayStage:
+			self.hallwaySafe = True
+			self.enterDialogue() # enter convo 3
+		
 		print 'leave battle'
 	
 	# displays the given PlayableCharacter's stats at the given position on the stat screen
@@ -840,12 +904,17 @@ class Game:
 		
 		self.refresh.append( self.statBGRect )
 	
+	# sends the game into dialogue mode for the next stored dialogue
 	def enterDialogue(self):
 		#move to next convo every time enterDialogue is called
 		#so that story moves sequentially
 		self.inDialogue = True  
-		#self.stage.fillBG( self.screen, self.refresh ) # for code without scrolling
-		self.stage.moveCamView( self.screen, self.refresh, self.camera )
+		
+		if self.inIntro:
+			self.fillIntroBG()
+		else:
+			self.stage.moveCamView( self.screen, self.refresh, self.camera )
+		
 		self.player.draw( self.screen )
 		self.gameConvo.displayText( self.convoNum )
 		print "ENTERED DIALOGUE"
@@ -907,13 +976,13 @@ class Game:
 					keydown = True
 					break
 				
-				elif event.key == pygame.K_b: # temporary easy trigger for battle
-					self.enterBattle()
-					keydown = True
-					break
-				elif event.key == pygame.K_c: # temporary easy trigger for dialogue
-					self.enterDialogue()
-					return
+# 				elif event.key == pygame.K_b: # temporary easy trigger for battle
+# 					self.enterBattle()
+# 					keydown = True
+# 					break
+# 				elif event.key == pygame.K_c: # temporary easy trigger for dialogue
+# 					self.enterDialogue()
+# 					return
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
@@ -998,10 +1067,16 @@ class Game:
 			self.stage.fillBG( self.screen, self.refresh, eraseRect, self.camera )
 			self.refresh.append( self.player.getRect() )
 		
-# 		else: # otherwise, player did not move at all, can trigger battle
-# 			probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
-# 			if random.random() < probBattle:
-# 				self.enterBattle()
+ 		else: # otherwise, player did not move at all, can trigger battle
+			if self.stage == self.hallwayStage:
+				if not self.hallwaySafe:
+					self.enterDialogue() # convo 2 upon entering hallway, enters battle when done
+			elif self.stage == self.roboLabStage and self.stage.battlesCompleted == 0:
+				self.enterDialogue() # convo 4 upon entering robotics lab for the first time
+			else:
+				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
+				if random.random() < probBattle:
+					self.enterBattle()
 		
 		self.player.draw( self.screen )
 		self.refresh.append( self.player.getRect() )
@@ -1254,12 +1329,21 @@ class Game:
 	def updateDialogue(self):
 		#print "IN UPDATE DIALOGUE"
 		if self.gameConvo.convoOver == True:
+			
 			#print "EXITING DIALOGUE"
 			self.inDialogue = False
-			#self.stage.fillBG( self.screen, self.refresh) # for code without scrolling
-			self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			
+			if self.inIntro:
+				self.fillIntroBG()
+			else:
+				self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			
 			self.player.draw( self.screen )
 			self.refresh.append( self.player.getRect() )
+			
+			if self.convoNum == 2 or self.convoNum == 4:
+				self.enterBattle()
+			
 			self.convoNum += 1
 		else:
 			for event in pygame.event.get():
@@ -1269,8 +1353,11 @@ class Game:
 						if self.gameConvo.convoOver != True:
 							#print "STILL MORE TEXT"
 							#draw BG again first
-							#self.stage.fillBG( self.screen, self.refresh) # for code without scrolling
-							self.stage.moveCamView( self.screen, self.refresh, self.camera )
+							if self.inIntro:
+								self.fillIntroBG()
+							else:
+								self.stage.moveCamView( self.screen, self.refresh, self.camera )
+							
 							self.player.draw( self.screen )
 
 							self.gameConvo.advanceText()
