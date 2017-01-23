@@ -275,6 +275,13 @@ class Game:
 		playerC = pygame.image.load( "images/Fatimah/FatimahHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		
+		# debugging
+		self.mel.levelUp(self)
+		self.mel.levelUp(self)
+		self.mel.levelUp(self)
+		self.mel.levelUp(self)
+		self.mel.levelUp(self)
+		
 		#initialize fa
 		battlePos = ( 600, 178 )
 		namePos = ( 15, 0 )

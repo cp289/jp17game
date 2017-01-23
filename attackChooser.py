@@ -75,6 +75,7 @@ class AttackChooser:
 		
 	def switchAtk(self, num):
 		if self.attack().name == "Share Code":
+			print "switchAtk case start"
 			self.attack().oldCursor()
 		
 		# update attack index
@@ -97,6 +98,7 @@ class AttackChooser:
 		pygame.display.update(oldRect if oldRect.w > self.atkRect.w else self.atkRect)
 		
 		if self.attack().name == "Share Code":
+			print "switchAtk case end"
 			self.attack().newCursor()
 
 
