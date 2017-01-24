@@ -804,6 +804,12 @@ class Game:
 		
 		self.livePlayers = [ self.mel, self.fa, self.zen ]
 		
+		# if Charles is currently playable
+		if charles:
+			self.cha.enterBattle(canFlee)
+			self.battleParticipants.append( self.cha )
+			self.livePlayers.append( self.cha )
+		
 		self.spawnEnemies( 3, 1 ) # number, level
 		self.enemies[0].select()
 		self.selectedEnemyIDX = 0
@@ -818,12 +824,6 @@ class Game:
 		
 		# reset stored points for new battle
 		self.storedPoints = 0
-		
-		# if Charles is currently playable
-		if charles:
-			self.cha.enterBattle(canFlee)
-			self.battleParticipants.append( self.cha )
-			self.livePlayers.append( self.cha )
 		
 # 		for chara in self.livePlayers:
 # 			print 'drew', chara.name, 'hp bar at', chara.hpbarBG

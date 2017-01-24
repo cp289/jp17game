@@ -589,7 +589,7 @@ class PlayableCharacter( Character ):
 	
 	# raise HP by percentage (value between 0 & 1)
 	def raiseHP( self, perc ):
-		self.hp += self.hp * perc
+		self.hp += self.totalHP * perc
 		if self.hp > self.totalHP:
 			self.hp = self.totalHP
 	
