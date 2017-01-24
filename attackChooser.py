@@ -31,10 +31,12 @@ class AttackChooser:
 		self.chara = None
 		self.attacks = []
 		self.atkIndex = 0
-		
+	
+	# returns the attack at the current index
 	def attack(self):
 		return self.attacks[self.atkIndex]
 		
+	# configures the attack chooser for a given character
 	def config(self, chara):
 		# setup text elements
 		self.chara = chara
@@ -50,7 +52,8 @@ class AttackChooser:
 				self.atkText.get_rect().h)
 			)
 	
-	def draw(self): # too much rendering ( in most cases, only text needs updating )
+	# draws the attack chooser
+	def draw(self): 
 		# draw self.surface
 		self.parSurface.blit(self.surface, self.pos )
 		
@@ -63,6 +66,7 @@ class AttackChooser:
 		
 		pygame.display.update(self.rect)
 		
+	# switches the selected attack
 	def switchAtk(self, num):
 		if self.attack().name == "Share Code":
 			self.attack().oldCursor()
