@@ -74,7 +74,7 @@ class Stage:
 	
 	# returns whether this stage has been completed
 	def completed( self ):
-		return self.numBattles == self.battlesCompleted
+		return self.battlesCompleted >= self.numBattles
 	
 	# returns whether the given character is within the given range of the left wall
 	# for stopping camera view adjustment at the wall
@@ -187,6 +187,7 @@ class Game:
 		self.player = self.mel
 		
 		# variables for battle mode
+		self.battlesWon = 0
 		self.battleParticipants = [] # list to loop through for battle turns
 		self.currentBattleTurn = -1 # stores index of current turn within battleParticipants
 		self.livePlayers = [] # stores players who are currently alive so that enemies can choose targets easily
@@ -1018,6 +1019,7 @@ class Game:
 			elif door.room == 'hallway': # if entering the hallway, determine from which room
 				if self.stage == self.roboLabStage and self.player.movement[0] == right:
 					if self.stage.completed() and not self.charlesBattle:
+						print 'story event: Charles!'
 						self.enterDialogue() # convo with Charles
 						return # so that characters aren't still drawn over convo
 					else:
@@ -1093,7 +1095,7 @@ class Game:
 	def enemyTurn( self ):
 		# randomly select a livePlayer and attack
 		target = random.choice( self.livePlayers )
-		self.battleParticipants[self.currentBattleTurn].attack( target, 50 ) # to always win
+		self.battleParticipants[self.currentBattleTurn].attack( target, 50 )
 		
 		# play attack sound
 		self.sound.play('zong')
@@ -1288,9 +1290,11 @@ class Game:
 								done = True
 								print 'you win the battle!'
 								
+								self.battlesWon += 1
+								print 'battles won:', self.battlesWon
 								self.stage.addBattle()
 								if self.stage.completed():
-									print 'this stage has been completed'
+									print 'stage', self.stage.name, 'has been completed'
 			
 			if event.type == pygame.QUIT:
 				sys.exit()
