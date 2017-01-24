@@ -8,7 +8,7 @@
 			( 200 * scale, 300 * scale ), 'mac lab' )
 		self.hallwayStage.addDoor( doorHallwayToMacLab )
 	
-	# added entire method
+	# add entire method
 	def enterHallwayStageBack( self ):
 		self.stage = self.hallwayStage
 		
