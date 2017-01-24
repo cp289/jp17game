@@ -1,4 +1,35 @@
-# loads images for Mac lab stage and creates the furniture objects
+	# only snippet of loadHallwayStage changed
+	def loadHallwayStage( self ):
+		# create two doors to robo lab and mac lab
+		doorToRoboLab = agents.Door( ( 0, 1365 * scale ), ( 10, 40 / scale ), 'robotics lab' )
+		self.hallwayStage.addDoor( doorToRoboLab )
+
+		doorHallwayToMacLab = agents.Door( (  2750 * scale, 3100 * scale ), \
+			( 200 * scale, 300 * scale ), 'mac lab' )
+		self.hallwayStage.addDoor( doorHallwayToMacLab )
+	
+	# added entire method
+	def enterHallwayStageBack( self ):
+		self.stage = self.hallwayStage
+		
+		# set initial player and camera positions for this room
+		self.camera.topleft = 2500 * self.stage.scale, 2000 * self.stage.scale
+		initPos = ( 2750 * self.stage.scale, 2800 * self.stage.scale )
+		
+		self.player.setStagePos( initPos[0], initPos[1] )
+		self.placePlayerOnScreen()
+		
+		self.player.goBackward( self.tileSize )
+		
+		self.hallwayStage.moveCamView( self.screen, self.refresh, self.camera )
+		self.player.draw( self.screen )
+		pygame.display.update()
+		
+		self.sound.play( 'explora', -1 )
+		
+		print 'enter hallway from mac lab'
+
+	# add entire method
 	def loadMacLabStage( self ):
 		scale = 0.5
 		
@@ -18,9 +49,9 @@
 		self.macLabStage = Stage( 'mac lab', 2, scale, bg, battleBG, bugImgs )
 
 		#def __init__( self, pos, dim, room ):
-		doorMacLab = agents.Door( (  800 * scale, 800 * scale ), \
-			( 15 * scale, 378 * scale ), 'hallway' )
-		self.macLabStage.addDoor( doorMacLab )
+		doorMacLabtoHallway = agents.Door( (  300 * scale, 800 * scale ), \
+			( 290 * scale, 15 * scale ), 'hallway' )
+		self.macLabStage.addDoor( doorMacLabtoHallway )
 		
 		# create walls
 		lWall = pygame.Surface( ( 5, self.macLabStage.height ) )
@@ -136,7 +167,7 @@
 
 		print 'loaded mac lab stage'
 	
-	# changes current stage to Mac lab and places player and camera at starting positions
+	# add entire method
 	def enterMacLabStage( self ):
 		self.stage = self.macLabStage
 		
@@ -159,8 +190,9 @@
 		
 		print 'enter mac lab'
 
-################ in updateExplore method #################
-
+	# added only snippets of code below 
+	def updateExplore( self ):
+	
 		# check for entering a door
 		door = self.stage.atDoor( self.player )
 		if door != None:
@@ -172,9 +204,10 @@
 				if self.stage == self.roboLabStage and self.player.movement[0] == right:
 					self.enterHallwayStageLeft()
 				if self.stage == self.macLabStage and self.player.movement[0] == back:
-					# need enterHallwayStageBack()
-					None
-					self.enterHallwayStageLeft()
-			elif door.room == 'mac lab': # make sure player goes in right direction
-				if self.player.movement[0] == forward:
+					self.enterHallwayStageBack()
+			elif door.room == 'mac lab': # make sure player enters mac lab stage
+				if self.stage == self.hallwayStage and self.player.movement[0] == front:
 					self.enterMacLabStage()
+		
+	
+
