@@ -13,6 +13,7 @@ from attackChooser import *
 from sound import *
 import conversation
 from main import exitGame
+from message import Message, MessageDisplay
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -234,6 +235,9 @@ class Game:
 		self.initConvo()
 		self.convoNum = 0
 		
+		# init Message object
+		self.messages = MessageDisplay(self.screen)
+		
 		# load sound object
 		self.sound = Sound()
 		
@@ -271,9 +275,9 @@ class Game:
 		# initialize mel
 		initpos = ( 300, 400 ) # hopefully the middle of the bottom
 		battlePos = ( 700, 50 )
-		namePos = ( 25, -1 )
+		namePos = [ 25, -1 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', namePos )
+		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', self, namePos )
 		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 7 ) )
 		# total HP, ATK, DFN, SPD, ACC, time
 		self.mel.setAllGR( ( 0.8, 0.9, 0.85, 0.75, 0.7 ) )
@@ -290,9 +294,9 @@ class Game:
 		
 		#initialize fa
 		battlePos = ( 600, 178 )
-		namePos = ( 15, 0 )
+		namePos = [ 15, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', namePos )
+		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', self, namePos)
 		self.fa.setAllStats( ( 400, 44, 54, 51, 50, 6 ) )
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
@@ -302,9 +306,9 @@ class Game:
 		playerC = pygame.image.load( "images/Zena/ZenaHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		battlePos = ( 500, 306 )
-		namePos = ( 40, 0 )
+		namePos = [40, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', namePos )
+		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', self, namePos )
 		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 9 ) )
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
@@ -314,9 +318,9 @@ class Game:
 		playerC = pygame.image.load( "images/Charles/CharlesHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		battlePos = ( 400, 404 )
-		namePos = ( 20, 0 )
+		namePos = [ 20, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', namePos )
+		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', self, namePos )
 		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 7 ) )
 		self.cha.setAllGR( ( 0.75, 0.7, 0.8, 0.9, 0.85 ) )
 		
@@ -332,50 +336,50 @@ class Game:
 		#initalize chaEvil
 		playerC = pygame.image.load( "images/Charles/PossessedCharles.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		namePos = ( 9, 0 )
+		namePos = [ 9, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.chaEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles?', namePos )
+		self.chaEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles?', self, namePos )
 		
 		#initialize bru
 		playerC = pygame.image.load( "images/Bruce/BruceHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		namePos = ( 33, 0 )
+		namePos = [ 33, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.bru = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce', namePos )
+		self.bru = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce', self, namePos )
 		
 		#initialize bruEvil
 		playerC = pygame.image.load( "images/Bruce/BruceHeadEvil.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		namePos = ( 24, 0 )
+		namePos = [ 24, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.bruEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce?', namePos )
+		self.bruEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce?', self, namePos )
 		
 		#initialize NPE
 		playerC = pygame.image.load( "images/bugs/BossBugSilhouette.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		namePos = ( 44, 0 )
+		namePos = [ 44, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.NPE = agents.PlayableCharacter( initpos, battlePos, imglist, 'NPE', namePos )
+		self.NPE = agents.PlayableCharacter( initpos, battlePos, imglist, 'NPE', self, namePos )
 		
 		playerC = None 
 		
 		#initialize stu1
 		otherlist = ( playerS, playerC )
-		namePos = ( 1, 0 )
+		namePos = [ 1, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.stu1 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_1', namePos )
+		self.stu1 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_1', self, namePos )
 		
 		#initialize stu2
 		otherlist = ( playerS, playerC )
-		namePos = ( 1, 0 )
+		namePos = [ 1, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.stu2 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_2', namePos )
+		self.stu2 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_2', self, namePos )
 		
 		#initialize CSC
 		otherlist = ( playerS, playerC )
-		namePos = ( 15, 0 )
+		namePos = [ 15, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.CSC = agents.PlayableCharacter( initpos, battlePos, imglist, 'CS_Child', namePos )
+		self.CSC = agents.PlayableCharacter( initpos, battlePos, imglist, 'CS_Child', self, namePos )
 		
 		print 'initialized playable characters'
 	
@@ -782,6 +786,9 @@ class Game:
 		self.stage.fillBattleBG( self.screen )
 		self.refresh.append( self.screen.get_rect() )
 		
+		# config messages
+		self.messages.setBackground(self.stage.battleBG)
+		
 		# play battle music
 		self.sound.stop('explora')
 		self.sound.play("battleMusic", -1 )
@@ -821,7 +828,7 @@ class Game:
 		
 # 		for chara in self.livePlayers:
 # 			print 'drew', chara.name, 'hp bar at', chara.hpbarBG
-	
+		
 		self.refresh.append( self.screen.get_rect() ) # possible fix for health bar issues?
 	
 	# changes game state back to exploration mode
@@ -933,7 +940,7 @@ class Game:
 			self.updateExplore()
 		
 		pygame.display.update( self.refresh )
-		
+		self.messages.update()
 		# clear out the refresh rects
 		self.refresh = []
 		
@@ -1274,6 +1281,7 @@ class Game:
 							eraseRect.width += 12
 							eraseRect.height += 12
 							self.stage.fillBattleBG( self.screen, eraseRect )
+							pygame.display.update(eraseRect)
 						
 							if len( self.enemies ) != 0: # if still enemies, reselect first one
 								self.enemies[0].select()
@@ -1305,6 +1313,8 @@ class Game:
 				self.refresh.append( edna.getRect() )
 			
 			self.refresh.append( self.player.getRect() )
+			for p in self.battleParticipants:
+				self.refresh.append( p.hpbarBG )
 	
 	# parses keyboard input for stat screen mode and updates screen contents
 	def updateStatScreen( self ):
