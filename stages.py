@@ -12,7 +12,6 @@ import random
 from attackChooser import *
 from sound import *
 import conversation
-from sound import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -783,7 +782,7 @@ class Game:
 			self.battleParticipants.append( e )
 	
 	# changes game state to battle mode
-	def enterBattle( self, charles = False ):
+	def enterBattle( self, charles = False, canFlee = True ):
 		# update display for background
 		self.stage.fillBattleBG( self.screen )
 		self.refresh.append( self.screen.get_rect() )
@@ -793,9 +792,9 @@ class Game:
 		self.sound.play("battleMusic", -1 )
 		
 		self.inBattle = True
-		self.player.enterBattle()
-		self.fa.enterBattle()
-		self.zen.enterBattle()
+		self.player.enterBattle(canFlee)
+		self.fa.enterBattle(canFlee)
+		self.zen.enterBattle(canFlee)
 		
 		# build list of battle participants
 		self.battleParticipants= [ self.mel, self.fa, self.zen ]
@@ -821,7 +820,7 @@ class Game:
 		
 		# if Charles is currently playable
 		if charles:
-			self.cha.enterBattle()
+			self.cha.enterBattle(canFlee)
 			self.battleParticipants.append( self.cha )
 			self.livePlayers.append( self.cha )
 		
@@ -831,10 +830,19 @@ class Game:
 		self.refresh.append( self.screen.get_rect() ) # possible fix for health bar issues?
 	
 	# changes game state back to exploration mode
-	def leaveBattle( self ):
+	def leaveBattle( self, charles = False ):
 		# stop battle music
 		self.sound.stop("battleMusic")
 		self.sound.play('explora', -1)
+		
+		players = [self.mel, self.fa, self.zen]
+		if charles == True:
+			players.append(self.cha)
+			
+		#reset current time left
+		for player in players:
+			player.fillTime()
+			print "RESET TIME TO FULL!"
 		
 		self.inBattle = False
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
@@ -1171,6 +1179,15 @@ class Game:
 	def updateBattle( self ):
 		done = False
 		
+		#check if we can and should flee
+		for player in self.livePlayers:
+			if player.escaped == True:
+				print "YOU ESCAPED!"
+				player.escaped = False
+				done = True
+				self.leaveBattle()
+				return
+		
 		attacker = self.battleParticipants[self.currentBattleTurn]
 		if attacker.getType() == 'PlayableCharacter':
 			playerTurn = True
@@ -1255,6 +1272,12 @@ class Game:
 					
 					# attack currently selected enemy
 					elif event.key == pygame.K_a:
+						
+						#don't allow attack if cost is greater than time left
+						if self.dashboard.attack().timeNeeded > attacker.time:
+							print "NOT ENOUGH TIME!"
+							return
+
 						target = self.enemies[self.selectedEnemyIDX]
 						
 						self.dashboard.attack().attack(target, self.battleParticipants[self.currentBattleTurn])
@@ -1353,9 +1376,9 @@ class Game:
 			self.refresh.append( self.player.getRect() )
 			
 			if self.convoNum == 2 or self.convoNum == 4:
-				self.enterBattle( charles = self.gotCharles )
+				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
 			elif self.convoNum == 5:
-				self.enterBattle() # CANNOT FLEE
+				self.enterBattle( canFlee = False) # CANNOT FLEE
 				self.charlesBattle = True # triggering Charles battle
 			
 			self.convoNum += 1

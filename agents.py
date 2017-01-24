@@ -283,7 +283,8 @@ class PlayableCharacter( Character ):
 		self.eraseRect.height += 20
 		
 		# initialize stats
-		self.time = 6
+		self.maxTime = 6
+		self.time = self.maxTime
 		self.atk = 50
 		self.dfn = 50
 		self.spd = 50
@@ -304,7 +305,9 @@ class PlayableCharacter( Character ):
 				AskSomeone(),
 				TakeBreak(),
 				ReadProject(),
-				PrintStatements()
+				PrintStatements(),
+				Flee(),
+				RestoreTime()
 			]
 		self.attacking = False # whether it is this character's turn to attack
 		
@@ -384,6 +387,12 @@ class PlayableCharacter( Character ):
 			self.imgConvo = other[1]
 			self.hasimgConvo = True
 
+		#if you have the option to flee battle; true by default
+		self.canFlee = True
+
+		#if escape was successful
+		self.escaped = False
+
 	
 	# adds a temporary stat
 	def addTempStat( self, stat, value, expir ):
@@ -404,7 +413,7 @@ class PlayableCharacter( Character ):
 	# returns a tuple of this character's stats, in the following order:
 	# time, hp, attack, defense, speed, accuracy, xp, level
 	def getStats( self ):
-		return ( self.time, self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp, self.level )
+		return ( self.maxTime, self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp, self.level )
 	
 	# returns the status image for this character
 	def getStatusIMG( self ):
@@ -584,6 +593,10 @@ class PlayableCharacter( Character ):
 		if self.hp > self.totalHP:
 			self.hp = self.totalHP
 	
+	# makes time bar full again
+	def fillTime( self ):
+		self.time = self.maxTime
+	
 	# setter for total HP
 	def setTotalHP( self, h ):
 		self.totalHP = h
@@ -625,7 +638,7 @@ class PlayableCharacter( Character ):
 		self.dfn = list[2]
 		self.spd = list[3]
 		self.acc = list[4]
-		self.time = list[5]
+		self.maxTime = list[5]
 	
 	# setter for HP growth rate
 	def setHPGR( self, hg ):
@@ -689,24 +702,31 @@ class PlayableCharacter( Character ):
 			self.acc += self.statStep
 			
 		# add new attack
+		newatk = None
 		if self.level == 2:
 			newatk = ReferNotes()
-		elif self.level == 3:
-			newatk = ReadCode()
 		elif self.level == 4:
-			newatk = ShareCode(game)
+			newatk = ReadCode()
 		elif self.level == 5:
-			newatk = LookTime()
+			newatk = ShareCode(game)
 		elif self.level == 6:
+			newatk = LookTime()
+		elif self.level == 8:
 			newatk = UseInternet()
-		elif self.level == 7:
+		elif self.level == 9:
 			newatk = CommentLines()
 			
-		self.addAttack(newatk)
+		if newatk != None:
+			self.addAttack(newatk)
 	
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view
-	def enterBattle( self ):
+	def enterBattle( self, fleeEnabled ):
+		if fleeEnabled == False:
+			self.canFlee = False
+		else:
+			self.canFlee = True
+		
 		self.showHP = True
 		self.image = self.imgBattle
 		
@@ -716,9 +736,35 @@ class PlayableCharacter( Character ):
 		
 		self.hp = self.totalHP # reset to full HP
 		self.movement = [ 0, 0 ] # clear out stored movement
-		
-		'''FILL IN CODE HERE FOR CHOOSING AVAILABLE ATTACKS AFTER CODING DEBUGGINGMETHODS'''
+		self.setRandAttacks()
 	
+	#chooses which 4 attacks the player stays in battle with
+	def setRandAttacks( self ):
+		# Shuffle all attacks
+		# print "ATTACKS %s" %self.attacks
+
+		# the list excluding flee and refill time, which are always there
+		listMinus2 = []
+		for attack in self.attacks:
+			print "ANOTHER ATTACK"
+			if attack.name != "Cancel Plans" and attack.name != "Flee":
+				listMinus2.append(attack)
+				print "APPENDED!"
+
+		print "RAND ATTACKS LEN: %s " % len(listMinus2)
+
+		shuffledAttacks = random.sample(listMinus2, len(listMinus2))
+
+		# First 4 attacks are random ones available
+		self.availableAttacks = shuffledAttacks[0:4]
+
+		#add in necessary attacks
+		for attack in self.attacks:
+			if attack.name == "Cancel Plans":
+				self.availableAttacks.append(attack)
+			if attack.name == "Flee" and self.canFlee == True:
+				self.availableAttacks.append(attack)
+
 	# takes the character out of battle mode
 	def leaveBattle( self ):
 		self.showHP = False
@@ -767,7 +813,7 @@ class PlayableCharacter( Character ):
 		s += '\n  DFN (defense) ' + str( self.dfn )
 		s += '\n  SPD (speed) ' + str( self.spd )
 		s += '\n  ACC (accuracy) ' + str( self.acc )
-		s += '\n  time ' + str( self.time )
+		s += '\n  time ' + str( self.maxTime )
 		s += '\n XP ' + str( self.xp )
 		return s
 	
