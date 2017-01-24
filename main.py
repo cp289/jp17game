@@ -129,6 +129,7 @@ def main():
 	game = stages.Game( screen, sound )
 	game.loadHallwayStage() # possibly do this in Game constructor later
 	game.loadRoboLabStage()
+	game.loadMacLabStage()
 	
 	sound.stop("start")
 	game.start()

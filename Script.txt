@@ -147,7 +147,7 @@ Zena: Yeah.
 Convo 9: (Mac/CS151 Lab) (Post-required number of battles)
 
 Fatimah: I see the paper!!
-Melody: But there’s a bug in front of it!
+Melody: But there's a bug in front of it!
 [END]
 
 Convo 10: (Mac/CS151 Lab) (Post-Chuck Norris bug battle)

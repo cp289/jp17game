@@ -118,7 +118,7 @@ class Character( Thing ):
 		self.hpbarBG = pygame.Rect( ( pos[0] + self.rect.width - self.hpbarWidth, pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
 		self.hpbarFG = pygame.Rect( ( pos[0] + self.rect.width - self.hpbarWidth + 1, pos[1] + self.rect.height + 1 ),
 			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
-		print 'init', self.name, 'hp bar at', self.hpbarBG
+		#print 'init', self.name, 'hp bar at', self.hpbarBG
 		
 		self.selected = False
 	
@@ -790,12 +790,12 @@ class PlayableCharacter( Character ):
 		# the list excluding flee and refill time, which are always there
 		listMinus2 = []
 		for attack in self.attacks:
-			print "ANOTHER ATTACK"
+			#print "ANOTHER ATTACK"
 			if attack.name != "Cancel Plans" and attack.name != "Flee":
 				listMinus2.append(attack)
-				print "APPENDED!"
+				#print "APPENDED!"
 
-		print "RAND ATTACKS LEN: %s " % len(listMinus2)
+		#print "RAND ATTACKS LEN: %s " % len(listMinus2)
 
 		shuffledAttacks = random.sample(listMinus2, len(listMinus2))
 
