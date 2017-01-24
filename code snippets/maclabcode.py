@@ -1,4 +1,4 @@
-	# only snippet of loadHallwayStage changed
+	# replace snippet of code below
 	def loadHallwayStage( self ):
 		# create two doors to robo lab and mac lab
 		doorToRoboLab = agents.Door( ( 0, 1365 * scale ), ( 10, 40 / scale ), 'robotics lab' )
@@ -190,7 +190,7 @@
 		
 		print 'enter mac lab'
 
-	# added only snippets of code below 
+	# replace snippet of code below
 	def updateExplore( self ):
 	
 		# check for entering a door
