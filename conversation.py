@@ -31,8 +31,8 @@ class Conversation():
 		self.boxX, self.boxY = textboxCoord
 
 		#where text in a convo is first blitted
-		self.upperLeft = [self.winWidth-self.boxWidth+36, self.winHeight-self.boxHeight+60]
-		self.nameBoxCenterLeft = [self.boxX+18, self.boxY-48]
+		self.upperLeft = [self.winWidth-self.boxWidth+44, self.winHeight-self.boxHeight+63]
+		self.nameBoxCenterLeft = [self.boxX+18, self.boxY-47]
 
 		self.cursorCoords = (self.boxX + self.boxWidth - 40, self.boxY + self.boxHeight -cursor.get_height() - 20)
 
@@ -44,7 +44,6 @@ class Conversation():
 		self.allConvos = self.makeConvos(textFile)
 
 	def displayText(self, convoNum):
-		print "CALLING DISPLAYTEXT"
 		self.convoNum = convoNum
 		self.convoOver = False
 		# no more convo to display, meaning last box is being 
@@ -57,9 +56,8 @@ class Conversation():
 			# draw new dialogue box
 			name = self.allConvos[self.convoNum][self.currentBoxIdx*2][:-1] # exclude ":"
 			currentText = self.allConvos[self.convoNum][(self.currentBoxIdx*2)+1]
-			print "CONVONUM: ", convoNum
-			print "CURRENTTEXT: %s" % currentText
-
+			#print "CONVONUM: ", convoNum
+			#print "CURRENTTEXT: %s" % currentText
 
 			#search for char portrait that will display when talking
 			#and the coords of the name when placed in the textbox
@@ -69,18 +67,26 @@ class Conversation():
 			headSize = None
 			for char in self.charList:
 				if char.name == name:
-					charHead = char.imgConvo
-					nameSurf = self.nameFont.render(char.name, True, red)
+					if char.hasimgConvo == True:
+						charHead = char.imgConvo
+						headSize = char.imgConvo.get_size()
+					if "_" in char.name:
+						nameToUse = char.name.replace("_"," ")
+					else:
+						nameToUse = char.name
+					nameSurf = self.nameFont.render(nameToUse, True, red)
 					nameCoords = self.nameBoxCenterLeft[0] + char.namePos[0], \
 						self.nameBoxCenterLeft[1] + char.namePos[1]
-					headSize = char.imgConvo.get_size()
 			#blit head and name
-			headCoords = (self.boxX, self.boxY - headSize[1]+50)
-			self.window.blit(charHead, headCoords)
+			if charHead != None:
+				headCoords = (self.boxX, self.boxY - headSize[1]+50)
+				self.window.blit(charHead, headCoords)
 
 			# blit textbox
 			self.window.blit(self.textboxImg,(self.boxX,self.boxY))
 
+			if nameSurf == None:
+				print "NO NAMESURF FSR"
 			self.window.blit(nameSurf, (nameCoords[0], nameCoords[1]+50))
 
 
@@ -166,7 +172,8 @@ class Conversation():
 			convList.append(wholeLineList)	
 
 		#divide all text into boxes to display
-		maxLineWidth = self.boxWidth - 50
+		maxLineWidth = self.boxWidth - 80 -self.cursor.get_width()
+
 		boxesList = [] #holds lists of strings indicating dialogue strings per box
 					   #and also holds the person speaking before it
 		returnList = [] #list of convos (list of boxesLists)

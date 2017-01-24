@@ -9,7 +9,6 @@
 # Playable Characters increase their stats with every level-up.
 
 # test code is now obsolete
-
 import pygame
 import sys
 import random
@@ -180,14 +179,13 @@ class Character( Thing ):
 		if self.showHP:
 			# draw health bar background (in black)
 			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
-			
+
 			# draw health bar foreground based on current HP left (if there is any)
 			if self.hp != 0:
 				fraction = float( self.hp ) / self.totalHP
 				newWidth = int( ( self.hpbarWidth - 2 ) * self.hp / self.totalHP )
 				self.hpbarFG.width = newWidth
 				#pygame.draw.rect( screen, green, self.hpbarFG )
-			
 				if fraction > 0.3:
 					pygame.draw.rect( screen, green, self.hpbarFG )
 				else:
@@ -377,10 +375,14 @@ class PlayableCharacter( Character ):
 			pass
 			'''make pyganim'''
 		
-		# THESE IMAGES MUST BE PROVIDED
 		other = imglist[5]
-		self.imgStatus = other[0]
-		self.imgConvo = other[1]
+		if other[0] != None:
+			self.imgStatus = other[0]
+			
+		self.hasimgConvo = False
+		if other[1] != None:
+			self.imgConvo = other[1]
+			self.hasimgConvo = True
 	
 	# adds a temporary stat
 	def addTempStat( self, stat, value, expir ):
@@ -686,20 +688,22 @@ class PlayableCharacter( Character ):
 			self.acc += self.statStep
 			
 		# add new attack
+		newatk = None
 		if self.level == 2:
 			newatk = ReferNotes()
-		elif self.level == 3:
-			newatk = ReadCode()
 		elif self.level == 4:
-			newatk = ShareCode(game)
+			newatk = ReadCode()
 		elif self.level == 5:
-			newatk = LookTime()
+			newatk = ShareCode(game)
 		elif self.level == 6:
+			newatk = LookTime()
+		elif self.level == 8:
 			newatk = UseInternet()
-		elif self.level == 7:
+		elif self.level == 9:
 			newatk = CommentLines()
 			
-		self.addAttack(newatk)
+		if newatk != None:
+			self.addAttack(newatk)
 	
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view
@@ -713,6 +717,17 @@ class PlayableCharacter( Character ):
 		
 		self.hp = self.totalHP # reset to full HP
 		self.movement = [ 0, 0 ] # clear out stored movement
+		self.setRandAttacks()
+
+	#chooses which 4 attacks the player stays in battle with
+	def setRandAttacks( self ):
+		# Shuffle all attacks
+		print "ATTACKS %s" %self.attacks
+		shuffledAttacks = random.sample(self.attacks, len(self.attacks))
+		print "SHUFFLED ATTACKS %s" %shuffledAttacks
+
+		# First 4 attacks are ones available
+		self.rand4Attacks = shuffledAttacks[0:4]
 		
 		'''FILL IN CODE HERE FOR CHOOSING AVAILABLE ATTACKS AFTER CODING DEBUGGINGMETHODS'''
 	

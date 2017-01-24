@@ -23,9 +23,10 @@ class Sound:
 			"battleMusic.ogg",
 			"enemyMusic.ogg",
 			"explora.wav",
-			"bonk.wav",
-			"zong.wav",
-			"pew.ogg"
+			"bonk.ogg",
+			"zong.ogg",
+			"pew.ogg",
+			"start.ogg"
 		])
 	
 	# Loads list of music files in the sounds/ directory
