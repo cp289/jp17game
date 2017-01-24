@@ -115,9 +115,10 @@ class Character( Thing ):
 		# rects for drawing health bar
 		self.hpbarWidth = 70
 		self.hpbarHeight = 10
-		self.hpbarBG = pygame.Rect( ( pos[0], pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
-		self.hpbarFG = pygame.Rect( ( pos[0] + 1, pos[1] + self.rect.height + 1 ),
+		self.hpbarBG = pygame.Rect( ( pos[0] + self.rect.width - self.hpbarWidth, pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
+		self.hpbarFG = pygame.Rect( ( pos[0] + self.rect.width - self.hpbarWidth + 1, pos[1] + self.rect.height + 1 ),
 			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
+		print 'init', self.name, 'hp bar at', self.hpbarBG
 		
 		self.selected = False
 	
@@ -178,6 +179,7 @@ class Character( Thing ):
 		if self.showHP:
 			# draw health bar background (in black)
 			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
+			#print 'drawing', self.name, 'hp bar at', self.hpbarBG
 			
 			# draw health bar foreground based on current HP left (if there is any)
 			if self.hp != 0:
@@ -248,6 +250,28 @@ class Enemy( Character ):
 		s = 'an Enemy named ' + self.name + ' with ' + str( self.hp ) + ' HP'
 		return s
 
+
+'''
+This class represents a non-playable character who only takes part in conversations.
+'''
+class SpeakingCharacter( Character ):
+	
+	# creates a new SpeakingCharacter with the given position, image, and name
+	def __init__( self, pos, img, name, namePos ):
+		if img == None: # eh
+			img = pygame.Surface( ( 100, 100 ) )
+			self.hasimgConvo = False
+		else:
+			self.hasimgConvo = True
+		Character.__init__( self, pos, img, name ) # call parent constructor
+		
+		self.namePos = namePos
+		self.imgConvo = img
+	
+	# returns the dialogue image for this character
+	def getConvoIMG( self ):
+		return self.imgConvo
+
 '''
 This class represents a character that the player can control throughout the game.
 Each character has stats, and can move around in exploring mode and attack in battle mode.
@@ -276,6 +300,9 @@ class PlayableCharacter( Character ):
 		else:
 			self.stagePos = [ stagePos[0], stagePos[1] ]
 		self.namePos = namePos
+		
+		# fix rect, because currently it's set to match the battle pic
+		self.rect = pygame.Rect( ( self.stagePos[0], self.stagePos[1] ), ( 62, 175 ) )
 		
 		# a larger rectangle for erasing previous position, to fix issues with erasing in animation
 		self.eraseRect = self.rect.move( -10, -10 )
@@ -362,8 +389,13 @@ class PlayableCharacter( Character ):
 			self.walkingAnim = self.walkingForward
 		
 		battle = imglist[2]
+		self.battleRect = None
 		if battle != None:
 			self.imgBattle = battle # TEMPORARY
+			self.battleRect = self.imgBattle.get_rect().move( battlePos[0], battlePos[1] )			
+			
+			self.adjustHPbar()
+			
 # 				battleReady = battle[0:2] # first two images are for idle
 # 				'''make pyganim'''
 # 				battleDamage = battle[2:] # last two images are for taking damage
@@ -393,6 +425,15 @@ class PlayableCharacter( Character ):
 		#if escape was successful
 		self.escaped = False
 
+	# fixes the position of the HP bar to match the battle rect
+	def adjustHPbar( self ):
+		# adjust health bar
+		#print self.name, 'hp bar was', self.hpbarBG
+		self.hpbarBG.right = self.battleRect.right - 70
+		self.hpbarBG.bottom = self.battleRect.bottom - 10
+		self.hpbarFG.right = self.battleRect.right - 71
+		self.hpbarFG.bottom = self.battleRect.bottom - 11
+		#print 'moved', self.name, 'hp bar to', self.hpbarBG
 	
 	# adds a temporary stat
 	def addTempStat( self, stat, value, expir ):
@@ -439,6 +480,8 @@ class PlayableCharacter( Character ):
 		
 		# adjust erasing rectangle
 		self.eraseRect.topleft = newx - 10, newy - 10
+		
+		self.adjustHPbar()
 	
 	# change the stage position of the PlayableCharacter to the given coordinates
 	def setStagePos( self, newx, newy ):
@@ -639,6 +682,7 @@ class PlayableCharacter( Character ):
 		self.spd = list[3]
 		self.acc = list[4]
 		self.maxTime = list[5]
+		self.time = self.maxTime
 	
 	# setter for HP growth rate
 	def setHPGR( self, hg ):
@@ -732,7 +776,7 @@ class PlayableCharacter( Character ):
 		
 		# store exploring position, switch to battle position
 		self.explorePos= self.pos[:]
-		self.setPosition( self.battlePos[0], self.battlePos[1] )
+		self.setScreenPos( self.battlePos[0], self.battlePos[1] )
 		
 		self.hp = self.totalHP # reset to full HP
 		self.movement = [ 0, 0 ] # clear out stored movement

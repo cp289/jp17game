@@ -269,14 +269,14 @@ class Game:
 		walkL = 'images/Melody/Walk/Left/MelodyLeftWalk'
 		walkR = 'images/Melody/Walk/Right/MelodyRightWalk'
 		walklist = ( walkF, walkB, walkL, walkR )
-		battlelist = ( pygame.image.load( 'images/Melody/MelodyBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = ( pygame.image.load( 'images/Melody/Attack/MelodyIdle0.png' ).convert_alpha() ) # TEMPORARY
 		attacklist = None
 		dielist = None
 		otherlist = ( playerS, playerC )
 		
 		# initialize mel
-		initpos = ( 300, 400 ) # hopefully the middle of the bottom
-		battlePos = ( 700, 50 )
+		initpos = ( 300, 400 )
+		battlePos = ( 590, 50 )
 		namePos = ( 25, -1 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', namePos )
@@ -287,7 +287,7 @@ class Game:
 		
 		standlist = None
 		walklist = None
-		battlelist = ( pygame.image.load( 'images/Fatimah/FatimahBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = ( pygame.image.load( 'images/Fatimah/Attack/FatimahIdle0.png' ).convert_alpha() ) # TEMPORARY
 		attacklist = None
 		dielist = None
 		playerS = pygame.image.load( 'images/Fatimah/FatimahStatPic.png' ).convert_alpha()
@@ -295,7 +295,7 @@ class Game:
 		otherlist = ( playerS, playerC )
 		
 		#initialize fa
-		battlePos = ( 600, 145 ) # changed from 178
+		battlePos = ( 490, 145 ) # changed from 178
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', namePos )
@@ -303,11 +303,11 @@ class Game:
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
 		# initialize zen
-		battlelist = ( pygame.image.load( 'images/Zena/ZenaBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = ( pygame.image.load( 'images/Zena/Attack/ZenaIdle0.png' ).convert_alpha() ) # TEMPORARY
 		playerS = pygame.image.load( 'images/Zena/ZenaStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Zena/ZenaHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 500, 240 ) # from 306
+		battlePos = ( 390, 240 ) # from 306
 		namePos = ( 40, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', namePos )
@@ -315,11 +315,11 @@ class Game:
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
 		# initialize cha
-		battlelist = ( pygame.image.load( 'images/Charles/CharlesBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = ( pygame.image.load( 'images/Charles/Attack/CharlesIdle0.png' ).convert_alpha() ) # TEMPORARY
 		playerS = pygame.image.load( 'images/Charles/CharlesStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Charles/CharlesHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 400, 304 ) # changed from 404
+		battlePos = ( 290, 304 ) # changed from 404
 		namePos = ( 20, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', namePos )
@@ -329,39 +329,33 @@ class Game:
 		"""
 		Initialize non-playable characters who just take part in convos
 		"""
-		playerS = None
-		otherlist = (playerS, playerC)
-		battlePos = ( 0, 0 ) # doesn't matter anyways
-		fillerImg = battlelist
-		battlelist = fillerImg # needs image but never battles anyways
-		
 		#initalize chaEvil
 		playerC = pygame.image.load( "images/Charles/PossessedCharles.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 9, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.chaEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles?', namePos )
+		self.chaEvil = agents.SpeakingCharacter( initpos, playerC, 'Charles?', namePos )
 		
 		#initialize bru
 		playerC = pygame.image.load( "images/Bruce/BruceHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 33, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.bru = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce', namePos )
+		self.bru = agents.SpeakingCharacter( initpos, playerC, 'Bruce', namePos )
 		
 		#initialize bruEvil
 		playerC = pygame.image.load( "images/Bruce/BruceHeadEvil.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 24, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.bruEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce?', namePos )
+		self.bruEvil = agents.SpeakingCharacter( initpos, playerC, 'Bruce?', namePos )
 		
 		#initialize NPE
 		playerC = pygame.image.load( "images/bugs/BossBugSilhouette.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 44, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.NPE = agents.PlayableCharacter( initpos, battlePos, imglist, 'NPE', namePos )
+		self.NPE = agents.SpeakingCharacter( initpos, playerC, 'NPE', namePos )
 		
 		playerC = None 
 		
@@ -369,19 +363,19 @@ class Game:
 		otherlist = ( playerS, playerC )
 		namePos = ( 1, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.stu1 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_1', namePos )
+		self.stu1 = agents.SpeakingCharacter( initpos, playerC, 'Student_1', namePos )
 		
 		#initialize stu2
 		otherlist = ( playerS, playerC )
 		namePos = ( 1, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.stu2 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_2', namePos )
+		self.stu2 = agents.SpeakingCharacter( initpos, playerC, 'Student_2', namePos )
 		
 		#initialize CSC
 		otherlist = ( playerS, playerC )
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.CSC = agents.PlayableCharacter( initpos, battlePos, imglist, 'CS_Child', namePos )
+		self.CSC = agents.SpeakingCharacter( initpos, playerC, 'CS_Child', namePos )
 		
 		print 'initialized playable characters'
 	
@@ -792,6 +786,11 @@ class Game:
 		self.sound.stop('explora')
 		self.sound.play("battleMusic", -1 )
 		
+		# TEMP
+# 		self.livePlayers = [ self.mel, self.fa, self.zen ]
+# 		for chara in self.livePlayers:
+# 			print 'hp for', chara.name, 'at', chara.hpbarBG
+		
 		self.inBattle = True
 		self.player.enterBattle(canFlee)
 		self.fa.enterBattle(canFlee)
@@ -825,10 +824,7 @@ class Game:
 		# reset stored points for new battle
 		self.storedPoints = 0
 		
-# 		for chara in self.livePlayers:
-# 			print 'drew', chara.name, 'hp bar at', chara.hpbarBG
-	
-		self.refresh.append( self.screen.get_rect() ) # possible fix for health bar issues?
+		self.refresh.append( self.screen.get_rect() )
 	
 	# changes game state back to exploration mode
 	def leaveBattle( self, charles = False ):
