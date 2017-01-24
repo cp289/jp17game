@@ -1,4 +1,4 @@
-	# loads images for Mac lab stage and creates the furniture objects
+# loads images for Mac lab stage and creates the furniture objects
 	def loadMacLabStage( self ):
 		scale = 0.5
 		
@@ -16,10 +16,11 @@
 						]
 
 		self.macLabStage = Stage( 'mac lab', 2, scale, bg, battleBG, bugImgs )
-		
-		# create doors	
-		# doorToMacLab = agents.Door( ( 0, 1365 * scale ), ( 10, 40 / scale ), 'mac lab' )
-		# self.macLabStage.addDoor( doorToMacLab )
+
+		#def __init__( self, pos, dim, room ):
+		doorMacLab = agents.Door( (  800 * scale, 800 * scale ), \
+			( 15 * scale, 378 * scale ), 'hallway' )
+		self.macLabStage.addDoor( doorMacLab )
 		
 		# create walls
 		lWall = pygame.Surface( ( 5, self.macLabStage.height ) )
@@ -157,3 +158,23 @@
 		pygame.display.update()
 		
 		print 'enter mac lab'
+
+################ in updateExplore method #################
+
+		# check for entering a door
+		door = self.stage.atDoor( self.player )
+		if door != None:
+			# if entering a door, determine which room the door leads to
+			if door.room == 'robotics lab':
+				if self.player.movement[0] == left: # make sure player is going in the correct direction
+					self.enterRoboLabStage()
+			elif door.room == 'hallway': # if entering the hallway, determine from which room
+				if self.stage == self.roboLabStage and self.player.movement[0] == right:
+					self.enterHallwayStageLeft()
+				if self.stage == self.macLabStage and self.player.movement[0] == back:
+					# need enterHallwayStageBack()
+					None
+					self.enterHallwayStageLeft()
+			elif door.room == 'mac lab': # make sure player goes in right direction
+				if self.player.movement[0] == forward:
+					self.enterMacLabStage()
