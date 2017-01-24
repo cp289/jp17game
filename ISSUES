@@ -1,0 +1,4 @@
+attackChooser.py
+	make attack chooser more visually appealing
+	reset cursor index to zero when switching to and from `share code' attack
+
