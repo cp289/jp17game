@@ -55,10 +55,10 @@ class AskSomeone(DebuggingMethod):
 		self.desc = "Ask for help to damage a bug."
 		
 	def actions(self, e, c):
-		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
-		else:
-			print "Attack Missed."
+		#if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
+		self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+		#else:
+			#print "Attack Missed."
 		
 class PrintStatements(DebuggingMethod):
 	def __init__(self):

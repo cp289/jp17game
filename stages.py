@@ -12,6 +12,7 @@ import random
 from attackChooser import *
 from sound import *
 import conversation
+from main import exitGame
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -155,7 +156,7 @@ class Game:
 	# fields: current stage, whether in battle mode, whether in dialogue, enemies
 	
 	# start a new Game
-	def __init__( self, screen ):
+	def __init__( self, screen, sound ):
 		# create a screen (width, height)
 		self.screenSize = ( screen.get_width(), screen.get_height() )
 		self.screen = screen
@@ -240,7 +241,7 @@ class Game:
 		self.convoNum = 0
 		
 		# load sound object
-		self.sound = Sound()
+		self.sound = sound
 		
 		# mostly for testing
 		self.timeStep = 0
@@ -995,7 +996,7 @@ class Game:
 # 					return
 			
 			if event.type == pygame.QUIT:
-				sys.exit()
+				exitGame()
 		
 		# for when the key is held down
 		if not keydown: # only check if there isn't a new button down
@@ -1320,7 +1321,7 @@ class Game:
 									print 'stage', self.stage.name, 'has been completed'
 			
 			if event.type == pygame.QUIT:
-				sys.exit()
+				exitGame()
 		
 		# if it's an enemy's turn, have it attack
 		if not playerTurn:
@@ -1357,7 +1358,7 @@ class Game:
 						self.refresh.append( self.player.getRect() )
 			
 			if event.type == pygame.QUIT:
-				sys.exit()
+				exitGame()
 	
 	#continues to next box in dialogue	
 	def updateDialogue(self):
@@ -1399,7 +1400,7 @@ class Game:
 							self.gameConvo.advanceText()
 						
 				if event.type == pygame.QUIT:
-					sys.exit()
+					exitGame()
 
 
 

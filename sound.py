@@ -25,7 +25,8 @@ class Sound:
 			"explora.wav",
 			"bonk.ogg",
 			"zong.ogg",
-			"pew.ogg"
+			"pew.ogg",
+			"start.ogg"
 		])
 	
 	# Loads list of music files in the sounds/ directory

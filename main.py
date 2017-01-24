@@ -8,6 +8,8 @@
 import pygame
 import stages
 import sys
+import os
+from sound import *
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -56,6 +58,14 @@ def showStartScreen( screen, buttons ):
 	
 	pygame.display.update()
 
+def exitGame():
+	print('cleaning up...')
+	d = os.path.dirname(os.path.realpath(__file__))
+	files = [ file for file in os.listdir(d) if file.endswith(".pyc") ]
+	for file in files:
+		os.remove(file)
+	sys.exit()
+
 # runs main game code
 def main():
 	# initialize pygame
@@ -68,7 +78,7 @@ def main():
 		pygame.font.init()
 	except:
 		print "Fonts unavailable"
-		sys.exit()
+		exitGame()
 	
 	pygame.display.set_caption( 'debugDavis()' )
 	print 'init screen'
@@ -88,6 +98,12 @@ def main():
 	buttons = [ startButton, instrButton ]
 	showStartScreen( screen, buttons )
 	
+	# initialize sounds
+	sound = Sound()
+	
+	# play start screen music
+	sound.play("start")
+	
 	print 'start screen'
 	
 	# run a loop for start screen
@@ -104,16 +120,17 @@ def main():
 						moveOn = True
 						break
 			if event.type == pygame.QUIT:
-				sys.exit()
+				exitGame()
 		
 		startButton.draw( screen )
 		instrButton.draw( screen )
 		pygame.display.update()
 	
-	game = stages.Game( screen )
+	game = stages.Game( screen, sound )
 	game.loadHallwayStage() # possibly do this in Game constructor later
 	game.loadRoboLabStage()
 	
+	sound.stop("start")
 	game.start()
 	
 	# loop for intro (hallway scene with unspecified students, conversation in my room)
@@ -150,7 +167,7 @@ def main():
 	while 2:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-				sys.exit()
+				exitGame()
 
 if __name__ == '__main__':
 	main()
