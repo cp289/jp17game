@@ -26,7 +26,8 @@ class Sound:
 			"bonk.ogg",
 			"zong.ogg",
 			"pew.ogg",
-			"start.ogg"
+			"start.ogg",
+			"win.ogg"
 		])
 	
 	# Loads list of music files in the sounds/ directory
@@ -41,6 +42,9 @@ class Sound:
 	# Stops the specified sound
 	def stop(self, name):
 		self.files[name].stop()
+		
+	def busy(self):
+		return pygame.mixer.get_busy()
 
 # Main method
 def main():

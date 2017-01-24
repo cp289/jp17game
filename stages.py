@@ -825,9 +825,17 @@ class Game:
 		self.refresh.append( self.screen.get_rect() ) # possible fix for health bar issues?
 	
 	# changes game state back to exploration mode
-	def leaveBattle( self ):
+	def leaveBattle( self, win ):
 		# stop battle music
 		self.sound.stop("battleMusic")
+		
+		# play win music
+		if win:
+			self.sound.play("win")
+			while self.sound.busy():
+				pass
+			
+		# return to exploration music
 		self.sound.play('explora', -1)
 		
 		self.inBattle = False
@@ -1271,7 +1279,7 @@ class Game:
 								self.enemies[0].select()
 							else: # if all enemies are gone
 								self.awardXP()
-								self.leaveBattle()
+								self.leaveBattle(True)
 								done = True
 								print 'you win the battle!'
 								
@@ -1286,7 +1294,7 @@ class Game:
 		if not playerTurn:
 			loss = self.enemyTurn()
 			if loss: # if the enemy turn resulted in a loss, the battle is done
-				self.leaveBattle()
+				self.leaveBattle(False)
 				done = True
 		
 		# if we're still on the battle screen
