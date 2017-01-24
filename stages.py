@@ -74,7 +74,7 @@ class Stage:
 	
 	# returns whether this stage has been completed
 	def completed( self ):
-		return self.numBattles == self.battlesCompleted
+		return self.battlesCompleted >= self.numBattles
 	
 	# returns whether the given character is within the given range of the left wall
 	# for stopping camera view adjustment at the wall
@@ -168,11 +168,16 @@ class Game:
 		self.gameClock = pygame.time.Clock()
 		
 		# boolean fields for game state
-		self.inIntro = False
-		self.hallwaySafe = False
 		self.inBattle = False
 		self.inDialogue = False
 		self.onStatScreen = False
+		
+		# boolean fields for game progress
+		self.inIntro = False
+		self.hallwaySafe = False
+		self.gotCharles = False
+		self.charlesBattle = False # whether the battle with Charles' bugs has been triggered
+		self.key2Battle = False # whether the battle for the second key has been triggered
 		
 		self.mel = None
 		self.fa = None
@@ -182,6 +187,7 @@ class Game:
 		self.player = self.mel
 		
 		# variables for battle mode
+		self.battlesWon = 0
 		self.battleParticipants = [] # list to loop through for battle turns
 		self.currentBattleTurn = -1 # stores index of current turn within battleParticipants
 		self.livePlayers = [] # stores players who are currently alive so that enemies can choose targets easily
@@ -235,7 +241,7 @@ class Game:
 		self.convoNum = 0
 		
 		# load sound object
-		self.sound = Sound()
+		self.sound = sound
 		
 		# mostly for testing
 		self.timeStep = 0
@@ -263,14 +269,14 @@ class Game:
 		walkL = 'images/Melody/Walk/Left/MelodyLeftWalk'
 		walkR = 'images/Melody/Walk/Right/MelodyRightWalk'
 		walklist = ( walkF, walkB, walkL, walkR )
-		battlelist = ( pygame.image.load( 'images/Melody/MelodyBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = ( pygame.image.load( 'images/Melody/Attack/MelodyIdle0.png' ).convert_alpha() ) # TEMPORARY
 		attacklist = None
 		dielist = None
 		otherlist = ( playerS, playerC )
 		
 		# initialize mel
-		initpos = ( 300, 400 ) # hopefully the middle of the bottom
-		battlePos = ( 700, 50 )
+		initpos = ( 300, 400 )
+		battlePos = ( 590, 50 )
 		namePos = ( 25, -1 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', namePos )
@@ -281,7 +287,7 @@ class Game:
 		
 		standlist = None
 		walklist = None
-		battlelist = ( pygame.image.load( 'images/Fatimah/FatimahBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = ( pygame.image.load( 'images/Fatimah/Attack/FatimahIdle0.png' ).convert_alpha() ) # TEMPORARY
 		attacklist = None
 		dielist = None
 		playerS = pygame.image.load( 'images/Fatimah/FatimahStatPic.png' ).convert_alpha()
@@ -289,7 +295,7 @@ class Game:
 		otherlist = ( playerS, playerC )
 		
 		#initialize fa
-		battlePos = ( 600, 178 )
+		battlePos = ( 490, 145 ) # changed from 178
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', namePos )
@@ -297,11 +303,11 @@ class Game:
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
 		# initialize zen
-		battlelist = ( pygame.image.load( 'images/Zena/ZenaBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = ( pygame.image.load( 'images/Zena/Attack/ZenaIdle0.png' ).convert_alpha() ) # TEMPORARY
 		playerS = pygame.image.load( 'images/Zena/ZenaStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Zena/ZenaHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 500, 306 )
+		battlePos = ( 390, 240 ) # from 306
 		namePos = ( 40, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', namePos )
@@ -309,11 +315,11 @@ class Game:
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
 		# initialize cha
-		battlelist = ( pygame.image.load( 'images/Charles/CharlesBattleSprite.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = ( pygame.image.load( 'images/Charles/Attack/CharlesIdle0.png' ).convert_alpha() ) # TEMPORARY
 		playerS = pygame.image.load( 'images/Charles/CharlesStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Charles/CharlesHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 400, 404 )
+		battlePos = ( 290, 304 ) # changed from 404
 		namePos = ( 20, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', namePos )
@@ -323,39 +329,33 @@ class Game:
 		"""
 		Initialize non-playable characters who just take part in convos
 		"""
-		playerS = None
-		otherlist = (playerS, playerC)
-		battlePos = ( 0, 0 ) # doesn't matter anyways
-		fillerImg = battlelist
-		battlelist = fillerImg # needs image but never battles anyways
-		
 		#initalize chaEvil
 		playerC = pygame.image.load( "images/Charles/PossessedCharles.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 9, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.chaEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles?', namePos )
+		self.chaEvil = agents.SpeakingCharacter( initpos, playerC, 'Charles?', namePos )
 		
 		#initialize bru
 		playerC = pygame.image.load( "images/Bruce/BruceHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 33, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.bru = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce', namePos )
+		self.bru = agents.SpeakingCharacter( initpos, playerC, 'Bruce', namePos )
 		
 		#initialize bruEvil
 		playerC = pygame.image.load( "images/Bruce/BruceHeadEvil.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 24, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.bruEvil = agents.PlayableCharacter( initpos, battlePos, imglist, 'Bruce?', namePos )
+		self.bruEvil = agents.SpeakingCharacter( initpos, playerC, 'Bruce?', namePos )
 		
 		#initialize NPE
 		playerC = pygame.image.load( "images/bugs/BossBugSilhouette.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
 		namePos = ( 44, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.NPE = agents.PlayableCharacter( initpos, battlePos, imglist, 'NPE', namePos )
+		self.NPE = agents.SpeakingCharacter( initpos, playerC, 'NPE', namePos )
 		
 		playerC = None 
 		
@@ -363,19 +363,19 @@ class Game:
 		otherlist = ( playerS, playerC )
 		namePos = ( 1, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.stu1 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_1', namePos )
+		self.stu1 = agents.SpeakingCharacter( initpos, playerC, 'Student_1', namePos )
 		
 		#initialize stu2
 		otherlist = ( playerS, playerC )
 		namePos = ( 1, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.stu2 = agents.PlayableCharacter( initpos, battlePos, imglist, 'Student_2', namePos )
+		self.stu2 = agents.SpeakingCharacter( initpos, playerC, 'Student_2', namePos )
 		
 		#initialize CSC
 		otherlist = ( playerS, playerC )
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.CSC = agents.PlayableCharacter( initpos, battlePos, imglist, 'CS_Child', namePos )
+		self.CSC = agents.SpeakingCharacter( initpos, playerC, 'CS_Child', namePos )
 		
 		print 'initialized playable characters'
 	
@@ -777,7 +777,7 @@ class Game:
 			self.battleParticipants.append( e )
 	
 	# changes game state to battle mode
-	def enterBattle( self, charles = False ):
+	def enterBattle( self, charles = False, canFlee = True ):
 		# update display for background
 		self.stage.fillBattleBG( self.screen )
 		self.refresh.append( self.screen.get_rect() )
@@ -786,10 +786,15 @@ class Game:
 		self.sound.stop('explora')
 		self.sound.play("battleMusic", -1 )
 		
+		# TEMP
+# 		self.livePlayers = [ self.mel, self.fa, self.zen ]
+# 		for chara in self.livePlayers:
+# 			print 'hp for', chara.name, 'at', chara.hpbarBG
+		
 		self.inBattle = True
-		self.player.enterBattle()
-		self.fa.enterBattle()
-		self.zen.enterBattle()
+		self.player.enterBattle(canFlee)
+		self.fa.enterBattle(canFlee)
+		self.zen.enterBattle(canFlee)
 		
 		# build list of battle participants
 		self.battleParticipants= [ self.mel, self.fa, self.zen ]
@@ -797,6 +802,12 @@ class Game:
 # 		self.mel.attacking = True
 		
 		self.livePlayers = [ self.mel, self.fa, self.zen ]
+		
+		# if Charles is currently playable
+		if charles:
+			self.cha.enterBattle(canFlee)
+			self.battleParticipants.append( self.cha )
+			self.livePlayers.append( self.cha )
 		
 		self.spawnEnemies( 3, 1 ) # number, level
 		self.enemies[0].select()
@@ -813,22 +824,22 @@ class Game:
 		# reset stored points for new battle
 		self.storedPoints = 0
 		
-		# if Charles is currently playable
-		if charles:
-			self.cha.enterBattle()
-			self.battleParticipants.append( self.cha )
-			self.livePlayers.append( self.cha )
-		
-# 		for chara in self.livePlayers:
-# 			print 'drew', chara.name, 'hp bar at', chara.hpbarBG
-	
-		self.refresh.append( self.screen.get_rect() ) # possible fix for health bar issues?
+		self.refresh.append( self.screen.get_rect() )
 	
 	# changes game state back to exploration mode
-	def leaveBattle( self ):
+	def leaveBattle( self, charles = False ):
 		# stop battle music
 		self.sound.stop("battleMusic")
 		self.sound.play('explora', -1)
+		
+		players = [self.mel, self.fa, self.zen]
+		if charles == True:
+			players.append(self.cha)
+			
+		#reset current time left
+		for player in players:
+			player.fillTime()
+			print "RESET TIME TO FULL!"
 		
 		self.inBattle = False
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
@@ -840,10 +851,12 @@ class Game:
 		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
 		
-		# if we're leaving the hallway battle, now make the hallway safe
-		if self.stage == self.hallwayStage:
+		if self.stage == self.hallwayStage: # if we're leaving the hallway battle, now make the hallway safe
 			self.hallwaySafe = True
 			self.enterDialogue() # enter convo 3
+		elif self.charlesBattle and not self.gotCharles: # if leaving battle with Charles, unlock him
+			self.gotCharles = True
+			self.enterDialogue() # convo 6
 		
 		print 'leave battle'
 	
@@ -908,8 +921,8 @@ class Game:
 			self.fillIntroBG()
 		else:
 			self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			self.player.draw( self.screen )
 		
-		self.player.draw( self.screen )
 		self.gameConvo.displayText( self.convoNum )
 		print "ENTERED DIALOGUE"
 	
@@ -946,7 +959,7 @@ class Game:
 				if event.key == pygame.K_s:
 					self.onStatScreen = True
 					print 'show stat screen'
-					self.showStatScreen()
+					self.showStatScreen( charles = self.gotCharles)
 					return # so that characters aren't still drawn over stat screens
 				
 				elif event.key == pygame.K_UP:
@@ -1010,7 +1023,12 @@ class Game:
 					self.enterRoboLabStage()
 			elif door.room == 'hallway': # if entering the hallway, determine from which room
 				if self.stage == self.roboLabStage and self.player.movement[0] == right:
-					self.enterHallwayStageLeft()
+					if self.stage.completed() and not self.charlesBattle:
+						print 'story event: Charles!'
+						self.enterDialogue() # convo with Charles
+						return # so that characters aren't still drawn over convo
+					else:
+						self.enterHallwayStageLeft()
 		
 		# update screen contents
 		
@@ -1065,12 +1083,14 @@ class Game:
 			if self.stage == self.hallwayStage:
 				if not self.hallwaySafe:
 					self.enterDialogue() # convo 2 upon entering hallway, enters battle when done
+					return # so that characters aren't still drawn over convo
 			elif self.stage == self.roboLabStage and self.stage.battlesCompleted == 0:
 				self.enterDialogue() # convo 4 upon entering robotics lab for the first time
+				return # so that characters aren't still drawn over convo
 			else:
 				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
 				if random.random() < probBattle:
-					self.enterBattle()
+					self.enterBattle( charles = self.gotCharles )
 		
 		self.player.draw( self.screen )
 		self.refresh.append( self.player.getRect() )
@@ -1080,7 +1100,7 @@ class Game:
 	def enemyTurn( self ):
 		# randomly select a livePlayer and attack
 		target = random.choice( self.livePlayers )
-		self.battleParticipants[self.currentBattleTurn].attack( target, 50 ) # to always win
+		self.battleParticipants[self.currentBattleTurn].attack( target, 50 )
 		
 		# play attack sound
 		self.sound.play('zong')
@@ -1156,6 +1176,15 @@ class Game:
 	def updateBattle( self ):
 		done = False
 		
+		#check if we can and should flee
+		for player in self.livePlayers:
+			if player.escaped == True:
+				print "YOU ESCAPED!"
+				player.escaped = False
+				done = True
+				self.leaveBattle()
+				return
+		
 		attacker = self.battleParticipants[self.currentBattleTurn]
 		if attacker.getType() == 'PlayableCharacter':
 			playerTurn = True
@@ -1170,7 +1199,7 @@ class Game:
 				if event.key == pygame.K_s: # show stat screen
 					self.onStatScreen = True
 					print 'show stat screen'
-					self.showStatScreen()
+					self.showStatScreen( charles = self.gotCharles)
 					return # so that characters aren't still drawn over stat screen
 				
 				# if it's the player's turn, check for other input
@@ -1240,6 +1269,12 @@ class Game:
 					
 					# attack currently selected enemy
 					elif event.key == pygame.K_a:
+						
+						#don't allow attack if cost is greater than time left
+						if self.dashboard.attack().timeNeeded > attacker.time:
+							print "NOT ENOUGH TIME!"
+							return
+
 						target = self.enemies[self.selectedEnemyIDX]
 						
 						self.dashboard.attack().attack(target, self.battleParticipants[self.currentBattleTurn])
@@ -1275,9 +1310,11 @@ class Game:
 								done = True
 								print 'you win the battle!'
 								
+								self.battlesWon += 1
+								print 'battles won:', self.battlesWon
 								self.stage.addBattle()
 								if self.stage.completed():
-									print 'this stage has been completed'
+									print 'stage', self.stage.name, 'has been completed'
 			
 			if event.type == pygame.QUIT:
 				exitGame()
@@ -1336,7 +1373,10 @@ class Game:
 			self.refresh.append( self.player.getRect() )
 			
 			if self.convoNum == 2 or self.convoNum == 4:
-				self.enterBattle()
+				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
+			elif self.convoNum == 5:
+				self.enterBattle( canFlee = False) # CANNOT FLEE
+				self.charlesBattle = True # triggering Charles battle
 			
 			self.convoNum += 1
 		else:
@@ -1351,8 +1391,7 @@ class Game:
 								self.fillIntroBG()
 							else:
 								self.stage.moveCamView( self.screen, self.refresh, self.camera )
-							
-							self.player.draw( self.screen )
+								self.player.draw( self.screen )
 
 							self.gameConvo.advanceText()
 						

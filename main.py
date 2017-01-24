@@ -65,7 +65,7 @@ def exitGame():
 	for file in files:
 		os.remove(file)
 	sys.exit()
-	
+
 # runs main game code
 def main():
 	# initialize pygame
@@ -103,7 +103,6 @@ def main():
 	
 	# play start screen music
 	sound.play("start")
-
 	print 'start screen'
 	
 	# run a loop for start screen

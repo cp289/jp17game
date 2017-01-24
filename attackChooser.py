@@ -11,7 +11,8 @@ class AttackChooser:
 		self.pos = (0,500)
 		self.dim = ( 800, 100 )
 		
-		self.atkPos = (self.pos[0] + 200, self.pos[1] + 0)
+		self.atkPos = (self.pos[0] + 205, self.pos[1] + 10)
+		self.descPos = (self.pos[0] + 240, self.pos[1] + 60)
 		
 		# define rectangle
 		self.rect = pygame.Rect(self.pos, self.dim)
@@ -23,9 +24,12 @@ class AttackChooser:
 		# initialize parent surface
 		self.parSurface = parSurface
 		
-		# initialize font
-		self.font = pygame.font.SysFont("helvetica", 40)
+		# initialize fonts
+		self.font = pygame.font.SysFont("helvetica", 33)
+		self.descFont = pygame.font.SysFont("helvetica", 18)
+		self.nameFont = pygame.font.SysFont("helvetica", 40)
 		self.atkText = self.font.render(" ", True, (255,255,255))
+		self.descText = self.font.render(" ", True, (255,255,255))
 		
 		# initialize display information
 		self.chara = None
@@ -39,15 +43,24 @@ class AttackChooser:
 		# setup text elements
 		self.chara = chara
 
-		self.attacks = chara.attacks #random 4 from them if you want
+		self.attacks = chara.availableAttacks #random 4 attacks + 2 mandatory ones
 
 		self.atkIndex = 0
 		
-		self.atkText = self.font.render(self.attack().name, True, (255,255,255))
+		self.atkText = self.font.render(self.attack().name, True, (0,0,205))
+
+		self.descText = self.descFont.render(self.attack().desc, True, (255,255,255))
+
 		self.atkRect = pygame.Rect(
 				self.atkPos,
 				(self.atkText.get_rect().w,
 				self.atkText.get_rect().h)
+			)
+
+		self.descRect = pygame.Rect(
+				self.descPos,
+				(self.descText.get_rect().w,
+				self.descText.get_rect().h)
 			)
 	
 	def draw(self): # too much rendering ( in most cases, only text needs updating )
@@ -56,10 +69,14 @@ class AttackChooser:
 		
 		# draw attack text
 		self.parSurface.blit(self.atkText, self.atkRect)
+
+		# draw atk description text
+		self.parSurface.blit(self.descText, self.descRect)
 		
 		# draw name
-		name = self.font.render(self.chara.name, True, (255,255,255))
-		self.parSurface.blit(name, (0,500))
+		name = self.nameFont.render(self.chara.name, True, (0, 255, 0))
+
+		self.parSurface.blit(name, (19, 530))
 		
 		pygame.display.update(self.rect)
 		
@@ -70,21 +87,34 @@ class AttackChooser:
 		# update attack index
 		self.atkIndex = (self.atkIndex + num) % len(self.attacks)
 		
-		# erase old attack text
+		# erase old attack and description text
 		self.parSurface.blit(self.surface, self.atkRect)
-		oldRect = self.atkRect
+		self.parSurface.blit(self.surface, self.descRect)
+		oldAtkRect = self.atkRect
+		oldDescRect = self.descRect
 		
-		# redraw attack text
-		self.atkText = self.font.render(self.attack().name, True, (255,255,255))
+		# redraw attack and description text
+		self.atkText = self.font.render(self.attack().name, True, (0, 0, 205))
+		self.descText = self.descFont.render(self.attack().desc, True, (255,255,255))
+
 		self.atkRect = pygame.Rect(
 				self.atkPos,
 				(self.atkText.get_rect().w,
 				self.atkText.get_rect().h)
 			)
+		self.descRect = pygame.Rect(
+				self.descPos,
+				(self.descText.get_rect().w,
+				self.descText.get_rect().h)
+			)
+
+		# actually blit the new text
 		self.parSurface.blit(self.atkText, self.atkRect)
+		self.parSurface.blit(self.descText, self.descRect)
 		
 		# update display
-		pygame.display.update(oldRect if oldRect.w > self.atkRect.w else self.atkRect)
+		pygame.display.update(oldAtkRect if oldAtkRect.w > self.atkRect.w else self.atkRect)
+		pygame.display.update(oldDescRect if oldDescRect.w > self.descRect.w else self.descRect)
 		
 		if self.attack().name == "Share Code":
 			self.attack().newCursor()
