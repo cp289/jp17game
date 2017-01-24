@@ -1199,8 +1199,8 @@ class Game:
 						self.enterHallwayStageLeft()
 				elif self.stage == self.macLabStage and self.player.movement[0] == back:
 					self.enterHallwayStageBottom()
-			elif door.room == 'mac lab': # make sure player goes in right direction
-				if self.player.movement[0] == front:
+			elif door.room == 'mac lab' and self.gotCharles: # only unlock Mac lab after unlocking Charles
+				if self.player.movement[0] == front: # make sure player goes in right direction
 					self.enterMacLabStage()
 		
 		# update screen contents
@@ -1260,10 +1260,10 @@ class Game:
 			elif self.stage == self.roboLabStage and self.stage.battlesCompleted == 0:
 				self.enterDialogue() # convo 4 upon entering robotics lab for the first time
 				return # so that characters aren't still drawn over convo
-# 			else:
-# 				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
-# 				if random.random() < probBattle:
-# 					self.enterBattle( charles = self.gotCharles )
+			else:
+				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
+				if random.random() < probBattle:
+					self.enterBattle( charles = self.gotCharles )
 		
 		self.player.draw( self.screen )
 		self.refresh.append( self.player.getRect() )
