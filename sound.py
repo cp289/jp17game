@@ -39,20 +39,33 @@ class Sound:
 	def play(self, name, loops=0):
 		self.files[name].play(loops)
 		
+	# Pauses specified music
+	def pause(self, name):
+		pygame.mixer.pause()
+		
 	# Stops the specified sound
 	def stop(self, name):
-		self.files[name].stop()
-		
+		self.files[name].fadeout(500)
+	
+	# returns whether the mixer is playing sound
 	def busy(self):
 		return pygame.mixer.get_busy()
 
 # Main method
 def main():
 	pygame.init()
+	screen = pygame.display.set_mode((800,600))
 	sound=Sound()
 	sound.play("enemyMusic")
 	while 1:
 		for event in pygame.event.get():
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_p:
+					sound.pause("enemyMusic")
+				if event.key == pygame.K_o:
+					sound.play("enemyMusic")
+				if event.key == pygame.K_s:
+					sound.stop("enemyMusic")
 			if event.type==pygame.QUIT:
 				sys.exit()
 
