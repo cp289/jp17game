@@ -168,11 +168,16 @@ class Game:
 		self.gameClock = pygame.time.Clock()
 		
 		# boolean fields for game state
-		self.inIntro = False
-		self.hallwaySafe = False
 		self.inBattle = False
 		self.inDialogue = False
 		self.onStatScreen = False
+		
+		# boolean fields for game progress
+		self.inIntro = False
+		self.hallwaySafe = False
+		self.gotCharles = False
+		self.charlesBattle = False # whether the battle with Charles' bugs has been triggered
+		self.key2Battle = False # whether the battle for the second key has been triggered
 		
 		self.mel = None
 		self.fa = None
@@ -840,10 +845,12 @@ class Game:
 		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
 		
-		# if we're leaving the hallway battle, now make the hallway safe
-		if self.stage == self.hallwayStage:
+		if self.stage == self.hallwayStage: # if we're leaving the hallway battle, now make the hallway safe
 			self.hallwaySafe = True
 			self.enterDialogue() # enter convo 3
+		elif self.charlesBattle and not self.gotCharles: # if leaving battle with Charles, unlock him
+			self.gotCharles = True
+			self.enterDialogue() # convo 6
 		
 		print 'leave battle'
 	
@@ -908,8 +915,8 @@ class Game:
 			self.fillIntroBG()
 		else:
 			self.stage.moveCamView( self.screen, self.refresh, self.camera )
+			self.player.draw( self.screen )
 		
-		self.player.draw( self.screen )
 		self.gameConvo.displayText( self.convoNum )
 		print "ENTERED DIALOGUE"
 	
@@ -946,7 +953,7 @@ class Game:
 				if event.key == pygame.K_s:
 					self.onStatScreen = True
 					print 'show stat screen'
-					self.showStatScreen()
+					self.showStatScreen( charles = self.gotCharles)
 					return # so that characters aren't still drawn over stat screens
 				
 				elif event.key == pygame.K_UP:
@@ -1010,7 +1017,11 @@ class Game:
 					self.enterRoboLabStage()
 			elif door.room == 'hallway': # if entering the hallway, determine from which room
 				if self.stage == self.roboLabStage and self.player.movement[0] == right:
-					self.enterHallwayStageLeft()
+					if self.stage.completed() and not self.charlesBattle:
+						self.enterDialogue() # convo with Charles
+						return # so that characters aren't still drawn over convo
+					else:
+						self.enterHallwayStageLeft()
 		
 		# update screen contents
 		
@@ -1065,12 +1076,14 @@ class Game:
 			if self.stage == self.hallwayStage:
 				if not self.hallwaySafe:
 					self.enterDialogue() # convo 2 upon entering hallway, enters battle when done
+					return # so that characters aren't still drawn over convo
 			elif self.stage == self.roboLabStage and self.stage.battlesCompleted == 0:
 				self.enterDialogue() # convo 4 upon entering robotics lab for the first time
+				return # so that characters aren't still drawn over convo
 			else:
 				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
 				if random.random() < probBattle:
-					self.enterBattle()
+					self.enterBattle( charles = self.gotCharles )
 		
 		self.player.draw( self.screen )
 		self.refresh.append( self.player.getRect() )
@@ -1170,7 +1183,7 @@ class Game:
 				if event.key == pygame.K_s: # show stat screen
 					self.onStatScreen = True
 					print 'show stat screen'
-					self.showStatScreen()
+					self.showStatScreen( charles = self.gotCharles)
 					return # so that characters aren't still drawn over stat screen
 				
 				# if it's the player's turn, check for other input
@@ -1336,7 +1349,10 @@ class Game:
 			self.refresh.append( self.player.getRect() )
 			
 			if self.convoNum == 2 or self.convoNum == 4:
-				self.enterBattle()
+				self.enterBattle( charles = self.gotCharles )
+			elif self.convoNum == 5:
+				self.enterBattle() # CANNOT FLEE
+				self.charlesBattle = True # triggering Charles battle
 			
 			self.convoNum += 1
 		else:
@@ -1351,8 +1367,7 @@ class Game:
 								self.fillIntroBG()
 							else:
 								self.stage.moveCamView( self.screen, self.refresh, self.camera )
-							
-							self.player.draw( self.screen )
+								self.player.draw( self.screen )
 
 							self.gameConvo.advanceText()
 						
