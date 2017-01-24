@@ -295,7 +295,7 @@ class Game:
 		otherlist = ( playerS, playerC )
 		
 		#initialize fa
-		battlePos = ( 600, 178 )
+		battlePos = ( 600, 145 ) # changed from 178
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', namePos )
@@ -307,7 +307,7 @@ class Game:
 		playerS = pygame.image.load( 'images/Zena/ZenaStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Zena/ZenaHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 500, 306 )
+		battlePos = ( 500, 240 ) # from 306
 		namePos = ( 40, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', namePos )
@@ -319,7 +319,7 @@ class Game:
 		playerS = pygame.image.load( 'images/Charles/CharlesStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Charles/CharlesHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 400, 404 )
+		battlePos = ( 400, 304 ) # changed from 404
 		namePos = ( 20, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', namePos )
