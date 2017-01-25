@@ -1026,7 +1026,9 @@ class Game:
 		elif self.charlesBattle and not self.gotCharles: # if leaving battle with Charles, unlock him
 			self.gotCharles = True
 			self.enterDialogue() # convo 6
-		
+		elif self.stage == self.macLabStage and self.stage.battlesCompleted == 1: # after first Mac lab battle
+			self.enterDialogue() # convo 8
+			return # so that characters aren't still drawn over convo
 		print 'leave battle'
 	
 	# displays the given PlayableCharacter's stats at the given position on the stat screen
@@ -1502,9 +1504,13 @@ class Game:
 		# if we're still on the battle screen
 		if not done:
 			# update screen contents
-			for edna in self.battleParticipants:
+			for edna in self.enemies:
 				edna.draw( self.screen )
 				self.refresh.append( edna.getRect() )
+			for priya in self.livePlayers:
+				priya.draw( self.screen )
+				self.refresh.append( priya.battleRect )
+			
 			
 			self.refresh.append( self.player.getRect() )
 	
@@ -1545,8 +1551,10 @@ class Game:
 			self.player.draw( self.screen )
 			self.refresh.append( self.player.getRect() )
 			
-			if self.convoNum == 2 or self.convoNum == 4:
+			if self.convoNum == 2 or self.convoNum == 7:
 				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
+			elif self.convoNum == 4:
+				self.enterBattle( charles = self.gotCharles )
 			elif self.convoNum == 5:
 				self.enterBattle( canFlee = False) # CANNOT FLEE
 				self.charlesBattle = True # triggering Charles battle
