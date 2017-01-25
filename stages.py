@@ -1020,6 +1020,7 @@ class Game:
 		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
 		
+		print 'checking for convo 8 trigger: stage', self.stage.name, 'battles', self.stage.battlesCompleted
 		if self.stage == self.hallwayStage: # if we're leaving the hallway battle, now make the hallway safe
 			self.hallwaySafe = True
 			self.enterDialogue() # enter convo 3
@@ -1484,13 +1485,14 @@ class Game:
 								self.enemies[0].select()
 							else: # if all enemies are gone
 								self.awardXP()
-								self.leaveBattle()
 								done = True
 								print 'you win the battle!'
 								
 								self.battlesWon += 1
-								print 'battles won:', self.battlesWon
 								self.stage.addBattle()
+								self.leaveBattle()
+								print 'battles won:', self.battlesWon
+								print 'for', self.stage.name, 'battle', self.stage.battlesCompleted, 'out of', self.stage.numBattles
 								if self.stage.completed():
 									print 'stage', self.stage.name, 'has been completed'
 			
