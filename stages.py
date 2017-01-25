@@ -1003,7 +1003,7 @@ class Game:
 		self.refresh.append( self.screen.get_rect() )
 	
 	# changes game state back to exploration mode
-	def leaveBattle( self, charles = False ):
+	def leaveBattle( self, win, charles = False ):
 		# stop battle music
 		self.sound.stop("battleMusic")
 		
@@ -1269,7 +1269,7 @@ class Game:
 			self.stage.fillBG( self.screen, self.refresh, eraseRect, self.camera )
 			self.refresh.append( self.player.getRect() )
 		
- 		else: # otherwise, player did not move at all, can trigger battle
+		else: # otherwise, player did not move at all, can trigger battle
 			if self.stage == self.hallwayStage:
 				if not self.hallwaySafe:
 					self.enterDialogue() # convo 2 upon entering hallway, enters battle when done
@@ -1372,7 +1372,7 @@ class Game:
 				print "YOU ESCAPED!"
 				player.escaped = False
 				done = True
-				self.leaveBattle()
+				self.leaveBattle(False, self.gotCharles)
 				return
 		
 		attacker = self.battleParticipants[self.currentBattleTurn]
@@ -1497,7 +1497,7 @@ class Game:
 								self.enemies[0].select()
 							else: # if all enemies are gone
 								self.awardXP()
-								self.leaveBattle(True)
+								self.leaveBattle(True,self.gotCharles)
 								done = True
 								print 'you win the battle!'
 								
@@ -1514,7 +1514,7 @@ class Game:
 		if not playerTurn:
 			loss = self.enemyTurn()
 			if loss: # if the enemy turn resulted in a loss, the battle is done
-				self.leaveBattle(False)
+				self.leaveBattle(False,self.gotCharles)
 				done = True
 		
 		# if we're still on the battle screen

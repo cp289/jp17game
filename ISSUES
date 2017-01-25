@@ -12,4 +12,4 @@ display
 	screen shifts up after traveling up towards a wall and then moving downwards
 	bottom 10 or so rows of pixels remain stationary in the hallway when moving side to
 		side near the bottom of the screen
-	in batte mode, cursors do not erase after the death of an enemy
+	in battle mode, characters do not erase properly after death

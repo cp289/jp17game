@@ -332,7 +332,9 @@ class PlayableCharacter( Character ):
 				AskSomeone(game),
 				TakeBreak(game),
 				ReadProject(game),
-				PrintStatements(game)
+				PrintStatements(game),
+				Flee(game),
+				RestoreTime(game)
 			]
 		self.attacking = False # whether it is this character's turn to attack
 		
@@ -779,18 +781,6 @@ class PlayableCharacter( Character ):
 		self.hp = self.totalHP # reset to full HP
 		self.movement = [ 0, 0 ] # clear out stored movement
 		self.setRandAttacks()
-
-	#chooses which 4 attacks the player stays in battle with
-	def setRandAttacks( self ):
-		# Shuffle all attacks
-		print "ATTACKS %s" %self.attacks
-		shuffledAttacks = random.sample(self.attacks, len(self.attacks))
-		print "SHUFFLED ATTACKS %s" %shuffledAttacks
-
-		# First 4 attacks are ones available
-		self.rand4Attacks = shuffledAttacks[0:4]
-		
-		'''FILL IN CODE HERE FOR CHOOSING AVAILABLE ATTACKS AFTER CODING DEBUGGINGMETHODS'''
 	
 	#chooses which 4 attacks the player stays in battle with
 	def setRandAttacks( self ):

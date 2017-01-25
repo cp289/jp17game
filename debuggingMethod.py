@@ -104,7 +104,7 @@ class ReadProject(DebuggingMethod):
 
 # Exit the battle with a random chance
 class Flee(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self, "Flee", 0, 0)
 		self.desc = "Change your major."
 	def actions(self, e, c):
@@ -116,7 +116,7 @@ class Flee(DebuggingMethod):
 
 # Restores all of the player's time
 class RestoreTime(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self, "Cancel Plans", 0, 0)
 		self.desc = "Rework your schedule. Restores your character's time fully."
 	def actions(self, e, c):
