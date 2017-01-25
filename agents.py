@@ -811,17 +811,17 @@ class PlayableCharacter( Character ):
 		# add new attack
 		newatk = None
 		if self.level == 2:
-			newatk = ReferNotes()
+			newatk = ReferNotes( game )
 		elif self.level == 4:
-			newatk = ReadCode()
+			newatk = ReadCode( game )
 		elif self.level == 5:
-			newatk = ShareCode(game)
+			newatk = ShareCode( game )
 		elif self.level == 6:
-			newatk = LookTime()
+			newatk = LookTime( game )
 		elif self.level == 8:
-			newatk = UseInternet()
+			newatk = UseInternet( game )
 		elif self.level == 9:
-			newatk = CommentLines()
+			newatk = CommentLines( game )
 			
 		if newatk != None:
 			self.addAttack(newatk)
