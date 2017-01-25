@@ -463,26 +463,24 @@ class PlayableCharacter( Character ):
 
 		elif stat == 'atk':
 			#remember character's actual stat value
-			self.origACC = self.acc
-			self.acc += boostValue
-			self.boostedStats.append("acc")
-			print "newACC%s " %self.acc
+			self.origATK = self.atk
+			self.atk += boostValue
+			self.boostedStats.append("atk")
+			print "newATK%s " %self.atk
 
 		elif stat == 'spd':
 			#remember character's actual stat value
-			self.origACC = self.acc
-			self.acc += boostValue
-			self.boostedStats.append("acc")
-			print "newACC%s " %self.acc
+			self.origSPD = self.spd
+			self.spd += boostValue
+			self.boostedStats.append("spd")
+			print "newSPD%s " %self.spd
 
 		elif stat == 'dfn':
 			#remember character's actual stat value
-			self.origACC = self.acc
-			self.acc += boostValue
-			self.boostedStats.append("acc")
-			print "newACC%s " %self.acc
-
-		self.tempStats.update( { stat: (value, self.turns + expir) } )
+			self.origDFN = self.dfn
+			self.dfn += boostValue
+			self.boostedStats.append("dfn")
+			print "newDFN%s " %self.dfn
 	
 	# returns the current position onstage of the character
 	def getStagePos( self ):
