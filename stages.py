@@ -1517,7 +1517,7 @@ class Game:
 								print 'battles won:', self.battlesWon
 								
 								if self.inBossBattle: # won the boss battle! go to end screen
-									self.gameComplete = True
+									self.enterDialogue() # trigger final congratulatory conversation
 									return
 								
 								self.stage.addBattle()
@@ -1601,6 +1601,8 @@ class Game:
 			elif self.convoNum == 12:
 				print 'SHOULD GET HERE'
 				self.enterBossBattle()
+			elif self.convoNum == 13:
+				self.gameComplete = True # congratulatory convo ends the game
 			
 			self.convoNum += 1
 		else:
