@@ -434,7 +434,8 @@ class PlayableCharacter( Character ):
 		self.hpbarBG.bottom = self.battleRect.bottom - 10
 		self.hpbarFG.right = self.battleRect.right - 71
 		self.hpbarFG.bottom = self.battleRect.bottom - 11
-		#print 'moved', self.name, 'hp bar to', self.hpbarBG
+# 		print 'moved', self.name, 'hp bar to', self.hpbarBG
+# 		print 'moved green to', self.hpbarFG
 	
 	# adds a temporary stat
 	def addTempStat( self, stat, value, expir ):
@@ -482,7 +483,7 @@ class PlayableCharacter( Character ):
 		# adjust erasing rectangle
 		self.eraseRect.topleft = newx - 10, newy - 10
 		
-		self.adjustHPbar()
+		#self.adjustHPbar()
 	
 	# change the stage position of the PlayableCharacter to the given coordinates
 	def setStagePos( self, newx, newy ):
@@ -637,6 +638,18 @@ class PlayableCharacter( Character ):
 		if self.hp > self.totalHP:
 			self.hp = self.totalHP
 	
+	# refills HP to capacity, resets HP bars
+	def fillHP( self ):
+		self.hp = self.totalHP
+		
+		# reset bars
+		self.hpbarWidth = 70
+		self.hpbarHeight = 10
+		self.hpbarBG = pygame.Rect( ( self.battleRect.right - 2 * self.hpbarWidth, \
+			self.battleRect.bottom - 2 * self.hpbarHeight ), ( self.hpbarWidth, self.hpbarHeight ) )
+		self.hpbarFG = pygame.Rect( ( self.hpbarBG.top + 1, self.hpbarBG.left + 1 ),
+			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
+	
 	# makes time bar full again
 	def fillTime( self ):
 		self.time = self.maxTime
@@ -778,8 +791,8 @@ class PlayableCharacter( Character ):
 		# store exploring position, switch to battle position
 		self.explorePos= self.pos[:]
 		self.setScreenPos( self.battlePos[0], self.battlePos[1] )
+		self.adjustHPbar()
 		
-		self.hp = self.totalHP # reset to full HP
 		self.movement = [ 0, 0 ] # clear out stored movement
 		self.setRandAttacks()
 	
@@ -813,6 +826,8 @@ class PlayableCharacter( Character ):
 	# takes the character out of battle mode
 	def leaveBattle( self ):
 		self.showHP = False
+		self.fillHP()
+		self.fillTime()
 		self.setPosition( self.explorePos[0], self.explorePos[1] )
 	
 	# draws the character at its current position on the given Surface

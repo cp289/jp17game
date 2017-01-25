@@ -1013,16 +1013,13 @@ class Game:
 		if charles == True:
 			players.append(self.cha)
 			
-		#reset current time left
-		for player in players:
-			player.fillTime()
-			print "RESET TIME TO FULL!"
-		
 		self.inBattle = False
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
 		self.stage.stepsTaken = 0 # reset steps
 		
-		self.player.leaveBattle()
+		# reset HP and time for all player characters
+		for chara in players:
+			chara.leaveBattle()
 		
 		self.enemies = [] # empty enemies list
 		self.selectedEnemyIDX = -1
@@ -1385,7 +1382,7 @@ class Game:
 				print "YOU ESCAPED!"
 				player.escaped = False
 				done = True
-				self.leaveBattle()
+				self.leaveBattle( charles = self.gotCharles )
 				return
 		
 		attacker = self.battleParticipants[self.currentBattleTurn]
@@ -1513,7 +1510,7 @@ class Game:
 								print 'you win the battle!'
 								
 								self.battlesWon += 1
-								self.leaveBattle()
+								self.leaveBattle( charles = self.gotCharles )
 								print 'battles won:', self.battlesWon
 								
 								if self.inBossBattle: # won the boss battle! go to end screen
@@ -1532,7 +1529,7 @@ class Game:
 		if not playerTurn:
 			loss = self.enemyTurn()
 			if loss: # if the enemy turn resulted in a loss, the battle is done
-				self.leaveBattle()
+				self.leaveBattle( charles = self.gotCharles )
 				done = True
 		
 		# if we're still on the battle screen
