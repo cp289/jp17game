@@ -393,7 +393,7 @@ class PlayableCharacter( Character ):
 		if battle != None:
 			self.imgBattle = battle # TEMPORARY
 			self.battleRect = self.imgBattle.get_rect().move( battlePos[0], battlePos[1] )
-			print 'battleRect', self.name, 'at', self.battleRect		
+			#print 'battleRect', self.name, 'at', self.battleRect		
 			
 			self.adjustHPbar()
 			
