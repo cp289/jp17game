@@ -42,7 +42,7 @@ class DebuggingMethod:
 	
 	# damages the character by given amount
 	def characterDamage(self, c, damage):
-		c.takeDamage(damage)
+		c.takeDamage(damage, cannotDie = True)
 		self.damageGiven = -damage
 	
 	# reports success of attack
@@ -96,8 +96,10 @@ class ReadProject(DebuggingMethod):
 		
 	def actions(self, e, c):
 		# boosts ACC and ATK for 2 turns
-		c.addTempStat( 'acc', 100, 2 )
-		c.addTempStat( 'atk', 100, 2 )
+		if c.ATKBoostTurnsLeft == 0:
+			c.ATKBoostTurnsLeft = 3
+			c.addTempStat( 'acc', 100 )
+			c.addTempStat( 'atk', 100 )
 
 
 # Not debugging methods, but always present battle actions
@@ -149,9 +151,12 @@ class ReadCode(DebuggingMethod):
 		
 	def actions(self, e, c):
 		# boosts SPD & DFN for 2 turns
-		c.addTempStat( 'spd', 100, 2 )
-		c.addTempStat( 'dfn', 100, 2 )
-
+		if c.DFNBoostTurnsLeft == 0:
+			#keep different from 3 turns for acc/atk
+			c.DFNBoostTurnsLeft = 2 
+			c.addTempStat( 'spd', 100 )
+			c.addTempStat( 'dfn', 100 )
+			
 # Level 4
 class ShareCode(DebuggingMethod):
 	def __init__(self, game):
@@ -230,32 +235,36 @@ class ShareCode(DebuggingMethod):
 # Level 5
 class LookTime(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Look at Time", 3, 600)
-		self.desc = "Can do good damage but has chance to hurt self."
+		DebuggingMethod.__init__(self,"Look at the Clock", 3, 600)
+		self.desc = "Does more damage the more time you have."
 		self.game = game
 		
 	def actions(self, e, c):
 		# has chance of damaging character...
-		if random.random() < 0.4:
-			self.characterDamage(c, self.damage)
+		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
+			#make damage lower for lower time
+			actualDamage = self.damage + self.damage*(c.time/c.maxTime)
+			print "ACTUAL DAMAGE: %s" % actualDamage
+			self.enemyDamage(e, actualDamage*(float(c.atk)/e.dfn))
 		else:
-			if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-				self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
-			else:
-				self.game.messages.send("Attack Missed", 2 )
+			print "Attack Missed."
 
 # Level 6
 class UseInternet(DebuggingMethod):
 	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Use the Internet", 5, 200)
-		self.desc = "Look up the bug to damage it somewhat."
+		self.desc = "Damage bug, but take damage if you get distracted."
 		self.game = game
 		
 	def actions(self, e, c):
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+
+			# has chance of damaging character in addition to enemy
+			if random.random() < 0.4:
+				self.characterDamage(c, self.damage)
 		else:
-			self.game.messages.send("Attack Missed", 2 )
+			print "Attack Missed."
 		
 # Level 7
 class CommentLines(DebuggingMethod):
@@ -268,8 +277,12 @@ class CommentLines(DebuggingMethod):
 		# high chance of critical hit... What is a critical hit??
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+			#critical hit chance; attacks again
+			if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
+				self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+				print "CRITICAL HIT!"
 		else:
-			self.game.messages.send("Attack Missed", 2 )
+			print "Attack Missed."
 
 def main():
 	attack=AskBruce() 

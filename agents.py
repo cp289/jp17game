@@ -155,11 +155,14 @@ class Character( Thing ):
 		self.selected = False
 	
 	# reduces the Character's HP by the given amount
-	def takeDamage( self, amt ):
+	def takeDamage( self, amt, cannotDie = False ):
 		self.hp -= amt
 		
 		if self.hp < 0: # if the damage would make the HP negative, just make it 0
-			self.hp = 0
+			if cannotDie:
+				self.hp = 1
+			else:
+				self.hp = 0
 	
 	# increases the Character's HP by the given percentage (0 <= perc < 1)
 	def takeHealth( self, perc ):
@@ -338,6 +341,16 @@ class PlayableCharacter( Character ):
 			]
 		self.attacking = False # whether it is this character's turn to attack
 		
+		#records currently boosted stats and 
+		#the turns left for the boost,
+		self.boostedStats = []
+		self.ATKBoostTurnsLeft = 0
+		self.DFNBoostTurnsLeft = 0
+		self.origATK = self.atk
+		self.origACC = self.acc
+		self.origSPD = self.spd
+		self.origDFN = self.dfn
+		
 		# variables for current player state
 		self.orientation = front
 		self.turns = 0
@@ -424,6 +437,10 @@ class PlayableCharacter( Character ):
 
 		#if escape was successful
 		self.escaped = False
+		
+		# battle records
+		self.timesKilled = 0
+		self.killCount = 0
 
 	# fixes the position of the HP bar to match the battle rect
 	def adjustHPbar( self ):
@@ -436,15 +453,35 @@ class PlayableCharacter( Character ):
 		#print 'moved', self.name, 'hp bar to', self.hpbarBG
 	
 	# adds a temporary stat
-	def addTempStat( self, stat, value, expir ):
+	def addTempStat( self, stat, boostValue ):
 		if stat == 'acc':
-			self.acc += value
+			#remember character's actual stat value
+			self.origACC = self.acc
+			self.acc += boostValue
+			self.boostedStats.append("acc")
+			print "newACC%s " %self.acc
+
 		elif stat == 'atk':
-			self.atk += value
+			#remember character's actual stat value
+			self.origACC = self.acc
+			self.acc += boostValue
+			self.boostedStats.append("acc")
+			print "newACC%s " %self.acc
+
 		elif stat == 'spd':
-			self.spd += value
+			#remember character's actual stat value
+			self.origACC = self.acc
+			self.acc += boostValue
+			self.boostedStats.append("acc")
+			print "newACC%s " %self.acc
+
 		elif stat == 'dfn':
-			self.dfn += value
+			#remember character's actual stat value
+			self.origACC = self.acc
+			self.acc += boostValue
+			self.boostedStats.append("acc")
+			print "newACC%s " %self.acc
+
 		self.tempStats.update( { stat: (value, self.turns + expir) } )
 	
 	# returns the current position onstage of the character
@@ -546,18 +583,45 @@ class PlayableCharacter( Character ):
 	
 	# updates temporary stats
 	def updateStats( self ):
-		for i in ['acc','atk','spd','def']:
-			if i in self.tempStats and self.turns >= self.tempStats[i][1]:
-				value = self.tempStats[i][0]
-				if i == 'acc':
-					self.acc -= value
-				elif i == 'atk':
-					self.atk -= value
-				elif i == 'spd':
-					self.spd -= value
-				elif i == 'dfn':
-					self.dfn -= value
-				del self.tempStats[i]
+		if len(self.boostedStats) != 0:
+			for stat in self.boostedStats:
+				if stat == 'acc':
+					print "UPDATING STAT!"
+					self.ATKBoostTurnsLeft -= 1
+					if self.ATKBoostTurnsLeft == 0:
+						print "0 TURNS LEFT!"
+						self.boostedStats.remove("atk")
+						self.boostedStats.remove("acc") 
+						self.atk = self.origATK
+						self.acc = self.origACC 
+					print "TURNS LEFT: %s" % self.ATKBoostTurnsLeft
+				elif stat == 'spd':
+					print "UPDATING STAT!"
+					self.DFNBoostTurnsLeft -= 1
+					if self.DFNBoostTurnsLeft == 0:
+						print "0 TURNS LEFT!"
+						self.boostedStats.remove("dfn")
+						self.boostedStats.remove("spd") 
+						self.dfn = self.origDFN
+						self.spd = self.origSPD
+					print "TURNS LEFT: %s" % self.DFNBoostTurnsLeft
+	
+	# 
+	def leaveBattleStatsReset( self ):
+			if len(self.boostedStats) != 0:
+				for stat in self.boostedStats:
+					if stat == 'acc':
+						self.boostedStats.remove("atk")
+						self.boostedStats.remove("acc")	
+						self.atk = self.origATK
+						self.acc = self.origACC		
+						self.ATKBoostTurnsLeft = 0
+					elif stat == 'spd':
+						self.boostedStats.remove("spd")
+						self.boostedStats.remove("dfn")	
+						self.spd = self.origSPD
+						self.dfn = self.origDFN
+						self.DFNBoostTurnsLeft = 0
 	
 	# updates the character's position to move along its current trajectory
 	# returns whether the character moved
@@ -762,6 +826,10 @@ class PlayableCharacter( Character ):
 			
 		if newatk != None:
 			self.addAttack(newatk)
+			
+		# max of 900 experience points
+		if self.level == 10:
+			self.xp = 900
 	
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view
@@ -813,6 +881,10 @@ class PlayableCharacter( Character ):
 	def leaveBattle( self ):
 		self.showHP = False
 		self.setPosition( self.explorePos[0], self.explorePos[1] )
+		self.atk = self.origATK
+		self.spd = self.origSPD
+		self.acc = self.origACC
+		self.dfn = self.origDFN
 	
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar

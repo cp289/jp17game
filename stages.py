@@ -189,6 +189,8 @@ class Game:
 		
 		# variables for battle mode
 		self.battlesWon = 0
+		self.battlesLost = 0
+		self.timesFled = 0
 		self.battleParticipants = [] # list to loop through for battle turns
 		self.currentBattleTurn = -1 # stores index of current turn within battleParticipants
 		self.livePlayers = [] # stores players who are currently alive so that enemies can choose targets easily
@@ -1021,6 +1023,7 @@ class Game:
 			
 		#reset current time left
 		for player in players:
+			player.leaveBattleStatsReset()
 			player.fillTime()
 			print "RESET TIME TO FULL!"
 		
@@ -1302,6 +1305,8 @@ class Game:
 		else:
 			print '--died: ' + target.name
 			
+			target.timesKilled += 1
+			
 			self.battleParticipants.remove( target )
 			self.livePlayers.remove( target )
 			
@@ -1357,12 +1362,14 @@ class Game:
 	# for wins: awards the currently stored amount of XP to all player characters who are still alive
 	def awardXP( self ) :
 		for chara in self.livePlayers:
-			chara.increaseXP( self.storedPoints )
-			
-			# check for leveling up
-			if chara.xp >= chara.level * 100:
-				chara.levelUp(self)
-				print 'leveled up', chara.name, 'to level', chara.level
+			#level cap is 10
+			if chara.level != 10:
+				chara.increaseXP( self.storedPoints )
+				# check for leveling up
+				if chara.xp >= chara.level * 100:
+					chara.levelUp(self)
+					print 'leveled up', chara.name, 'to level', chara.level
+
 	
 	# parses keyboard input for battle mode and updates screen contents
 	def updateBattle( self ):
@@ -1466,6 +1473,27 @@ class Game:
 						if self.dashboard.attack().timeNeeded > attacker.time:
 							print "NOT ENOUGH TIME!"
 							return
+						#don't allow stat-boost stacking
+						if self.dashboard.attack().name == "Read Over Project":
+							if attacker.ATKBoostTurnsLeft != 0:
+								print "STAT ALREADY BOOSTED!"
+								return
+							if self.dashboard.attack().name == "Read Code":
+								if attacker.DFNBoostTurnsLeft != 0:
+									print "STAT ALREADY BOOSTED!"
+									return          
+						
+						#don't allow restoring full HP
+						if self.dashboard.attack().name == "Take a Break":
+							if attacker.hp == attacker.totalHP:
+								print "HP IS ALREADY FULL!"
+								return
+								
+						#don't allow restoring full time
+						if self.dashboard.attack().name == "Cancel Plans":
+							if attacker.time == attacker.maxTime:
+								print "TIME IS ALREADY FULL!"
+								return
 
 						target = self.enemies[self.selectedEnemyIDX]
 						
@@ -1480,6 +1508,8 @@ class Game:
 						# if attack killed target
 						if target.isDead():
 							print '--died: ' + target.name
+							
+							attacker.killCount += 1
 							
 							toRemove = self.enemies.pop( self.selectedEnemyIDX )
 							self.battleParticipants.remove( toRemove )
@@ -1516,6 +1546,7 @@ class Game:
 		if not playerTurn:
 			loss = self.enemyTurn()
 			if loss: # if the enemy turn resulted in a loss, the battle is done
+				self.battlesLost += 1
 				self.leaveBattle(False,self.gotCharles)
 				done = True
 		
