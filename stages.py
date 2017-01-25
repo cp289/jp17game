@@ -1582,10 +1582,8 @@ class Game:
 				self.player.draw( self.screen )
 				self.refresh.append( self.player.getRect() )
 			
-			if self.convoNum == 2 or self.convoNum == 7:
+			if self.convoNum == 2 or self.convoNum == 4 or self.convoNum == 7:
 				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
-			elif self.convoNum == 4:
-				self.enterBattle( charles = self.gotCharles )
 			elif self.convoNum == 5:
 				self.enterBattle( canFlee = False) # CANNOT FLEE
 				self.charlesBattle = True # triggering Charles battle
