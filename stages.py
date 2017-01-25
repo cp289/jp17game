@@ -269,7 +269,6 @@ class Game:
 		playerF = pygame.image.load( 'images/Melody/Walk/Down/MelodyDownStand.png' ).convert_alpha()
 		playerB = pygame.image.load( 'images/Melody/Walk/Up/MelodyUpStand.png' ).convert_alpha()
 		playerS = pygame.image.load( 'images/Melody/MelodyStatPic.png' ).convert_alpha()
-		#playerBattle = pygame.image.load( 'images/Melody/MelodyBattleSprite.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Melody/MelodyHead.png" ).convert_alpha()
 		standlist = ( playerF, playerB, playerL, playerR )
 		walkF = 'images/Melody/Walk/Down/MelodyDownWalk'
@@ -277,7 +276,7 @@ class Game:
 		walkL = 'images/Melody/Walk/Left/MelodyLeftWalk'
 		walkR = 'images/Melody/Walk/Right/MelodyRightWalk'
 		walklist = ( walkF, walkB, walkL, walkR )
-		battlelist = ( pygame.image.load( 'images/Melody/Attack/MelodyIdle0.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = 'images/Melody/Attack/MelodyIdle'
 		attacklist = None
 		dielist = None
 		otherlist = ( playerS, playerC )
@@ -295,7 +294,7 @@ class Game:
 		
 		standlist = None
 		walklist = None
-		battlelist = ( pygame.image.load( 'images/Fatimah/Attack/FatimahIdle0.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = 'images/Fatimah/Attack/FatimahIdle'
 		attacklist = None
 		dielist = None
 		playerS = pygame.image.load( 'images/Fatimah/FatimahStatPic.png' ).convert_alpha()
@@ -311,7 +310,7 @@ class Game:
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
 		# initialize zen
-		battlelist = ( pygame.image.load( 'images/Zena/Attack/ZenaIdle0.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = 'images/Zena/Attack/ZenaIdle'
 		playerS = pygame.image.load( 'images/Zena/ZenaStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Zena/ZenaHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
@@ -323,7 +322,7 @@ class Game:
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
 		# initialize cha
-		battlelist = ( pygame.image.load( 'images/Charles/Attack/CharlesIdle0.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = 'images/Charles/Attack/CharlesIdle'
 		playerS = pygame.image.load( 'images/Charles/CharlesStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Charles/CharlesHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
@@ -1538,6 +1537,10 @@ class Game:
 			for edna in self.enemies:
 				edna.draw( self.screen )
 				self.refresh.append( edna.getRect() )
+			
+			# updating players requires two loops, otherwise erasures mess up characters already drawn
+			for priya in self.livePlayers:
+				self.stage.fillBattleBG( self.screen, priya.battleRect ) # erase previous frame of animation
 			for priya in self.livePlayers:
 				priya.draw( self.screen )
 				self.refresh.append( priya.battleRect )

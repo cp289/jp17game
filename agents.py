@@ -284,13 +284,13 @@ class PlayableCharacter( Character ):
 	# creates a new PlayableCharacter with the given position, images, and name
 	# the given image list should contain six lists: standing, walking, battle, attacking, dying, and other
 	# the standing list contains the standing images in the order: front, back, left, right
-	# the walking, attacking, and dying lists are animation frames in orders
-	# the battle list contains two frames for idle, and two frames for taking damage
+	# the walking, attacking, and dying lists are animation frames in order
+	# battle is just the base string for idle battle frames
 	# the other list contains: status, conversation heads
 	# all images for an animation should be the same size
 	# all stats and growth rates are given a default value, use setAllStats and setAllGR to specialize
 	def __init__( self, pos, battlePos, imglist, name, namePos, stagePos = None ):
-		Character.__init__( self, pos, imglist[2], name ) # call parent constructor
+		Character.__init__( self, pos, imglist[5][0], name ) # call parent constructor
 		
 		# self.pos is location on screen
 		self.battlePos = [ battlePos[0], battlePos[1] ] # location on screen when in battle mode
@@ -336,7 +336,6 @@ class PlayableCharacter( Character ):
 				Flee(),
 				RestoreTime()
 			]
-		self.attacking = False # whether it is this character's turn to attack
 		
 		# variables for current player state
 		self.orientation = front
@@ -386,20 +385,23 @@ class PlayableCharacter( Character ):
 				walkingRList.append( ( walkingR + str( i ) + '.png', 0.1 ) )
 			self.walkingRight = pyganim.PygAnimation( walkingRList )
 			
-			self.walkingAnim = self.walkingForward
+			self.walkingAnim = self.walkingForward # stores walking animation that should currently play
 		
+		# battle: the base string for idle battle images
 		battle = imglist[2]
 		self.battleRect = None
 		if battle != None:
-			self.imgBattle = battle # TEMPORARY
-			self.battleRect = self.imgBattle.get_rect().move( battlePos[0], battlePos[1] )
-			#print 'battleRect', self.name, 'at', self.battleRect		
+			# make idle battle animation
+			battleIdleList = [ ( battle + '0.png', 0.5 ), ( battle + '1.png', 0.5 ) ]
+			self.battleIdle = pyganim.PygAnimation( battleIdleList )
 			
+			battleDmgList = [ ( battle + '0Dmg.png', 0.5 ), ( battle + '1Dmg.png', 0.5 ) ]
+			self.battleDmg = pyganim.PygAnimation( battleDmgList )
+			
+			self.battleAnim = self.battleIdle # stores battle animation that should currently play
+			
+			self.battleRect = pygame.Rect( ( battlePos[0], battlePos[1] ), ( 270, 200 ) )
 			self.adjustHPbar()
-			
-# 				battleReady = battle[0:2] # first two images are for idle
-# 				'''make pyganim'''
-# 				battleDamage = battle[2:] # last two images are for taking damage
 		
 		attacking = imglist[3]
 		if attacking != None:
@@ -411,14 +413,19 @@ class PlayableCharacter( Character ):
 			pass
 			'''make pyganim'''
 		
+		# variables to determine which battle animation should be playing
+		self.takingDamage = 0 # means not taking damage
+		self.attacking = False
+		self.dying = False
+		
 		other = imglist[5]
-		if other[0] != None:
-			self.imgStatus = other[0]
+		#if other[0] != None:
+		self.imgStatus = other[0]
 			
 		self.hasimgConvo = False
-		if other[1] != None:
-			self.imgConvo = other[1]
-			self.hasimgConvo = True
+		#if other[1] != None:
+		self.imgConvo = other[1]
+		self.hasimgConvo = True
 
 		#if you have the option to flee battle; true by default
 		self.canFlee = True
@@ -632,6 +639,18 @@ class PlayableCharacter( Character ):
 			else:
 				return False
 	
+	
+	
+	# reduces the PlayableCharacter's HP by the given amount
+	def takeDamage( self, amt ):
+		self.hp -= amt
+		
+		if self.hp < 0: # if the damage would make the HP negative, just make it 0
+			self.hp = 0
+		
+		self.takingDamage = 5
+		self.battleAnim = self.battleDmg
+	
 	# raise HP by percentage (value between 0 & 1)
 	def raiseHP( self, perc ):
 		self.hp += self.totalHP * perc
@@ -786,7 +805,9 @@ class PlayableCharacter( Character ):
 			self.canFlee = True
 		
 		self.showHP = True
-		self.image = self.imgBattle
+		self.battleAnim = self.battleIdle
+		self.battleIdle.play()
+		self.battleDmg.play()
 		
 		# store exploring position, switch to battle position
 		self.explorePos= self.pos[:]
@@ -829,6 +850,11 @@ class PlayableCharacter( Character ):
 		self.fillHP()
 		self.fillTime()
 		self.setPosition( self.explorePos[0], self.explorePos[1] )
+		
+		# stop animations
+		self.battleIdle.stop()
+		self.battleDmg.stop()
+		'''REMEMBER TO STOP ATTACKING AND DYING ANIMATION HERE TOO'''
 	
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar
@@ -850,8 +876,15 @@ class PlayableCharacter( Character ):
 				
 				Character.draw( self, screen )
 		else: # draw in battle mode
-			Character.draw( self, screen )
-			#screen.blit( self.imgBattle, self.battleRect ) # DOES NOT DRAW HEALTH BAR
+			self.battleAnim.blit( screen, self.battlePos )
+			
+			# stop showing animation for taking damage after some time
+			if self.takingDamage > 0:
+				self.takingDamage -= 1
+				
+				if self.takingDamage == 0:
+					self.battleAnim = self.battleIdle
+			#Character.draw( self, screen )
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
