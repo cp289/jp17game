@@ -289,7 +289,7 @@ class PlayableCharacter( Character ):
 	# the other list contains: status, conversation heads
 	# all images for an animation should be the same size
 	# all stats and growth rates are given a default value, use setAllStats and setAllGR to specialize
-	def __init__( self, pos, battlePos, imglist, name, namePos, stagePos = None ):
+	def __init__( self, pos, battlePos, imglist, name, game, namePos, stagePos = None ):
 		Character.__init__( self, pos, imglist[2], name ) # call parent constructor
 		
 		# self.pos is location on screen
@@ -329,12 +329,10 @@ class PlayableCharacter( Character ):
 		
 		# initialize level 1 attacks
 		self.attacks = [
-				AskSomeone(),
-				TakeBreak(),
-				ReadProject(),
-				PrintStatements(),
-				Flee(),
-				RestoreTime()
+				AskSomeone(game),
+				TakeBreak(game),
+				ReadProject(game),
+				PrintStatements(game)
 			]
 		self.attacking = False # whether it is this character's turn to attack
 		

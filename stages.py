@@ -13,6 +13,7 @@ from attackChooser import *
 from sound import *
 import conversation
 from main import exitGame
+from message import Message, MessageDisplay
 
 # some useful variables for the rest of this file
 back, front, left, right, none = range( 5 )
@@ -240,6 +241,9 @@ class Game:
 		self.initConvo()
 		self.convoNum = 0
 		
+		# init Message object
+		self.messages = MessageDisplay(self.screen)
+		
 		# load sound object
 		self.sound = sound
 		
@@ -279,7 +283,7 @@ class Game:
 		battlePos = ( 590, 50 )
 		namePos = ( 25, -1 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', namePos )
+		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', self, namePos )
 		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 7 ) )
 		# total HP, ATK, DFN, SPD, ACC, time
 		self.mel.setAllGR( ( 0.8, 0.9, 0.85, 0.75, 0.7 ) )
@@ -298,7 +302,7 @@ class Game:
 		battlePos = ( 490, 145 ) # changed from 178
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', namePos )
+		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', self, namePos)
 		self.fa.setAllStats( ( 400, 44, 54, 51, 50, 6 ) )
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
@@ -310,7 +314,7 @@ class Game:
 		battlePos = ( 390, 240 ) # from 306
 		namePos = ( 40, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', namePos )
+		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', self, namePos )
 		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 9 ) )
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
@@ -322,7 +326,7 @@ class Game:
 		battlePos = ( 290, 304 ) # changed from 404
 		namePos = ( 20, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', namePos )
+		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', self, namePos )
 		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 7 ) )
 		self.cha.setAllGR( ( 0.75, 0.7, 0.8, 0.9, 0.85 ) )
 		
@@ -332,28 +336,28 @@ class Game:
 		#initalize chaEvil
 		playerC = pygame.image.load( "images/Charles/PossessedCharles.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		namePos = ( 9, 0 )
+		namePos = [ 9, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.chaEvil = agents.SpeakingCharacter( initpos, playerC, 'Charles?', namePos )
 		
 		#initialize bru
 		playerC = pygame.image.load( "images/Bruce/BruceHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		namePos = ( 33, 0 )
+		namePos = [ 33, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.bru = agents.SpeakingCharacter( initpos, playerC, 'Bruce', namePos )
 		
 		#initialize bruEvil
 		playerC = pygame.image.load( "images/Bruce/BruceHeadEvil.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		namePos = ( 24, 0 )
+		namePos = [ 24, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.bruEvil = agents.SpeakingCharacter( initpos, playerC, 'Bruce?', namePos )
 		
 		#initialize NPE
 		playerC = pygame.image.load( "images/bugs/BossBugSilhouette.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		namePos = ( 44, 0 )
+		namePos = [ 44, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.NPE = agents.SpeakingCharacter( initpos, playerC, 'NPE', namePos )
 		
@@ -361,19 +365,19 @@ class Game:
 		
 		#initialize stu1
 		otherlist = ( playerS, playerC )
-		namePos = ( 1, 0 )
+		namePos = [ 1, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.stu1 = agents.SpeakingCharacter( initpos, playerC, 'Student_1', namePos )
 		
 		#initialize stu2
 		otherlist = ( playerS, playerC )
-		namePos = ( 1, 0 )
+		namePos = [ 1, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.stu2 = agents.SpeakingCharacter( initpos, playerC, 'Student_2', namePos )
 		
 		#initialize CSC
 		otherlist = ( playerS, playerC )
-		namePos = ( 15, 0 )
+		namePos = [ 15, 0 ]
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.CSC = agents.SpeakingCharacter( initpos, playerC, 'CS_Child', namePos )
 		
@@ -957,6 +961,9 @@ class Game:
 		self.stage.fillBattleBG( self.screen )
 		self.refresh.append( self.screen.get_rect() )
 		
+		# config messages
+		self.messages.setBackground(self.stage.battleBG)
+		
 		# play battle music
 		self.sound.stop('explora')
 		self.sound.play("battleMusic", -1 )
@@ -999,6 +1006,14 @@ class Game:
 	def leaveBattle( self, charles = False ):
 		# stop battle music
 		self.sound.stop("battleMusic")
+		
+		# play win music
+		if win:
+			self.sound.play("win")
+			while self.sound.busy():
+				pass
+			
+		# return to exploration music
 		self.sound.play('explora', -1)
 		
 		players = [self.mel, self.fa, self.zen]
@@ -1108,7 +1123,7 @@ class Game:
 			self.updateExplore()
 		
 		pygame.display.update( self.refresh )
-		
+		self.messages.update()
 		# clear out the refresh rects
 		self.refresh = []
 		
@@ -1476,12 +1491,13 @@ class Game:
 							eraseRect.width += 12
 							eraseRect.height += 12
 							self.stage.fillBattleBG( self.screen, eraseRect )
+							pygame.display.update(eraseRect)
 						
 							if len( self.enemies ) != 0: # if still enemies, reselect first one
 								self.enemies[0].select()
 							else: # if all enemies are gone
 								self.awardXP()
-								self.leaveBattle()
+								self.leaveBattle(True)
 								done = True
 								print 'you win the battle!'
 								
@@ -1498,7 +1514,7 @@ class Game:
 		if not playerTurn:
 			loss = self.enemyTurn()
 			if loss: # if the enemy turn resulted in a loss, the battle is done
-				self.leaveBattle()
+				self.leaveBattle(False)
 				done = True
 		
 		# if we're still on the battle screen
@@ -1513,6 +1529,8 @@ class Game:
 			
 			
 			self.refresh.append( self.player.getRect() )
+			for p in self.battleParticipants:
+				self.refresh.append( p.hpbarBG )
 	
 	# parses keyboard input for stat screen mode and updates screen contents
 	def updateStatScreen( self ):

@@ -4,9 +4,9 @@
 # Note: stats should not be zero as this will likely cause division by zero errors.
 
 import pygame, random
+from message import Message, MessageDisplay
 
-class DebuggingMethod:
-	
+class DebuggingMethod:	
 	def __init__(self, name, time, damage):
 		self.name = name
 		
@@ -18,6 +18,7 @@ class DebuggingMethod:
 		
 		self.damageGiven = 0
 		
+	# executes attack
 	def attack(self, enemy, character): # Needs to be tested!
 		# reset damage given
 		self.damageGiven = 0
@@ -34,62 +35,64 @@ class DebuggingMethod:
 #			if random.random() < 0.5+(character.acc-enemy.spd)/(2*1000): # What should the highest value be for a stat?
 #				enemy.takeDamage(self.damage*(character.atk/enemy.dfn))  # Likely to cause problems... adjust scale factor later.
 	
+	# damages the enemy by given amount
 	def enemyDamage(self, e, damage):
 		self.damageGiven = damage
 		e.takeDamage(damage)
 	
+	# damages the character by given amount
 	def characterDamage(self, c, damage):
 		c.takeDamage(damage)
 		self.damageGiven = -damage
 	
+	# reports success of attack
 	def report(self):
 		print "Used attack " + self.name + ". Damage: " + str(self.damageGiven) + "\n"
 	
+	# carries out actions defined in each attack object
 	def actions(self, e, c):
 		pass
 
 # level 1 attacks
 class AskSomeone(DebuggingMethod):
-	def __init__(self):
-		DebuggingMethod.__init__(self,"Ask Someone", 4, 500)
+	def __init__(self,game):
+		DebuggingMethod.__init__(self,"Ask Someone", 4, 500) # affects all bugs?? No. Why would we select a single one?
 		self.desc = "Ask for help to damage a bug."
+		self.game = game
 		
 	def actions(self, e, c):
-		#if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-		self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
-		#else:
-			#print "Attack Missed."
-		
+		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
+			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+		else:
+			self.game.messages.send("Attack Missed", 2 )
+			
 class PrintStatements(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Use Print Statements", 3, 300)
 		self.desc = "May do decent damage to one bug."
+		self.game = game
 		
 	def actions(self, e, c):
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 		else:
-			print "Attack Missed."
-		
-	def actions(self, e, c):
-		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
-		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed", 2 )
 		
 class TakeBreak(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Take a Break", 3, 0)
 		self.desc = "Restores 40% of HP."
+		self.game = game
 		
 	def actions(self, e, c):
 		# Restore 40% max health.
 		c.raiseHP(0.4)
 	
 class ReadProject(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Read Over Project", 2, 0)
 		self.desc = "Boosts ACC and ATK for 2 turns."
+		self.game = game
 		
 	def actions(self, e, c):
 		# boosts ACC and ATK for 2 turns
@@ -126,21 +129,23 @@ class RestoreTime(DebuggingMethod):
 
 # Level 2
 class ReferNotes(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Refer to Notes", 1, 100)
 		self.desc = "Helps you damage bug a bit."
+		self.game = game
 		
 	def actions(self, e, c):
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed", 2 )
 
 # Level 3
 class ReadCode(DebuggingMethod):
-	def __init__(self):
-		DebuggingMethod.__init__(self,"Read Code", 2, 0)
+	def __init__(self,game):
+		DebuggingMethod.__init__(self,"Read Code", 2, 0) # damage???
 		self.desc = "Boosts SPD and DEF for 2 turns."
+		self.game = game
 		
 	def actions(self, e, c):
 		# boosts SPD & DFN for 2 turns
@@ -174,7 +179,7 @@ class ShareCode(DebuggingMethod):
 								   ( 2 * rad + 2, 2 * rad + 2 ) )
 		self.game.stage.fillBattleBG( self.game.screen, eraseRect )
 		
-	def oldCursor(self):
+	def oldCursor(self,game):
 		prev = self.game.enemies[self.game.selectedEnemyIDX]
 		rad = 10
 		prev.deselect()
@@ -224,9 +229,10 @@ class ShareCode(DebuggingMethod):
 		
 # Level 5
 class LookTime(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Look at Time", 3, 600)
 		self.desc = "Can do good damage but has chance to hurt self."
+		self.game = game
 		
 	def actions(self, e, c):
 		# has chance of damaging character...
@@ -236,32 +242,34 @@ class LookTime(DebuggingMethod):
 			if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 				self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 			else:
-				print "Attack Missed."
+				self.game.messages.send("Attack Missed", 2 )
 
 # Level 6
 class UseInternet(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Use the Internet", 5, 200)
 		self.desc = "Look up the bug to damage it somewhat."
+		self.game = game
 		
 	def actions(self, e, c):
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed", 2 )
 		
 # Level 7
 class CommentLines(DebuggingMethod):
-	def __init__(self):
+	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Comment Out Lines", 6, 700)
 		self.desc = "Does high damage and has high critical hit chance."
+		self.game = game
 		
 	def actions(self, e, c):
 		# high chance of critical hit... What is a critical hit??
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed", 2 )
 
 def main():
 	attack=AskBruce() 
