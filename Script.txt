@@ -122,8 +122,8 @@ Charles: Cool, thanks! So what should we do now?
 Fatimah: Well, we are the only ones awake and equipped to take out the baddies.
 Melody: So that means we have some debugging to do.
 Fatimah: And some keys to collect!
-Zena: Let's do this!
-Charles: Right!
+Zena: It looks like this room is pretty clear for now. We should head to the Mac lab.
+Charles: Alright, let's go!
 [END]
 
 Convo 7: (Mac/CS151 Lab) (Pre-first battle)
