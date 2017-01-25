@@ -26,7 +26,7 @@ class DebuggingMethod:
 		# perform desired attack actions
 		self.actions(enemy, character)
 		
-		self.report()
+		self.report(character)
 		
 		# decrease time
 		character.takeTime(self.timeNeeded)
@@ -46,8 +46,8 @@ class DebuggingMethod:
 		self.damageGiven = -damage
 	
 	# reports success of attack
-	def report(self):
-		print "Used attack " + self.name + ". Damage: " + str(self.damageGiven) + "\n"
+	def report(self,c):
+		print c.name+" used attack " + self.name + ". Damage: " + str(self.damageGiven) + "\n"
 	
 	# carries out actions defined in each attack object
 	def actions(self, e, c):

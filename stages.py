@@ -992,8 +992,7 @@ class Game:
 		
 		# create dashboard
 		self.dashboard = AttackChooser(self.screen)
-		self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
-		self.dashboard.draw()
+		self.dashboard.config(self.livePlayers[self.currentBattleTurn])
 		
 		print 'enter battle'
 		
@@ -1307,7 +1306,7 @@ class Game:
 			self.livePlayers.remove( target )
 			
 			# erase killed target
-			eraseRect = target.getRect()
+			eraseRect = target.battleRect
 			eraseRect.width += 12
 			eraseRect.height += 12
 			self.stage.fillBattleBG( self.screen, eraseRect )
@@ -1316,6 +1315,9 @@ class Game:
 			# if indices are now off (which happens when the attacker is the last in the participant list)
 			if self.currentBattleTurn == len( self.battleParticipants ):
 				self.currentBattleTurn = 0
+				p = self.battleParticipants[self.currentBattleTurn]
+				if p.getType() == 'PlayableCharacter':
+					self.dashboard.config(p)
 		
 		if len( self.livePlayers ) == 0:
 			print 'you lose the battle!'
@@ -1328,7 +1330,8 @@ class Game:
 # 		prev = self.battleParticipants[self.currentBattleTurn]
 # 		if prev.getType() == 'PlayableCharacter':
 # 			prev.attacking = False
-		
+		print [ i.name for i in self.battleParticipants ]
+		print [ i.name for i in self.livePlayers ]
 		# pass on battle turn
 		self.currentBattleTurn += 1
 		if self.currentBattleTurn > len( self.battleParticipants ) - 1: # wrap around to front of list
@@ -1343,7 +1346,6 @@ class Game:
 			
 			# reconfigure dashboard
 			self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
-			self.dashboard.draw() # is this necessary?
 		
 # 		next = self.battleParticipants[self.currentBattleTurn]
 # 		if next.getType() == 'PlayableCharacter':
