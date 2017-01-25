@@ -1263,6 +1263,9 @@ class Game:
 				if not self.hallwaySafe:
 					self.enterDialogue() # convo 2 upon entering hallway, enters battle when done
 					return # so that characters aren't still drawn over convo
+				elif self.charlesBattle and self.key2Battle: # if both story battles in Davis have happened
+					self.enterDialogue() # convo 11, which leads to the final boss battle
+					return # so that characters aren't still drawn over convo
 			elif self.stage == self.roboLabStage and self.stage.battlesCompleted == 0:
 				self.enterDialogue() # convo 4 upon entering robotics lab for the first time
 				return # so that characters aren't still drawn over convo
@@ -1577,6 +1580,9 @@ class Game:
 			elif self.convoNum == 9:
 				self.enterBattle( charles = True, canFlee = False ) # CANNOT FLEE
 				self.key2Battle = True # triggering battle for key 2
+			elif self.convoNum == 11:
+				print 'ENTER FINAL BOSS BATTLE'
+				'''ENTER FINAL BOSS BATTLE HERE'''
 			
 			self.convoNum += 1
 		else:
