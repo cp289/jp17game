@@ -58,6 +58,11 @@ def showStartScreen( screen, buttons ):
 	
 	pygame.display.update()
 
+# draws game end screen
+def showEndScreen( screen ):
+	screen.fill( white )
+	pygame.display.update()
+
 def exitGame():
 	print('cleaning up...')
 	d = os.path.dirname(os.path.realpath(__file__))
@@ -142,31 +147,11 @@ def main():
 	
 	game.enterHallwayStageRight()
 	
-	'''
-	just load all stages to begin with (probably put a loading screen on while that's going)
-	
-	enter hallway stage
-	
-	run a loop with just update
-	within update, if you enter another room, just call the enter for that stage
-	just keep going...
-	
-	in beginning: macLabUnlocked = False
-	if you walk into the door, trigger dialogue with Kimberly
-	if you walk into the robotics lab, call enterRoboLabStage
-	
-	'''
-	
-	# run a loop for the robotics lab
-	while 1:
+	# loop for the rest of the game
+	while not game.gameComplete:
 		game.update()
-	'''put the above loop inside another loop for while the stage is not finished'''
 	
-	# when that loop is done, load stage 2
-	
-	# etc
-	
-	# exit option for end screen?
+	showEndScreen( screen )
 	
 	# after game end, keep screen until user closes window
 	while 2:

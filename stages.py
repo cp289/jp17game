@@ -179,6 +179,9 @@ class Game:
 		self.gotCharles = False
 		self.charlesBattle = False # whether the battle with Charles' bugs has been triggered
 		self.key2Battle = False # whether the battle for the second key has been triggered
+		self.gotKey2 = False
+		self.inBossBattle = False
+		self.gameComplete = False # used by main.py to determine when to stop calling update
 		
 		self.mel = None
 		self.fa = None
@@ -198,6 +201,8 @@ class Game:
 		
 		self.enemies = [] # start out with no enemies, because not in battle
 		self.selectedEnemyIDX = -1 # index of current selected enemy
+		bossBugIMGorig = pygame.image.load( 'images/bugs/Boss Bug.png' ).convert_alpha()
+		self.bossBugIMG = pygame.transform.scale( bossBugIMGorig, ( 283, 262 ) )
 		
 		self.camera = pygame.Rect( ( 0, 0 ), self.screenSize ) # represents current section of stage in view
 		self.stage = None # set by calling the methods for entering stages
@@ -220,6 +225,9 @@ class Game:
 		ratio = float( self.screenSize[0] ) / melRoomBGorig.get_width()
 		adjustedHeight = int( melRoomBGorig.get_height() * ratio )
 		self.melRoomBG = pygame.transform.scale( melRoomBGorig, ( self.screenSize[0], adjustedHeight ) )
+		
+		bossBattleBGorig = pygame.image.load( 'images/backgrounds/FinalRoom.png' ).convert_alpha()
+		self.bossBattleBG = pygame.transform.scale( bossBattleBGorig, self.screenSize )
 		
 		# makes boxes for the characters on the stat screen
 		offset = 20
@@ -754,11 +762,11 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1101.png' ).convert_alpha()
 						]
 
-		self.macLabStage = Stage( 'mac lab', 2, scale, bg, battleBG, bugImgs )
+		self.macLabStage = Stage( 'mac lab', 3, scale, bg, battleBG, bugImgs )
 
 		#def __init__( self, pos, dim, room ):
 		doorToHallway = agents.Door( (  235 * scale, 800 * scale ), \
-			( 50 * scale, 10 * scale ), 'hallway' )
+			( 150 * scale, 10 * scale ), 'hallway' )
 		self.macLabStage.addDoor( doorToHallway )
 		
 		# create walls
@@ -1043,9 +1051,12 @@ class Game:
 		elif self.charlesBattle and not self.gotCharles: # if leaving battle with Charles, unlock him
 			self.gotCharles = True
 			self.enterDialogue() # convo 6
-		elif self.stage == self.macLabStage and self.stage.battlesCompleted == 1: # after first Mac lab battle
+		elif self.stage == self.macLabStage and self.stage.battlesCompleted == 1 and self.convoNum == 8: # after first Mac lab battle
 			self.enterDialogue() # convo 8
-			return # so that characters aren't still drawn over convo
+		elif self.key2Battle and not self.gotKey2:
+			self.gotKey2 = True
+			self.enterDialogue() # convo 10
+		
 		print 'leave battle'
 	
 	# displays the given PlayableCharacter's stats at the given position on the stat screen
@@ -1106,6 +1117,8 @@ class Game:
 
 		if self.inIntro:
 			self.fillIntroBG()
+		elif self.inBossBattle:
+			self.fillBossBattleBG()
 		else:
 			self.stage.moveCamView( self.screen, self.refresh, self.camera )
 			self.player.draw( self.screen )
@@ -1276,9 +1289,24 @@ class Game:
 				if not self.hallwaySafe:
 					self.enterDialogue() # convo 2 upon entering hallway, enters battle when done
 					return # so that characters aren't still drawn over convo
+				elif self.charlesBattle and self.key2Battle: # if both story battles in Davis have happened
+					self.enterDialogue() # convo 11, which leads to the final boss battle
+					return # so that characters aren't still drawn over convo
 			elif self.stage == self.roboLabStage and self.stage.battlesCompleted == 0:
 				self.enterDialogue() # convo 4 upon entering robotics lab for the first time
 				return # so that characters aren't still drawn over convo
+			elif self.stage == self.macLabStage:
+				if self.stage.battlesCompleted == 0:
+					self.enterDialogue() # convo 7 upon entering Mac lab for the first time
+					return # so that characters aren't still drawn over convo
+				elif self.stage.completed() and not self.key2Battle:
+					print 'story event: battle for key 2!'
+					self.enterDialogue() # convo 9 after completing Mac lab stage
+					return # so that characters aren't still drawn over convo
+				else:
+					probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
+					if random.random() < probBattle:
+						self.enterBattle( charles = self.gotCharles )
 			else:
 				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
 				if random.random() < probBattle:
@@ -1529,13 +1557,19 @@ class Game:
 								self.enemies[0].select()
 							else: # if all enemies are gone
 								self.awardXP()
-								self.leaveBattle(True,self.gotCharles)
 								done = True
 								print 'you win the battle!'
 								
 								self.battlesWon += 1
+								self.leaveBattle(True, self.gotCharles)
 								print 'battles won:', self.battlesWon
+								
+								if self.inBossBattle: # won the boss battle! go to end screen
+									self.gameComplete = True
+									return
+								
 								self.stage.addBattle()
+								print 'for', self.stage.name, 'battle', self.stage.battlesCompleted, 'out of', self.stage.numBattles
 								if self.stage.completed():
 									print 'stage', self.stage.name, 'has been completed'
 			
@@ -1559,7 +1593,6 @@ class Game:
 			for priya in self.livePlayers:
 				priya.draw( self.screen )
 				self.refresh.append( priya.battleRect )
-			
 			
 			self.refresh.append( self.player.getRect() )
 			for p in self.battleParticipants:
@@ -1596,11 +1629,12 @@ class Game:
 			
 			if self.inIntro:
 				self.fillIntroBG()
+			elif self.inBossBattle:
+				self.fillBossBattleBG()
 			else:
 				self.stage.moveCamView( self.screen, self.refresh, self.camera )
-			
-			self.player.draw( self.screen )
-			self.refresh.append( self.player.getRect() )
+				self.player.draw( self.screen )
+				self.refresh.append( self.player.getRect() )
 			
 			if self.convoNum == 2 or self.convoNum == 7:
 				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
@@ -1609,9 +1643,19 @@ class Game:
 			elif self.convoNum == 5:
 				self.enterBattle( canFlee = False) # CANNOT FLEE
 				self.charlesBattle = True # triggering Charles battle
+			elif self.convoNum == 9:
+				self.enterBattle( charles = True, canFlee = False ) # CANNOT FLEE
+				self.key2Battle = True # triggering battle for key 2
+			elif self.convoNum == 11:
+				self.convoNum += 1
+				self.enterCyberSystem()
+			elif self.convoNum == 12:
+				print 'SHOULD GET HERE'
+				self.enterBossBattle()
 			
 			self.convoNum += 1
 		else:
+			
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_c:
@@ -1621,6 +1665,8 @@ class Game:
 							#draw BG again first
 							if self.inIntro:
 								self.fillIntroBG()
+							elif self.inBossBattle:
+								self.fillBossBattleBG()
 							else:
 								self.stage.moveCamView( self.screen, self.refresh, self.camera )
 								self.player.draw( self.screen )
@@ -1629,6 +1675,67 @@ class Game:
 						
 				if event.type == pygame.QUIT:
 					exitGame()
+	
+	# fills the given rectangle (or the entire screen) with the current intro background
+	def fillBossBattleBG( self, rect = None ):
+		if rect == None:
+			self.screen.blit( self.bossBattleBG, ( 0, 0 ) )
+			self.refresh.append( self.screen.get_rect() )
+		else:
+			self.screen.blit( self.bossBattleBG, rect, rect )
+			self.refresh.append( rect )
+	
+	# sends game into CyberSystem location, triggers dialogue that leads into final boss battle
+	def enterCyberSystem( self ):
+		self.screen.blit( self.bossBattleBG, ( 0, 0 ) )
+		self.inBossBattle = True
+		print 'story event: into the CyberSystem!'
+		
+		pygame.display.update()
+		
+		print 'convo should be 12, is', self.convoNum
+		
+		self.enterDialogue() # convo 12 with NPE
+		
+		self.convoNum -= 1 # should fix issue with convoNum resulting from back-to-back dialogues
+	
+	# sends everyone into battle mode and creates final boss
+	def enterBossBattle( self ):
+		print 'ENTER BOSS BATTLE'
+		
+		# play battle music
+		self.sound.stop('explora')
+		self.sound.play("battleMusic", -1 )
+		
+		self.inBattle = True
+		self.player.enterBattle( False ) # no one is allowed to flree
+		self.fa.enterBattle( False )
+		self.zen.enterBattle( False )
+		self.cha.enterBattle( False )
+		
+		#bossBug = agents.Enemy( ( 10, 100 ), self.bossBugIMG, 'final boss', 7 )
+		bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 2 ) # just to make testing easier
+		
+		# build list of battle participants
+		self.battleParticipants= [ self.mel, self.fa, self.zen, self.cha, bossBug ]
+		self.currentBattleTurn = 0
+		self.livePlayers = [ self.mel, self.fa, self.zen, self.cha ]
+		self.enemies = [ bossBug ]
+		
+		
+		# create dashboard
+		self.dashboard = AttackChooser(self.screen)
+		self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
+		self.dashboard.draw()
+		
+		print 'enter battle'
+		
+		# reset stored points for new battle
+		self.storedPoints = 0
+		
+		self.refresh.append( self.screen.get_rect() )
+
+
 
 
 
