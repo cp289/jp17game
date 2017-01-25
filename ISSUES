@@ -1,0 +1,15 @@
+attackChooser.py
+	make attack chooser more visually appealing
+	reset cursor index to zero when switching to and from `share code' attack
+
+script
+	"my code is taking too long to compile" - in this context, it makes more sense
+		to replace "compile" with "run" or "execute". Code with a bug would probably
+		compile in the same amount of time or less time than the same program
+		without bugs.
+
+display
+	screen shifts up after traveling up towards a wall and then moving downwards
+	bottom 10 or so rows of pixels remain stationary in the hallway when moving side to
+		side near the bottom of the screen
+	in battle mode, characters do not erase properly after death

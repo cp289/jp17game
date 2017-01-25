@@ -122,30 +122,18 @@ Charles: Cool, thanks! So what should we do now?
 Fatimah: Well, we are the only ones awake and equipped to take out the baddies.
 Melody: So that means we have some debugging to do.
 Fatimah: And some keys to collect!
-Zena: Let's do this!
-Charles: Right!
+Zena: It looks like this room is pretty clear for now. We should head to the Mac lab.
+Charles: Alright, let's go!
 [END]
 
-Convo 7: (Entrance/Hallway PreBattles)
-
-Zena: Okay, I think we can cover more ground if we split up.
-Fatimah: Splitting up won't work!
-Charles: Well, mystery-solving groups split up all the time and
-\they always win in the end...
-Fatimah: We'll be better off if we don't split up. Going into battle
-\together will give us the ability to cover each other's backs while
-\we take out as many bad guys as possible.
-Melody: Alright then, here we go.
-[END]
-
-Convo 8: (Mac/CS151 Lab) (Pre-first battle)
+Convo 7: (Mac/CS151 Lab) (Pre-first battle)
 
 Melody: CS Children, we're here to save you from your bugs!
 CS_Child: I don't need saving! Bug minions, take them out!
 Zena: Byte me!
 [END]
 
-Convo 9: (Mac/CS151 Lab) (Post-Battle)
+Convo 8: (Mac/CS151 Lab) (Post-Battle)
 
 Charles: Take that, exception scum.
 CS_Child: Thanks so much!
@@ -156,13 +144,13 @@ Melody: Okay, let's move onward and debug as much
 Zena: Yeah.
 [END]
 
-Convo 10: (Mac/CS151 Lab) (Post-required number of battles)
+Convo 9: (Mac/CS151 Lab) (Post-required number of battles)
 
-Fatimah: I HEARD A BUG SAY A CHUCK NORRIS LINE!!
-Melody: ...Chuck Norris?
+Fatimah: I see the paper!!
+Melody: But there's a bug in front of it!
 [END]
 
-Convo 11: (Mac/CS151 Lab) (Post-Chuck Norris bug battle)
+Convo 10: (Mac/CS151 Lab) (Post-Chuck Norris bug battle)
 
 Fatimah: Haha! Look at that! It didn't stand a chance, faced with our awesomeness.
 Melody: Well, it was just a matter of searching Hack Overfull and--
@@ -170,7 +158,7 @@ Zena: Okay, let's get that code.
 Charles: Now we just have to give them back to Bruce.
 [END]
 
-Convo 12: Entrance/Hallway (Post-Battles, Pre-Boss)
+Convo 11: Entrance/Hallway (Post-Battles, Pre-Boss)
 
 Melody: Bruce! We found both of the codes.
 Zena: Here you go!
@@ -205,7 +193,7 @@ Charles: Sounds like a plan.
 Melody: Well then, let's do this.
 [END]
 
-Convo 13: Final Battle Arena (Neg. Version of Entrance/Hallway or Mel's Room)
+Convo 12: Final Battle Arena (Neg. Version of Entrance/Hallway or Mel's Room)
 
 Fatimah: There it is! The Null Pointer Exception!
 NPE: Ugh, I can't believe you insignificant specks have
@@ -237,7 +225,7 @@ Fatimah: Yaaaaah!!!
 Melody: Get your Error Scramblers out! We're starting!
 [END]
 
-Convo 14: Final Battle Arena [Neg. Entrance/Hallway or Melody's Room (Post-Boss)]
+Convo 13: Final Battle Arena [Neg. Entrance/Hallway or Melody's Room (Post-Boss)]
 
 NPE: NOOOOOOOOOOOOOO!!! MY KINGDOM!!! MY MINIONS!!! AAAHHHHHH.... 
 NPE: ...aahhhh...

@@ -116,9 +116,10 @@ class Character( Thing ):
 		# rects for drawing health bar
 		self.hpbarWidth = 70
 		self.hpbarHeight = 10
-		self.hpbarBG = pygame.Rect( ( pos[0], pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
-		self.hpbarFG = pygame.Rect( ( pos[0] + 1, pos[1] + self.rect.height + 1 ),
+		self.hpbarBG = pygame.Rect( ( pos[0] + self.rect.width - self.hpbarWidth, pos[1] + self.rect.height ), ( self.hpbarWidth, self.hpbarHeight ) )
+		self.hpbarFG = pygame.Rect( ( pos[0] + self.rect.width - self.hpbarWidth + 1, pos[1] + self.rect.height + 1 ),
 			( self.hpbarWidth - 2, self.hpbarHeight - 2 ) )
+		#print 'init', self.name, 'hp bar at', self.hpbarBG
 		
 		self.selected = False
 	
@@ -154,11 +155,14 @@ class Character( Thing ):
 		self.selected = False
 	
 	# reduces the Character's HP by the given amount
-	def takeDamage( self, amt ):
+	def takeDamage( self, amt, cannotDie = False ):
 		self.hp -= amt
 		
 		if self.hp < 0: # if the damage would make the HP negative, just make it 0
-			self.hp = 0
+			if cannotDie:
+				self.hp = 1
+			else:
+				self.hp = 0
 	
 	# increases the Character's HP by the given percentage (0 <= perc < 1)
 	def takeHealth( self, perc ):
@@ -179,7 +183,8 @@ class Character( Thing ):
 		if self.showHP:
 			# draw health bar background (in black)
 			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
-
+			#print 'drawing', self.name, 'hp bar at', self.hpbarBG
+			
 			# draw health bar foreground based on current HP left (if there is any)
 			if self.hp != 0:
 				fraction = float( self.hp ) / self.totalHP
@@ -248,6 +253,28 @@ class Enemy( Character ):
 		s = 'an Enemy named ' + self.name + ' with ' + str( self.hp ) + ' HP'
 		return s
 
+
+'''
+This class represents a non-playable character who only takes part in conversations.
+'''
+class SpeakingCharacter( Character ):
+	
+	# creates a new SpeakingCharacter with the given position, image, and name
+	def __init__( self, pos, img, name, namePos ):
+		if img == None: # eh
+			img = pygame.Surface( ( 100, 100 ) )
+			self.hasimgConvo = False
+		else:
+			self.hasimgConvo = True
+		Character.__init__( self, pos, img, name ) # call parent constructor
+		
+		self.namePos = namePos
+		self.imgConvo = img
+	
+	# returns the dialogue image for this character
+	def getConvoIMG( self ):
+		return self.imgConvo
+
 '''
 This class represents a character that the player can control throughout the game.
 Each character has stats, and can move around in exploring mode and attack in battle mode.
@@ -265,7 +292,7 @@ class PlayableCharacter( Character ):
 	# the other list contains: status, conversation heads
 	# all images for an animation should be the same size
 	# all stats and growth rates are given a default value, use setAllStats and setAllGR to specialize
-	def __init__( self, pos, battlePos, imglist, name, namePos, stagePos = None ):
+	def __init__( self, pos, battlePos, imglist, name, game, namePos, stagePos = None ):
 		Character.__init__( self, pos, imglist[2], name ) # call parent constructor
 		
 		# self.pos is location on screen
@@ -277,13 +304,17 @@ class PlayableCharacter( Character ):
 			self.stagePos = [ stagePos[0], stagePos[1] ]
 		self.namePos = namePos
 		
+		# fix rect, because currently it's set to match the battle pic
+		self.rect = pygame.Rect( ( self.stagePos[0], self.stagePos[1] ), ( 62, 175 ) )
+		
 		# a larger rectangle for erasing previous position, to fix issues with erasing in animation
 		self.eraseRect = self.rect.move( -10, -10 )
 		self.eraseRect.width += 20
 		self.eraseRect.height += 20
 		
 		# initialize stats
-		self.time = 6
+		self.maxTime = 6
+		self.time = self.maxTime
 		self.atk = 50
 		self.dfn = 50
 		self.spd = 50
@@ -301,12 +332,24 @@ class PlayableCharacter( Character ):
 		
 		# initialize level 1 attacks
 		self.attacks = [
-				AskSomeone(),
-				TakeBreak(),
-				ReadProject(),
-				PrintStatements()
+				AskSomeone(game),
+				TakeBreak(game),
+				ReadProject(game),
+				PrintStatements(game),
+				Flee(game),
+				RestoreTime(game)
 			]
 		self.attacking = False # whether it is this character's turn to attack
+		
+		#records currently boosted stats and 
+		#the turns left for the boost,
+		self.boostedStats = []
+		self.ATKBoostTurnsLeft = 0
+		self.DFNBoostTurnsLeft = 0
+		self.origATK = self.atk
+		self.origACC = self.acc
+		self.origSPD = self.spd
+		self.origDFN = self.dfn
 		
 		# variables for current player state
 		self.orientation = front
@@ -359,8 +402,14 @@ class PlayableCharacter( Character ):
 			self.walkingAnim = self.walkingForward
 		
 		battle = imglist[2]
+		self.battleRect = None
 		if battle != None:
 			self.imgBattle = battle # TEMPORARY
+			self.battleRect = self.imgBattle.get_rect().move( battlePos[0], battlePos[1] )
+			#print 'battleRect', self.name, 'at', self.battleRect		
+			
+			self.adjustHPbar()
+			
 # 				battleReady = battle[0:2] # first two images are for idle
 # 				'''make pyganim'''
 # 				battleDamage = battle[2:] # last two images are for taking damage
@@ -383,18 +432,56 @@ class PlayableCharacter( Character ):
 		if other[1] != None:
 			self.imgConvo = other[1]
 			self.hasimgConvo = True
+
+		#if you have the option to flee battle; true by default
+		self.canFlee = True
+
+		#if escape was successful
+		self.escaped = False
+		
+		# battle records
+		self.timesKilled = 0
+		self.killCount = 0
+
+	# fixes the position of the HP bar to match the battle rect
+	def adjustHPbar( self ):
+		# adjust health bar
+		#print self.name, 'hp bar was', self.hpbarBG
+		self.hpbarBG.right = self.battleRect.right - 70
+		self.hpbarBG.bottom = self.battleRect.bottom - 10
+		self.hpbarFG.right = self.battleRect.right - 71
+		self.hpbarFG.bottom = self.battleRect.bottom - 11
+		#print 'moved', self.name, 'hp bar to', self.hpbarBG
 	
 	# adds a temporary stat
-	def addTempStat( self, stat, value, expir ):
+	def addTempStat( self, stat, boostValue ):
 		if stat == 'acc':
-			self.acc += value
+			#remember character's actual stat value
+			self.origACC = self.acc
+			self.acc += boostValue
+			self.boostedStats.append("acc")
+			print "newACC%s " %self.acc
+
 		elif stat == 'atk':
-			self.atk += value
+			#remember character's actual stat value
+			self.origATK = self.atk
+			self.atk += boostValue
+			self.boostedStats.append("atk")
+			print "newATK%s " %self.atk
+
 		elif stat == 'spd':
-			self.spd += value
+			#remember character's actual stat value
+			self.origSPD = self.spd
+			self.spd += boostValue
+			self.boostedStats.append("spd")
+			print "newSPD%s " %self.spd
+
 		elif stat == 'dfn':
-			self.dfn += value
-		self.tempStats.update( { stat: (value, self.turns + expir) } )
+			#remember character's actual stat value
+			self.origDFN = self.dfn
+			self.dfn += boostValue
+			self.boostedStats.append("dfn")
+			print "newDFN%s " %self.dfn
 	
 	# returns the current position onstage of the character
 	def getStagePos( self ):
@@ -403,7 +490,7 @@ class PlayableCharacter( Character ):
 	# returns a tuple of this character's stats, in the following order:
 	# time, hp, attack, defense, speed, accuracy, xp, level
 	def getStats( self ):
-		return ( self.time, self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp, self.level )
+		return ( self.maxTime, self.totalHP, self.atk, self.dfn, self.spd, self.acc, self.xp, self.level )
 	
 	# returns the status image for this character
 	def getStatusIMG( self ):
@@ -429,6 +516,8 @@ class PlayableCharacter( Character ):
 		
 		# adjust erasing rectangle
 		self.eraseRect.topleft = newx - 10, newy - 10
+		
+		self.adjustHPbar()
 	
 	# change the stage position of the PlayableCharacter to the given coordinates
 	def setStagePos( self, newx, newy ):
@@ -493,18 +582,45 @@ class PlayableCharacter( Character ):
 	
 	# updates temporary stats
 	def updateStats( self ):
-		for i in ['acc','atk','spd','def']:
-			if i in self.tempStats and self.turns >= self.tempStats[i][1]:
-				value = self.tempStats[i][0]
-				if i == 'acc':
-					self.acc -= value
-				elif i == 'atk':
-					self.atk -= value
-				elif i == 'spd':
-					self.spd -= value
-				elif i == 'dfn':
-					self.dfn -= value
-				del self.tempStats[i]
+		if len(self.boostedStats) != 0:
+			for stat in self.boostedStats:
+				if stat == 'acc':
+					print "UPDATING STAT!"
+					self.ATKBoostTurnsLeft -= 1
+					if self.ATKBoostTurnsLeft == 0:
+						print "0 TURNS LEFT!"
+						self.boostedStats.remove("atk")
+						self.boostedStats.remove("acc") 
+						self.atk = self.origATK
+						self.acc = self.origACC 
+					print "TURNS LEFT: %s" % self.ATKBoostTurnsLeft
+				elif stat == 'spd':
+					print "UPDATING STAT!"
+					self.DFNBoostTurnsLeft -= 1
+					if self.DFNBoostTurnsLeft == 0:
+						print "0 TURNS LEFT!"
+						self.boostedStats.remove("dfn")
+						self.boostedStats.remove("spd") 
+						self.dfn = self.origDFN
+						self.spd = self.origSPD
+					print "TURNS LEFT: %s" % self.DFNBoostTurnsLeft
+	
+	# 
+	def leaveBattleStatsReset( self ):
+			if len(self.boostedStats) != 0:
+				for stat in self.boostedStats:
+					if stat == 'acc':
+						self.boostedStats.remove("atk")
+						self.boostedStats.remove("acc")	
+						self.atk = self.origATK
+						self.acc = self.origACC		
+						self.ATKBoostTurnsLeft = 0
+					elif stat == 'spd':
+						self.boostedStats.remove("spd")
+						self.boostedStats.remove("dfn")	
+						self.spd = self.origSPD
+						self.dfn = self.origDFN
+						self.DFNBoostTurnsLeft = 0
 	
 	# updates the character's position to move along its current trajectory
 	# returns whether the character moved
@@ -579,9 +695,13 @@ class PlayableCharacter( Character ):
 	
 	# raise HP by percentage (value between 0 & 1)
 	def raiseHP( self, perc ):
-		self.hp += self.hp * perc
+		self.hp += self.totalHP * perc
 		if self.hp > self.totalHP:
 			self.hp = self.totalHP
+	
+	# makes time bar full again
+	def fillTime( self ):
+		self.time = self.maxTime
 	
 	# setter for total HP
 	def setTotalHP( self, h ):
@@ -624,7 +744,8 @@ class PlayableCharacter( Character ):
 		self.dfn = list[2]
 		self.spd = list[3]
 		self.acc = list[4]
-		self.time = list[5]
+		self.maxTime = list[5]
+		self.time = self.maxTime
 	
 	# setter for HP growth rate
 	def setHPGR( self, hg ):
@@ -704,37 +825,65 @@ class PlayableCharacter( Character ):
 			
 		if newatk != None:
 			self.addAttack(newatk)
+			
+		# max of 900 experience points
+		if self.level == 10:
+			self.xp = 900
 	
 	# sends the character into battle mode, with full HP, a randomized set of available attacks,
 	# and orientation set to a side view
-	def enterBattle( self ):
+	def enterBattle( self, fleeEnabled ):
+		if fleeEnabled == False:
+			self.canFlee = False
+		else:
+			self.canFlee = True
+		
 		self.showHP = True
 		self.image = self.imgBattle
 		
 		# store exploring position, switch to battle position
 		self.explorePos= self.pos[:]
-		self.setPosition( self.battlePos[0], self.battlePos[1] )
+		self.setScreenPos( self.battlePos[0], self.battlePos[1] )
 		
 		self.hp = self.totalHP # reset to full HP
 		self.movement = [ 0, 0 ] # clear out stored movement
 		self.setRandAttacks()
-
+	
 	#chooses which 4 attacks the player stays in battle with
 	def setRandAttacks( self ):
 		# Shuffle all attacks
-		print "ATTACKS %s" %self.attacks
-		shuffledAttacks = random.sample(self.attacks, len(self.attacks))
-		print "SHUFFLED ATTACKS %s" %shuffledAttacks
+		# print "ATTACKS %s" %self.attacks
 
-		# First 4 attacks are ones available
-		self.rand4Attacks = shuffledAttacks[0:4]
-		
-		'''FILL IN CODE HERE FOR CHOOSING AVAILABLE ATTACKS AFTER CODING DEBUGGINGMETHODS'''
-	
+		# the list excluding flee and refill time, which are always there
+		listMinus2 = []
+		for attack in self.attacks:
+			#print "ANOTHER ATTACK"
+			if attack.name != "Cancel Plans" and attack.name != "Flee":
+				listMinus2.append(attack)
+				#print "APPENDED!"
+
+		#print "RAND ATTACKS LEN: %s " % len(listMinus2)
+
+		shuffledAttacks = random.sample(listMinus2, len(listMinus2))
+
+		# First 4 attacks are random ones available
+		self.availableAttacks = shuffledAttacks[0:4]
+
+		#add in necessary attacks
+		for attack in self.attacks:
+			if attack.name == "Cancel Plans":
+				self.availableAttacks.append(attack)
+			if attack.name == "Flee" and self.canFlee == True:
+				self.availableAttacks.append(attack)
+
 	# takes the character out of battle mode
 	def leaveBattle( self ):
 		self.showHP = False
 		self.setPosition( self.explorePos[0], self.explorePos[1] )
+		self.atk = self.origATK
+		self.spd = self.origSPD
+		self.acc = self.origACC
+		self.dfn = self.origDFN
 	
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar
@@ -757,6 +906,7 @@ class PlayableCharacter( Character ):
 				Character.draw( self, screen )
 		else: # draw in battle mode
 			Character.draw( self, screen )
+			#screen.blit( self.imgBattle, self.battleRect ) # DOES NOT DRAW HEALTH BAR
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		
@@ -779,7 +929,7 @@ class PlayableCharacter( Character ):
 		s += '\n  DFN (defense) ' + str( self.dfn )
 		s += '\n  SPD (speed) ' + str( self.spd )
 		s += '\n  ACC (accuracy) ' + str( self.acc )
-		s += '\n  time ' + str( self.time )
+		s += '\n  time ' + str( self.maxTime )
 		s += '\n XP ' + str( self.xp )
 		return s
 	
