@@ -64,6 +64,7 @@ class AttackChooser:
 				(self.descText.get_rect().w,
 				self.descText.get_rect().h)
 			)
+		self.draw()
 	
 	# draws the attack chooser
 	def draw(self): 
