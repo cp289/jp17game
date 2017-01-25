@@ -760,7 +760,7 @@ class Game:
 
 		#def __init__( self, pos, dim, room ):
 		doorToHallway = agents.Door( (  235 * scale, 800 * scale ), \
-			( 50 * scale, 10 * scale ), 'hallway' )
+			( 150 * scale, 10 * scale ), 'hallway' )
 		self.macLabStage.addDoor( doorToHallway )
 		
 		# create walls
