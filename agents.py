@@ -392,7 +392,8 @@ class PlayableCharacter( Character ):
 		self.battleRect = None
 		if battle != None:
 			self.imgBattle = battle # TEMPORARY
-			self.battleRect = self.imgBattle.get_rect().move( battlePos[0], battlePos[1] )			
+			self.battleRect = self.imgBattle.get_rect().move( battlePos[0], battlePos[1] )
+			print 'battleRect', self.name, 'at', self.battleRect		
 			
 			self.adjustHPbar()
 			
@@ -835,6 +836,7 @@ class PlayableCharacter( Character ):
 				Character.draw( self, screen )
 		else: # draw in battle mode
 			Character.draw( self, screen )
+			#screen.blit( self.imgBattle, self.battleRect ) # DOES NOT DRAW HEALTH BAR
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 		

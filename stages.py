@@ -1026,6 +1026,8 @@ class Game:
 		elif self.charlesBattle and not self.gotCharles: # if leaving battle with Charles, unlock him
 			self.gotCharles = True
 			self.enterDialogue() # convo 6
+		elif self.stage == self.macLabStage and self.stage.battlesCompleted == 1: # after first Mac lab battle
+			self.enterDialogue() # convo 8
 		
 		print 'leave battle'
 	
@@ -1259,6 +1261,9 @@ class Game:
 					return # so that characters aren't still drawn over convo
 			elif self.stage == self.roboLabStage and self.stage.battlesCompleted == 0:
 				self.enterDialogue() # convo 4 upon entering robotics lab for the first time
+				return # so that characters aren't still drawn over convo
+			elif self.stage == self.macLabStage and self.stage.battlesCompleted == 0:
+				self.enterDialogue() # convo 7 upon entering Mac lab for the first time
 				return # so that characters aren't still drawn over convo
 			else:
 				probBattle = ( self.stage.stepsTaken % 1000 ) / float( 1000 )
@@ -1502,9 +1507,12 @@ class Game:
 		# if we're still on the battle screen
 		if not done:
 			# update screen contents
-			for edna in self.battleParticipants:
+			for edna in self.enemies:
 				edna.draw( self.screen )
 				self.refresh.append( edna.getRect() )
+			for priya in self.livePlayers:
+				priya.draw( self.screen )
+				self.refresh.append( priya.battleRect )
 			
 			self.refresh.append( self.player.getRect() )
 	
@@ -1545,8 +1553,10 @@ class Game:
 			self.player.draw( self.screen )
 			self.refresh.append( self.player.getRect() )
 			
-			if self.convoNum == 2 or self.convoNum == 4:
+			if self.convoNum == 2 or self.convoNum == 7:
 				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
+			elif self.convoNum == 4:
+				self.enterBattle( charles = self.gotCharles )
 			elif self.convoNum == 5:
 				self.enterBattle( canFlee = False) # CANNOT FLEE
 				self.charlesBattle = True # triggering Charles battle
