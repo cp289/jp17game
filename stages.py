@@ -19,6 +19,7 @@ from message import Message, MessageDisplay
 back, front, left, right, none = range( 5 )
 green = ( 150, 180, 160 )
 white = ( 255, 255, 255 )
+blue = ( 0, 1, 171 )
 
 '''
 This class represents one stage/room of the game.
@@ -170,6 +171,7 @@ class Game:
 		
 		# boolean fields for game state
 		self.inBattle = False
+		self.inStoryBattle = False # whether we're currently in a story battle
 		self.holdBattle = False # whether battle screen should be held for animations to finish
 		self.inDialogue = False
 		self.onStatScreen = False
@@ -1058,6 +1060,14 @@ class Game:
 		self.selectedEnemyIDX = -1
 		self.battleParticipants = []
 		
+		if self.inStoryBattle:
+			if not win: # if a story battle has been lost
+				self.showReplayScreen()
+				self.runReplayScreen()
+				return # do not run checks below
+			else: # otherwise no longer in story battle
+				self.inStoryBattle = False
+		
 		if self.stage == self.hallwayStage: # if we're leaving the hallway battle, now make the hallway safe
 			self.hallwaySafe = True
 			self.enterDialogue() # enter convo 3
@@ -1334,8 +1344,8 @@ class Game:
 	def enemyTurn( self ):
 		# randomly select a livePlayer and attack
 		target = random.choice( self.livePlayers )
-		#self.battleParticipants[self.currentBattleTurn].attack( target, 50 )
-		self.battleParticipants[self.currentBattleTurn].attack( target, 200 )
+		self.battleParticipants[self.currentBattleTurn].attack( target, 50 )
+		#self.battleParticipants[self.currentBattleTurn].attack( target, 200 ) # to lose really easily
 		
 		# play attack sound
 		self.sound.play('zong')
@@ -1391,6 +1401,29 @@ class Game:
 			
 			# reconfigure dashboard
 			self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
+	
+	# displays blue screen of death for when you lose a story battle
+	def showReplayScreen( self ):
+		self.screen.fill( blue )
+		
+		text = self.bigFont.render( 'YOU LOST.', True, white )
+		text2 = self.bigFont.render( 'PRESS V TO REPLAY.', True, white )
+		self.screen.blit( text, ( 200, 200 ) )
+		self.screen.blit( text2, ( 200, 300 ) )
+		
+		pygame.display.update()
+	
+	# runs a loop until player presses v to restart the story battle
+	def runReplayScreen( self ):
+		replay = False
+		while not replay:
+			for event in pygame.event.get():
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_v:
+						replay = True
+						self.enterBattle( False, self.gotCharles )
+				if event.type == pygame.QUIT:
+					exitGame()
 	
 	# for wins: awards the currently stored amount of XP to all player characters who are still alive
 	def awardXP( self ) :
@@ -1666,18 +1699,22 @@ class Game:
 			
 			if self.convoNum == 2 or self.convoNum == 4 or self.convoNum == 7:
 				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
+				self.inStoryBattle = True
 			elif self.convoNum == 5:
 				self.enterBattle( canFlee = False) # CANNOT FLEE
 				self.charlesBattle = True # triggering Charles battle
+				self.inStoryBattle = True
 			elif self.convoNum == 9:
 				self.enterBattle( charles = True, canFlee = False ) # CANNOT FLEE
 				self.key2Battle = True # triggering battle for key 2
+				self.inStoryBattle = True
 			elif self.convoNum == 11:
 				self.convoNum += 1
 				self.enterCyberSystem()
 			elif self.convoNum == 12:
 				print 'SHOULD GET HERE'
 				self.enterBossBattle()
+				self.inStoryBattle = True
 			elif self.convoNum == 13:
 				self.gameComplete = True # congratulatory convo ends the game
 			
