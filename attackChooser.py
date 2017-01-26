@@ -12,7 +12,10 @@ class AttackChooser:
 		self.dim = ( 800, 100 )
 		
 		self.atkPos = (self.pos[0] + 205, self.pos[1] + 10)
-		self.descPos = (self.pos[0] + 240, self.pos[1] + 60)
+		self.descPos = (self.pos[0] + 330, self.pos[1] + 55)
+		self.namePos = (self.pos[0] + 19, self.pos[1] + 7)
+		self.charTimePos = (self.pos[0] + 19, self.pos[1] + 60)
+		self.atkTimePos = (self.pos[0] + 210, self.pos[1] + 55)
 		
 		# define rectangle
 		self.rect = pygame.Rect(self.pos, self.dim)
@@ -28,8 +31,14 @@ class AttackChooser:
 		self.font = pygame.font.SysFont("helvetica", 33)
 		self.descFont = pygame.font.SysFont("helvetica", 18)
 		self.nameFont = pygame.font.SysFont("helvetica", 40)
+		self.charTimeFont = pygame.font.SysFont("helvetica", 15)
+		
+		# initialize text
 		self.atkText = self.font.render(" ", True, (255,255,255))
-		self.descText = self.font.render(" ", True, (255,255,255))
+		self.descText = self.descFont.render(" ", True, (255,255,255))
+		self.nameText = self.nameFont.render(" ", True, (0, 255, 0))
+		self.charTimeText = self.charTimeFont.render(" ", True, (255,255,255))
+		self.atkTimeText = self.descFont.render(" ", True, (255,255,255))
 		
 		# initialize display information
 		self.chara = None
@@ -52,19 +61,51 @@ class AttackChooser:
 		self.atkText = self.font.render(self.attack().name, True, (0,0,205))
 
 		self.descText = self.descFont.render(self.attack().desc, True, (255,255,255))
+		
+		self.nameText = self.nameFont.render(self.chara.name, True, (0, 255, 0))
+		
+		self.charTimeText = self.charTimeFont.render("Time: "+str(chara.time)+"/"+str(self.chara.maxTime), True, (255,255,255))
+		
+		self.atkTimeText = self.descFont.render("(Time Cost: "+str(self.attack().timeNeeded)+")", True, (255,255,255))
+		
+		print('config time: ')
 
 		self.atkRect = pygame.Rect(
 				self.atkPos,
-				(self.atkText.get_rect().w,
-				self.atkText.get_rect().h)
+				(self.atkText.get_rect().w,self.atkText.get_rect().h)
 			)
 
 		self.descRect = pygame.Rect(
 				self.descPos,
-				(self.descText.get_rect().w,
-				self.descText.get_rect().h)
+				(self.descText.get_rect().w, self.descText.get_rect().h)
+			)
+			
+		self.charTimeRect = pygame.Rect(
+				self.charTimePos,
+				(self.charTimeText.get_rect().w, self.charTimeText.get_rect().h)
+			)
+		
+		self.atkTimeRect = pygame.Rect(
+				self.atkTimePos,
+				(self.atkTimeText.get_rect().w, self.atkTimeText.get_rect().h)
 			)
 		self.draw()
+	
+	def updateTime(self): # No erasing yet...
+		# erase old time
+		self.parSurface.blit(self.surface, self.pos, self.charTimeRect)
+		oldCharTimeRect = self.charTimeRect
+		
+		# update time value
+		self.charTimeText = self.charTimeFont.render(str(self.chara.time)+"/"+str(self.chara.maxTime), True, (255,255,255))
+		
+		self.charTimeRect = pygame.Rect(
+				self.charTimePos,
+				(self.charTimeText.get_rect().w, self.charTimeText.get_rect().h)
+			)
+		
+		# update display
+		pygame.display.update(self.charTimeRect if self.charTimeRect.w > oldCharTimeRect.w else oldCharTimeRect)
 	
 	# draws the attack chooser
 	def draw(self): 
@@ -78,9 +119,13 @@ class AttackChooser:
 		self.parSurface.blit(self.descText, self.descRect)
 		
 		# draw name
-		name = self.nameFont.render(self.chara.name, True, (0, 255, 0))
-
-		self.parSurface.blit(name, (19, 530))
+		self.parSurface.blit(self.nameText, self.namePos)
+		
+		# draw charTime
+		self.parSurface.blit(self.charTimeText, self.charTimePos)
+		
+		# draw atkTime
+		self.parSurface.blit(self.atkTimeText, self.atkTimePos)
 		
 		pygame.display.update(self.rect)
 		
@@ -93,14 +138,17 @@ class AttackChooser:
 		self.atkIndex = (self.atkIndex + num) % len(self.attacks)
 		
 		# erase old attack and description text
-		self.parSurface.blit(self.surface, self.atkRect)
-		self.parSurface.blit(self.surface, self.descRect)
+		self.parSurface.blit(self.surface, self.atkRect, self.atkRect)
+		self.parSurface.blit(self.surface, self.atkTimeRect, self.atkTimeRect)
+		self.parSurface.blit(self.surface, self.descRect, self.descRect)
 		oldAtkRect = self.atkRect
+		oldAtkTimeRect = self.atkTimeRect
 		oldDescRect = self.descRect
 		
 		# redraw attack and description text
 		self.atkText = self.font.render(self.attack().name, True, (0, 0, 205))
 		self.descText = self.descFont.render(self.attack().desc, True, (255,255,255))
+		self.atkTimeText = self.descFont.render('(Time Cost: '+str(self.attack().timeNeeded)+')', True, (255,255,255))
 
 		self.atkRect = pygame.Rect(
 				self.atkPos,
@@ -112,13 +160,19 @@ class AttackChooser:
 				(self.descText.get_rect().w,
 				self.descText.get_rect().h)
 			)
+		self.atkTimeRect = pygame.Rect(
+				self.atkTimePos,
+				(self.atkTimeText.get_rect().w, self.atkTimeText.get_rect().h)
+			)
 
 		# actually blit the new text
 		self.parSurface.blit(self.atkText, self.atkRect)
+		self.parSurface.blit(self.atkTimeText, self.atkTimeRect)
 		self.parSurface.blit(self.descText, self.descRect)
 		
 		# update display
 		pygame.display.update(oldAtkRect if oldAtkRect.w > self.atkRect.w else self.atkRect)
+		pygame.display.update(oldAtkTimeRect if oldAtkTimeRect > self.atkRect.w else self.atkRect)
 		pygame.display.update(oldDescRect if oldDescRect.w > self.descRect.w else self.descRect)
 		
 		if self.attack().name == "Share Code":
@@ -157,7 +211,7 @@ def main():
 	battlePos = ( 700, 50 )
 	namePos = ( 25, -1 )
 	imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-	mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', namePos )
+	mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', None, namePos )
 	mel.setAllStats( ( 500, 54, 44, 43, 50, 7 ) )
 	# total HP, ATK, DFN, SPD, ACC, time
 	mel.setAllGR( ( 0.8, 0.9, 0.85, 0.75, 0.7 ) )
