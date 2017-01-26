@@ -1097,14 +1097,14 @@ class Game:
 		stats = chara.getStats()
 		
 		lines = [ chara.name ]
-		lines.append( ' - time:     ' + str( stats[0] ) )
-		lines.append( ' - hp:       ' + str( stats[1] ) )
-		lines.append( ' - attack:   ' + str( stats[2] ) )
-		lines.append( ' - defense:  ' + str( stats[3] ) )
-		lines.append( ' - speed:    ' + str( stats[4] ) )
-		lines.append( ' - accuracy: ' + str( stats[5] ) )
-		lines.append( ' - xp:       ' + str( stats[6] ) )
-		lines.append( ' - level:    ' + str( stats[7] ) )
+		lines.append( '   Time:          ' + str( stats[0] ) )
+		lines.append( '   HP:            ' + str( stats[1] ) )
+		lines.append( '   Confidence:    ' + str( stats[2] ) )
+		lines.append( '   Passivity:     ' + str( stats[3] ) )
+		lines.append( '   Concentration: ' + str( stats[4] ) )
+		lines.append( '   Honesty:       ' + str( stats[5] ) )
+		lines.append( '   EXP:           ' + str( stats[6] ) )
+		lines.append( '   Level:         ' + str( stats[7] ) )
 		
 		for idx in range( len ( lines ) ):
 			lineText = self.smallFont.render( lines[idx], True, white )
@@ -1189,7 +1189,7 @@ class Game:
 		# parse keyboard/mouse input events
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN: # for initial key presses
-				if event.key == pygame.K_s:
+				if event.key == pygame.K_c:
 					self.onStatScreen = True
 					print 'show stat screen'
 					self.showStatScreen( charles = self.gotCharles)
@@ -1542,7 +1542,7 @@ class Game:
 					
 					
 							# attack currently selected enemy
-							elif event.key == pygame.K_a:
+							elif event.key == pygame.K_v:
 						
 								#don't allow attack if cost is greater than time left
 								if self.dashboard.attack().timeNeeded > attacker.time:
@@ -1674,7 +1674,7 @@ class Game:
 		# parse keyboard/mouse input events
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN: # for initial key presses
-				if event.key == pygame.K_s:
+				if event.key == pygame.K_c:
 					self.onStatScreen = False
 					print 'leave stat screen'
 					
@@ -1707,7 +1707,10 @@ class Game:
 				self.player.draw( self.screen )
 				self.refresh.append( self.player.getRect() )
 			
-			if self.convoNum == 2 or self.convoNum == 4 or self.convoNum == 7:
+			if self.convoNum == 2:
+				self.drawBattleGuide()
+				self.runBattleGuide()
+			elif self.convoNum == 4 or self.convoNum == 7:
 				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
 				self.inStoryBattle = True
 			elif self.convoNum == 5:
@@ -1733,7 +1736,7 @@ class Game:
 			
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN:
-					if event.key == pygame.K_c:
+					if event.key == pygame.K_v:
 						#print "UPDATING DIALOGUE"
 						if self.gameConvo.convoOver != True:
 							#print "STILL MORE TEXT"
@@ -1748,6 +1751,27 @@ class Game:
 
 							self.gameConvo.advanceText()
 						
+				if event.type == pygame.QUIT:
+					exitGame()
+	
+	# draws the initial battle guide
+	def drawBattleGuide( self ):
+		guideOrig = pygame.image.load( 'images/BattleGuide.png' ).convert_alpha()
+		guide = pygame.transform.scale( guideOrig, self.screenSize )
+		
+		self.screen.blit( guide, ( 0, 0 ) )
+		pygame.display.update()
+	
+	# runs a loop for the initial battle guide, exits into battle when user presses v
+	def runBattleGuide( self ):
+		done = False
+		while not done:
+			for event in pygame.event.get():
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_v:
+						done = True
+						self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
+						self.inStoryBattle = True
 				if event.type == pygame.QUIT:
 					exitGame()
 	
