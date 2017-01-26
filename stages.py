@@ -1497,36 +1497,36 @@ class Game:
 							self.dashboard.switchAtk(1)
 					
 					
-					# attack currently selected enemy
-					elif event.key == pygame.K_a:
+						# attack currently selected enemy
+						elif event.key == pygame.K_a:
 						
-						#don't allow attack if cost is greater than time left
-						if self.dashboard.attack().timeNeeded > attacker.time:
-							self.messages.send("Not Enough Time!",0.5)
-							return
-						#don't allow stat-boost stacking
-						if self.dashboard.attack().name == "Read Over Project":
-							if attacker.ATKBoostTurnsLeft != 0:
-								self.messages.send("Stats Already Boosted!",0.5)
+							#don't allow attack if cost is greater than time left
+							if self.dashboard.attack().timeNeeded > attacker.time:
+								self.messages.send("Not Enough Time!",0.5)
 								return
-							if self.dashboard.attack().name == "Read Code":
-								if attacker.DFNBoostTurnsLeft != 0:
+							#don't allow stat-boost stacking
+							if self.dashboard.attack().name == "Read Over Project":
+								if attacker.ATKBoostTurnsLeft != 0:
 									self.messages.send("Stats Already Boosted!",0.5)
-									return          
+									return
+								if self.dashboard.attack().name == "Read Code":
+									if attacker.DFNBoostTurnsLeft != 0:
+										self.messages.send("Stats Already Boosted!",0.5)
+										return          
 						
-						#don't allow restoring full HP
-						if self.dashboard.attack().name == "Take a Break":
-							if attacker.hp == attacker.totalHP:
-								self.messages.send("HP Is Already Full!",0.5)
-								return
+							#don't allow restoring full HP
+							if self.dashboard.attack().name == "Take a Break":
+								if attacker.hp == attacker.totalHP:
+									self.messages.send("HP Is Already Full!",0.5)
+									return
 								
-						#don't allow restoring full time
-						if self.dashboard.attack().name == "Cancel Plans":
-							if attacker.time == attacker.maxTime:
-								self.messages.send("Time Is Already Full!",0.5)
-								return
+							#don't allow restoring full time
+							if self.dashboard.attack().name == "Cancel Plans":
+								if attacker.time == attacker.maxTime:
+									self.messages.send("Time Is Already Full!",0.5)
+									return
 						
-						attacker.startAttack() # starts attack animation
+							attacker.startAttack() # starts attack animation
 			
 			if event.type == pygame.QUIT:
 				exitGame()
