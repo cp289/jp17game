@@ -1471,11 +1471,11 @@ class Game:
 			# parse keyboard/mouse input events
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN: # for initial key presses
-					if event.key == pygame.K_s: # show stat screen
-						self.onStatScreen = True
-						print 'show stat screen'
-						self.showStatScreen( charles = self.gotCharles)
-						return # so that characters aren't still drawn over stat screen
+# 					if event.key == pygame.K_s: # show stat screen
+# 						self.onStatScreen = True
+# 						print 'show stat screen'
+# 						self.showStatScreen( charles = self.gotCharles)
+# 						return # so that characters aren't still drawn over stat screen
 				
 					# if it's the player's turn, check for other input
 					if playerTurn:
