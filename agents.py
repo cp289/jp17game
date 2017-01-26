@@ -906,6 +906,11 @@ class PlayableCharacter( Character ):
 		
 		self.movement = [ 0, 0 ] # clear out stored movement
 		self.setRandAttacks()
+		
+		self.origATK = self.atk
+		self.origACC = self.acc
+		self.origSPD = self.spd
+		self.origDFN = self.dfn
 	
 	#chooses which 4 attacks the player stays in battle with
 	def setRandAttacks( self ):
