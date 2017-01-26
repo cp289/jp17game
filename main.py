@@ -45,7 +45,7 @@ class Button:
 
 # draws game start screen
 def showStartScreen( screen, buttons ):
-	startScreen = pygame.image.load( 'images/Debug Davis Start Screen.png' ).convert_alpha()
+	startScreen = pygame.image.load( 'images/start/Debug Davis Start Screen.png' ).convert_alpha()
 	#bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
 	#startText = bigFont.render( 'press s to start', True, white )
 
@@ -56,6 +56,14 @@ def showStartScreen( screen, buttons ):
 	for button in buttons:
 		button.draw( screen )
 	
+	pygame.display.update()
+
+# draws instruction screen
+def showInstructionScreen( screen ):
+	instructionScreenOrig = pygame.image.load( 'images/start/StartInstructions.png' ).convert_alpha()
+	instructionScreen = pygame.transform.scale( instructionScreenOrig, screen.get_size() )
+	
+	screen.blit( instructionScreen, ( 0, 0 ) )
 	pygame.display.update()
 
 # draws game end screen
@@ -90,13 +98,13 @@ def main():
 	
 	# make start screen buttons
 	
-	startImg = pygame.image.load( 'images/startUnselected.png' ).convert_alpha()
-	startImgSel = pygame.image.load( 'images/startSelected.png' ).convert_alpha()
+	startImg = pygame.image.load( 'images/start/startUnselected.png' ).convert_alpha()
+	startImgSel = pygame.image.load( 'images/start/startSelected.png' ).convert_alpha()
 	startButton = Button( ( 200, 300 ), startImg, startImgSel, 'start' )
 	startButton.select()
 	
-	instrImg = pygame.image.load( 'images/instrUnselected.png' ).convert_alpha()
-	instrImgSel = pygame.image.load( 'images/instrSelected.png' ).convert_alpha()
+	instrImg = pygame.image.load( 'images/start/instrUnselected.png' ).convert_alpha()
+	instrImgSel = pygame.image.load( 'images/start/instrSelected.png' ).convert_alpha()
 	instrButton = Button( ( 200, 375 ), instrImg, instrImgSel, 'instructions' )
 	
 	selectedButton = 0
@@ -112,6 +120,7 @@ def main():
 	
 	# run a loop for start screen
 	moveOn = False
+	onInstr = False
 	while not moveOn:
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN:
@@ -120,15 +129,23 @@ def main():
 					selectedButton = ( selectedButton + 1 ) % 2
 					buttons[selectedButton].select()
 				elif event.key == pygame.K_RETURN:
-					if buttons[selectedButton].name == 'start':
-						moveOn = True
-						break
+					if onInstr:
+						showStartScreen( screen, buttons )
+						onInstr = False
+					else:
+						if buttons[selectedButton].name == 'start':
+							moveOn = True
+							break
+						elif buttons[selectedButton].name == 'instructions':
+							showInstructionScreen( screen )
+							onInstr = True
 			if event.type == pygame.QUIT:
 				exitGame()
 		
-		startButton.draw( screen )
-		instrButton.draw( screen )
-		pygame.display.update()
+		if not onInstr:
+			startButton.draw( screen )
+			instrButton.draw( screen )
+			pygame.display.update()
 	
 	game = stages.Game( screen, sound )
 	game.loadHallwayStage() # possibly do this in Game constructor later

@@ -1597,6 +1597,7 @@ class Game:
 					eraseRect.width += 12
 					eraseRect.height += 12
 					self.stage.fillBattleBG( self.screen, eraseRect )
+					self.refresh.append( eraseRect )
 		
 					if len( self.enemies ) != 0: # if still enemies, reselect first one
 						self.enemies[0].select()

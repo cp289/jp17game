@@ -61,11 +61,11 @@ class AskSomeone(DebuggingMethod):
 		self.game = game
 
 	def actions(self, e, c):
-		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
-		else:
-			self.game.messages.send("Attack Missed", 0.5 )
-# 		self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+# 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
+# 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+# 		else:
+# 			self.game.messages.send("Attack Missed", 0.5 )
+		self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 			
 class PrintStatements(DebuggingMethod):
 	def __init__(self,game):
