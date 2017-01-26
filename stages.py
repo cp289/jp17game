@@ -189,6 +189,7 @@ class Game:
 		self.cha = None
 		self.initPlayers()
 		self.player = self.mel
+		self.allPlayers = [ self.mel, self.fa, self.zen ]
 		
 		# variables for battle mode
 		self.battlesWon = 0
@@ -269,13 +270,17 @@ class Game:
 		# the battle list contains two frames for idle, and two frames for taking damage
 		# the other list contains: status, conversation heads
 		
+		# Melody: 0.5, 0.2, 0.2, 0.5
+		# Fatimah: 0.2, 0.1, 0.1, 0.1, 0.5
+		# Zena: 0.5, 0.1, 0.1, 0.5
+		# Charles: 0.5, 0.5, 0.2, 0.2, 0.5
+		
 		# load images
 		playerL = pygame.image.load( 'images/Melody/Walk/Left/MelodyLeftStand.png' ).convert_alpha()
 		playerR = pygame.image.load( 'images/Melody/Walk/Right/MelodyRightStand.png' ).convert_alpha()
 		playerF = pygame.image.load( 'images/Melody/Walk/Down/MelodyDownStand.png' ).convert_alpha()
 		playerB = pygame.image.load( 'images/Melody/Walk/Up/MelodyUpStand.png' ).convert_alpha()
 		playerS = pygame.image.load( 'images/Melody/MelodyStatPic.png' ).convert_alpha()
-		#playerBattle = pygame.image.load( 'images/Melody/MelodyBattleSprite.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Melody/MelodyHead.png" ).convert_alpha()
 		standlist = ( playerF, playerB, playerL, playerR )
 		walkF = 'images/Melody/Walk/Down/MelodyDownWalk'
@@ -283,14 +288,14 @@ class Game:
 		walkL = 'images/Melody/Walk/Left/MelodyLeftWalk'
 		walkR = 'images/Melody/Walk/Right/MelodyRightWalk'
 		walklist = ( walkF, walkB, walkL, walkR )
-		battlelist = ( pygame.image.load( 'images/Melody/Attack/MelodyIdle0.png' ).convert_alpha() ) # TEMPORARY
-		attacklist = None
-		dielist = None
+		battlelist = 'images/Melody/Attack/MelodyIdle'
+		attacklist = 'images/Melody/Attack/MelodyAttack'
+		dielist = ( 'images/Melody/Death/MelodyDeath', ( 0.5, 0.2, 0.2, 0.5 ) )
 		otherlist = ( playerS, playerC )
 		
 		# initialize mel
 		initpos = ( 300, 400 )
-		battlePos = ( 590, 50 )
+		battlePos = ( 560, 50 )
 		namePos = ( 25, -1 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', self, namePos )
@@ -301,15 +306,15 @@ class Game:
 		
 		standlist = None
 		walklist = None
-		battlelist = ( pygame.image.load( 'images/Fatimah/Attack/FatimahIdle0.png' ).convert_alpha() ) # TEMPORARY
-		attacklist = None
-		dielist = None
+
+		#initialize fa
+		battlelist = 'images/Fatimah/Attack/FatimahIdle'
+		attacklist = 'images/Fatimah/Attack/FatimahAttack'
+		dielist = ( 'images/Fatimah/Death/FatimahDeath', ( 0.2, 0.1, 0.1, 0.1, 0.5 ) )
 		playerS = pygame.image.load( 'images/Fatimah/FatimahStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Fatimah/FatimahHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		
-		#initialize fa
-		battlePos = ( 490, 145 ) # changed from 178
+		battlePos = ( 460, 140 )
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', self, namePos)
@@ -317,11 +322,13 @@ class Game:
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
 		# initialize zen
-		battlelist = ( pygame.image.load( 'images/Zena/Attack/ZenaIdle0.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = 'images/Zena/Attack/ZenaIdle'
+		attacklist = 'images/Zena/Attack/ZenaAttack'
+		dielist = ( 'images/Zena/Death/ZenaDeath', ( 0.5, 0.1, 0.1, 0.5 ) )
 		playerS = pygame.image.load( 'images/Zena/ZenaStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Zena/ZenaHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 390, 240 ) # from 306
+		battlePos = ( 360, 230 )
 		namePos = ( 40, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', self, namePos )
@@ -329,11 +336,13 @@ class Game:
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
 		# initialize cha
-		battlelist = ( pygame.image.load( 'images/Charles/Attack/CharlesIdle0.png' ).convert_alpha() ) # TEMPORARY
+		battlelist = 'images/Charles/Attack/CharlesIdle'
+		attacklist = 'images/Charles/Attack/CharlesAttack'
+		dielist = ( 'images/Charles/Death/CharlesDeath', ( 0.5, 0.5, 0.2, 0.2, 0.5 ) )
 		playerS = pygame.image.load( 'images/Charles/CharlesStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Charles/CharlesHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 290, 304 ) # changed from 404
+		battlePos = ( 260, 289 )
 		namePos = ( 20, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', self, namePos )
@@ -1039,7 +1048,9 @@ class Game:
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
 		self.stage.stepsTaken = 0 # reset steps
 		
-		self.player.leaveBattle()
+		# reset HP and time for all player characters
+		for chara in players:
+			chara.leaveBattle()
 		
 		self.enemies = [] # empty enemies list
 		self.selectedEnemyIDX = -1
@@ -1050,6 +1061,7 @@ class Game:
 			self.enterDialogue() # enter convo 3
 		elif self.charlesBattle and not self.gotCharles: # if leaving battle with Charles, unlock him
 			self.gotCharles = True
+			self.allPlayers.append( self.cha )
 			self.enterDialogue() # convo 6
 		elif self.stage == self.macLabStage and self.stage.battlesCompleted == 1 and self.convoNum == 8: # after first Mac lab battle
 			self.enterDialogue() # convo 8
@@ -1320,7 +1332,10 @@ class Game:
 	def enemyTurn( self ):
 		# randomly select a livePlayer and attack
 		target = random.choice( self.livePlayers )
-		self.battleParticipants[self.currentBattleTurn].attack( target, 50 )
+		#self.battleParticipants[self.currentBattleTurn].attack( target, 50 ) # TEMP CHANGE
+		
+		#target = self.mel
+		self.battleParticipants[self.currentBattleTurn].attack( target, 200 )
 		
 		# play attack sound
 		self.sound.play('zong')
@@ -1345,6 +1360,8 @@ class Game:
 			self.stage.fillBattleBG( self.screen, eraseRect )
 			self.refresh.append( eraseRect )
 			
+			target.die() # start target's death animation
+			
 			# if indices are now off (which happens when the attacker is the last in the participant list)
 			if self.currentBattleTurn == len( self.battleParticipants ):
 				self.currentBattleTurn = 0
@@ -1360,11 +1377,6 @@ class Game:
 	
 	# moves the battle turn to the next character
 	def passOnTurn( self ):
-# 		prev = self.battleParticipants[self.currentBattleTurn]
-# 		if prev.getType() == 'PlayableCharacter':
-# 			prev.attacking = False
-		print [ i.name for i in self.battleParticipants ]
-		print [ i.name for i in self.livePlayers ]
 		# pass on battle turn
 		self.currentBattleTurn += 1
 		if self.currentBattleTurn > len( self.battleParticipants ) - 1: # wrap around to front of list
@@ -1379,13 +1391,6 @@ class Game:
 			
 			# reconfigure dashboard
 			self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
-		
-# 		next = self.battleParticipants[self.currentBattleTurn]
-# 		if next.getType() == 'PlayableCharacter':
-# 			next.attacking = True
-		
-# 		print '\ncurrent battle turn is', self.battleParticipants[self.currentBattleTurn].name + ',', \
-# 			self.currentBattleTurn, 'out of', len( self.battleParticipants), 'left'
 	
 	# for wins: awards the currently stored amount of XP to all player characters who are still alive
 	def awardXP( self ) :
@@ -1415,7 +1420,6 @@ class Game:
 		attacker = self.battleParticipants[self.currentBattleTurn]
 		if attacker.getType() == 'PlayableCharacter':
 			playerTurn = True
-			attacker.attacking = True # make blue box appear
 		else:
 			playerTurn = False
 			#print 'enemy turn'
@@ -1431,65 +1435,66 @@ class Game:
 				
 				# if it's the player's turn, check for other input
 				if playerTurn:
-					#print 'player turn'
+					if attacker.attacking == 0: # if they haven't input something they can use
+						#print 'player turn'
 					
-					# change enemy selection
-					if event.key == pygame.K_UP:
-						newIDX = self.selectedEnemyIDX - 1
-						if newIDX > -1:
-							prev = self.enemies[self.selectedEnemyIDX]
-							rad = 10
-							prev.deselect()
+						# change enemy selection
+						if event.key == pygame.K_UP:
+							newIDX = self.selectedEnemyIDX - 1
+							if newIDX > -1:
+								prev = self.enemies[self.selectedEnemyIDX]
+								rad = 10
+								prev.deselect()
 							
-							# erase selection cursor
-							eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-													   ( 2 * rad + 2, 2 * rad + 2 ) )
-							self.stage.fillBattleBG( self.screen, eraseRect )
+								# erase selection cursor
+								eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+														   ( 2 * rad + 2, 2 * rad + 2 ) )
+								self.stage.fillBattleBG( self.screen, eraseRect )
 						
-							self.selectedEnemyIDX -= 1
-							self.enemies[self.selectedEnemyIDX].select()
-						elif newIDX == -1:
-							prev = self.enemies[self.selectedEnemyIDX]
-							rad = 10
-							prev.deselect()
+								self.selectedEnemyIDX -= 1
+								self.enemies[self.selectedEnemyIDX].select()
+							elif newIDX == -1:
+								prev = self.enemies[self.selectedEnemyIDX]
+								rad = 10
+								prev.deselect()
 							
-							# erase selection cursor
-							eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-													   ( 2 * rad + 2, 2 * rad + 2 ) )
-							self.stage.fillBattleBG( self.screen, eraseRect )
+								# erase selection cursor
+								eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+														   ( 2 * rad + 2, 2 * rad + 2 ) )
+								self.stage.fillBattleBG( self.screen, eraseRect )
 						
-							self.selectedEnemyIDX = len( self.enemies ) - 1
-							self.enemies[self.selectedEnemyIDX].select()
-					elif event.key == pygame.K_DOWN:
-						newIDX = self.selectedEnemyIDX + 1
-						if newIDX < len( self.enemies ):
-							prev = self.enemies[self.selectedEnemyIDX]
-							rad = 10
-							prev.deselect()
+								self.selectedEnemyIDX = len( self.enemies ) - 1
+								self.enemies[self.selectedEnemyIDX].select()
+						elif event.key == pygame.K_DOWN:
+							newIDX = self.selectedEnemyIDX + 1
+							if newIDX < len( self.enemies ):
+								prev = self.enemies[self.selectedEnemyIDX]
+								rad = 10
+								prev.deselect()
 							
-							# erase selection cursor
-							eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-													   ( 2 * rad + 2, 2 * rad + 2 ) )
-							self.stage.fillBattleBG( self.screen, eraseRect )
+								# erase selection cursor
+								eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+														   ( 2 * rad + 2, 2 * rad + 2 ) )
+								self.stage.fillBattleBG( self.screen, eraseRect )
 						
-							self.selectedEnemyIDX += 1
-							self.enemies[self.selectedEnemyIDX].select()
-						elif newIDX == len( self.enemies ):
-							prev = self.enemies[self.selectedEnemyIDX]
-							rad = 10
-							prev.deselect()
+								self.selectedEnemyIDX += 1
+								self.enemies[self.selectedEnemyIDX].select()
+							elif newIDX == len( self.enemies ):
+								prev = self.enemies[self.selectedEnemyIDX]
+								rad = 10
+								prev.deselect()
 							
-							# erase selection cursor
-							eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-													   ( 2 * rad + 2, 2 * rad + 2 ) )
-							self.stage.fillBattleBG( self.screen, eraseRect )
+								# erase selection cursor
+								eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
+														   ( 2 * rad + 2, 2 * rad + 2 ) )
+								self.stage.fillBattleBG( self.screen, eraseRect )
 						
-							self.selectedEnemyIDX = 0
-							self.enemies[self.selectedEnemyIDX].select()
-					elif event.key == pygame.K_LEFT:
-						self.dashboard.switchAtk(-1)
-					elif event.key == pygame.K_RIGHT:
-						self.dashboard.switchAtk(1)
+								self.selectedEnemyIDX = 0
+								self.enemies[self.selectedEnemyIDX].select()
+						elif event.key == pygame.K_LEFT:
+							self.dashboard.switchAtk(-1)
+						elif event.key == pygame.K_RIGHT:
+							self.dashboard.switchAtk(1)
 					
 					
 					# attack currently selected enemy
@@ -1520,59 +1525,64 @@ class Game:
 							if attacker.time == attacker.maxTime:
 								self.messages.send("Time Is Already Full!",0.5)
 								return
-
-						target = self.enemies[self.selectedEnemyIDX]
 						
-						self.dashboard.attack().attack(target, self.battleParticipants[self.currentBattleTurn])
-						
-						attacker.attacking = False # make box disappear
-						self.passOnTurn()
-						
-						# play attack sound
-						self.sound.play('pew')
-						
-						# if attack killed target
-						if target.isDead():
-							print '--died: ' + target.name
-							
-							attacker.killCount += 1
-							
-							toRemove = self.enemies.pop( self.selectedEnemyIDX )
-							self.battleParticipants.remove( toRemove )
-							self.selectedEnemyIDX = 0 # reset selection to 0
-							
-							# add points for kill to stored total
-							self.storedPoints += toRemove.level * 10
-							
-							# erase killed target
-							eraseRect = toRemove.getRect()
-							eraseRect.width += 12
-							eraseRect.height += 12
-							self.stage.fillBattleBG( self.screen, eraseRect )
-							pygame.display.update(eraseRect)
-						
-							if len( self.enemies ) != 0: # if still enemies, reselect first one
-								self.enemies[0].select()
-							else: # if all enemies are gone
-								self.awardXP()
-								done = True
-								print 'you win the battle!'
-								
-								self.battlesWon += 1
-								self.leaveBattle(True, self.gotCharles)
-								print 'battles won:', self.battlesWon
-								
-								if self.inBossBattle: # won the boss battle! go to end screen
-									self.gameComplete = True
-									return
-								
-								self.stage.addBattle()
-								print 'for', self.stage.name, 'battle', self.stage.battlesCompleted, 'out of', self.stage.numBattles
-								if self.stage.completed():
-									print 'stage', self.stage.name, 'has been completed'
+						attacker.startAttack() # starts attack animation
 			
 			if event.type == pygame.QUIT:
 				exitGame()
+		
+		# if player has attacked and animation is done
+		if playerTurn and attacker.attacking == 2: # if player has chosen an attack and animation is finished
+			target = self.enemies[self.selectedEnemyIDX]
+			self.dashboard.attack().attack(target, self.battleParticipants[self.currentBattleTurn])
+			
+			print '----ENDING ATTACK----'
+			
+			self.passOnTurn()
+			attacker.attacking = 0 # reset attacker's state
+		
+			# play attack sound
+			self.sound.play('pew')
+		
+			# if attack killed target
+			target = self.enemies[self.selectedEnemyIDX]
+			if target.isDead():
+				print '--died: ' + target.name
+				
+				attacker.killCount += 1
+				
+				toRemove = self.enemies.pop( self.selectedEnemyIDX )
+				self.battleParticipants.remove( toRemove )
+				self.selectedEnemyIDX = 0 # reset selection to 0
+			
+				# add points for kill to stored total
+				self.storedPoints += toRemove.level * 10
+			
+				# erase killed target
+				eraseRect = toRemove.getRect()
+				eraseRect.width += 12
+				eraseRect.height += 12
+				self.stage.fillBattleBG( self.screen, eraseRect )
+		
+				if len( self.enemies ) != 0: # if still enemies, reselect first one
+					self.enemies[0].select()
+				else: # if all enemies are gone
+					self.awardXP()
+					done = True
+					print 'you win the battle!'
+				
+					self.battlesWon += 1
+					self.leaveBattle( charles = self.gotCharles )
+					print 'battles won:', self.battlesWon
+				
+					if self.inBossBattle: # won the boss battle! go to end screen
+						self.enterDialogue() # trigger final congratulatory conversation
+						return
+				
+					self.stage.addBattle()
+					print 'for', self.stage.name, 'battle', self.stage.battlesCompleted, 'out of', self.stage.numBattles
+					if self.stage.completed():
+						print 'stage', self.stage.name, 'has been completed'
 		
 		# if it's an enemy's turn, have it attack
 		if not playerTurn:
@@ -1588,7 +1598,14 @@ class Game:
 			for edna in self.enemies:
 				edna.draw( self.screen )
 				self.refresh.append( edna.getRect() )
-			for priya in self.livePlayers:
+			
+			# updating players requires two loops, otherwise erasures mess up characters already drawn
+			for priya in self.allPlayers: # erase previous frame of animation
+				if not self.inBossBattle:
+					self.stage.fillBattleBG( self.screen, priya.battleRect )
+				else:
+					self.fillBossBattleBG( priya.battleRect )
+			for priya in self.allPlayers: # draw new frame
 				priya.draw( self.screen )
 				self.refresh.append( priya.battleRect )
 			
@@ -1634,10 +1651,8 @@ class Game:
 				self.player.draw( self.screen )
 				self.refresh.append( self.player.getRect() )
 			
-			if self.convoNum == 2 or self.convoNum == 7:
+			if self.convoNum == 2 or self.convoNum == 4 or self.convoNum == 7:
 				self.enterBattle( charles = self.gotCharles, canFlee = False ) # CANNOT FLEE
-			elif self.convoNum == 4:
-				self.enterBattle( charles = self.gotCharles )
 			elif self.convoNum == 5:
 				self.enterBattle( canFlee = False) # CANNOT FLEE
 				self.charlesBattle = True # triggering Charles battle
@@ -1650,6 +1665,8 @@ class Game:
 			elif self.convoNum == 12:
 				print 'SHOULD GET HERE'
 				self.enterBossBattle()
+			elif self.convoNum == 13:
+				self.gameComplete = True # congratulatory convo ends the game
 			
 			self.convoNum += 1
 		else:
