@@ -36,7 +36,10 @@ class MessageDisplay:
 		
 	# registers a message to display for a given amount of time
 	def send(self, text, time):
+		if self.hasMessage:
+			self.message.erase(self.surface, self.background)
 		self.message = Message(text, time)
+		self.drawn = False
 		self.hasMessage = True
 	
 	# sets the background surface of 
@@ -64,8 +67,8 @@ def main():
 	
 	disp = MessageDisplay(screen)
 	disp.setBackground(screen)
-	disp.send(Message('test',2))
-	disp.send(Message('test2',3))
+	disp.send('test',2)
+	disp.send('test2',3)
 	while True:
 		disp.update()
 		for e in pygame.event.get():

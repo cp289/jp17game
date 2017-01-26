@@ -172,7 +172,7 @@ class AttackChooser:
 		
 		# update display
 		pygame.display.update(oldAtkRect if oldAtkRect.w > self.atkRect.w else self.atkRect)
-		pygame.display.update(oldAtkTimeRect if oldAtkTimeRect > self.atkRect.w else self.atkRect)
+		pygame.display.update(oldAtkTimeRect if oldAtkTimeRect > self.atkTimeRect.w else self.atkTimeRect)
 		pygame.display.update(oldDescRect if oldDescRect.w > self.descRect.w else self.descRect)
 		
 		if self.attack().name == "Share Code":

@@ -1033,7 +1033,7 @@ class Game:
 		for player in players:
 			player.leaveBattleStatsReset()
 			player.fillTime()
-			print "RESET TIME TO FULL!"
+			self.messages.send("Reset Time to Full!")
 		
 		self.inBattle = False
 		self.stage.moveCamView( self.screen, self.refresh, self.camera )
@@ -1331,7 +1331,7 @@ class Game:
 		# if the attack was fatal, remove that character from the lists
 		# do not pass on turn here, because removing player makes indices for enemies go one down
 		else:
-			print '--died: ' + target.name
+			self.messages.send(target.name+' died!',5)
 			
 			target.timesKilled += 1
 			
@@ -1406,7 +1406,7 @@ class Game:
 		#check if we can and should flee
 		for player in self.livePlayers:
 			if player.escaped == True:
-				print "YOU ESCAPED!"
+				self.messages.send("You Escaped!",5)
 				player.escaped = False
 				done = True
 				self.leaveBattle(False, self.gotCharles)
@@ -1499,28 +1499,28 @@ class Game:
 						
 						#don't allow attack if cost is greater than time left
 						if self.dashboard.attack().timeNeeded > attacker.time:
-							print "NOT ENOUGH TIME!"
+							self.messages.send("Not Enough Time!",5)
 							return
 						#don't allow stat-boost stacking
 						if self.dashboard.attack().name == "Read Over Project":
 							if attacker.ATKBoostTurnsLeft != 0:
-								print "STAT ALREADY BOOSTED!"
+								self.messages.send("Stats Already Boosted!",5)
 								return
 							if self.dashboard.attack().name == "Read Code":
 								if attacker.DFNBoostTurnsLeft != 0:
-									print "STAT ALREADY BOOSTED!"
+									self.messages.send("Stats Already Boosted!",5)
 									return          
 						
 						#don't allow restoring full HP
 						if self.dashboard.attack().name == "Take a Break":
 							if attacker.hp == attacker.totalHP:
-								print "HP IS ALREADY FULL!"
+								self.messages.send("HP Is Already Full!",5)
 								return
 								
 						#don't allow restoring full time
 						if self.dashboard.attack().name == "Cancel Plans":
 							if attacker.time == attacker.maxTime:
-								print "TIME IS ALREADY FULL!"
+								self.messages.send("Time Is Already Full!",5)
 								return
 
 						target = self.enemies[self.selectedEnemyIDX]
