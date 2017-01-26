@@ -188,6 +188,7 @@ class Game:
 		self.cha = None
 		self.initPlayers()
 		self.player = self.mel
+		self.allPlayers = [ self.mel, self.fa, self.zen ]
 		
 		# variables for battle mode
 		self.battlesWon = 0
@@ -263,6 +264,11 @@ class Game:
 		# the battle list contains two frames for idle, and two frames for taking damage
 		# the other list contains: status, conversation heads
 		
+		# Melody: 0.5, 0.2, 0.2, 0.5
+		# Fatimah: 0.2, 0.1, 0.1, 0.1, 0.5
+		# Zena: 0.5, 0.1, 0.1, 0.5
+		# Charles: 0.5, 0.5, 0.2, 0.2, 0.5
+		
 		# load images
 		playerL = pygame.image.load( 'images/Melody/Walk/Left/MelodyLeftStand.png' ).convert_alpha()
 		playerR = pygame.image.load( 'images/Melody/Walk/Right/MelodyRightStand.png' ).convert_alpha()
@@ -278,12 +284,12 @@ class Game:
 		walklist = ( walkF, walkB, walkL, walkR )
 		battlelist = 'images/Melody/Attack/MelodyIdle'
 		attacklist = 'images/Melody/Attack/MelodyAttack'
-		dielist = None
+		dielist = ( 'images/Melody/Death/MelodyDeath', ( 0.5, 0.2, 0.2, 0.5 ) )
 		otherlist = ( playerS, playerC )
 		
 		# initialize mel
 		initpos = ( 300, 400 )
-		battlePos = ( 590, 50 )
+		battlePos = ( 560, 50 )
 		namePos = ( 25, -1 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', namePos )
@@ -294,15 +300,15 @@ class Game:
 		
 		standlist = None
 		walklist = None
+
+		#initialize fa
 		battlelist = 'images/Fatimah/Attack/FatimahIdle'
 		attacklist = 'images/Fatimah/Attack/FatimahAttack'
-		dielist = None
+		dielist = ( 'images/Fatimah/Death/FatimahDeath', ( 0.2, 0.1, 0.1, 0.1, 0.5 ) )
 		playerS = pygame.image.load( 'images/Fatimah/FatimahStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Fatimah/FatimahHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		
-		#initialize fa
-		battlePos = ( 490, 145 ) # changed from 178
+		battlePos = ( 460, 140 )
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', namePos )
@@ -312,10 +318,11 @@ class Game:
 		# initialize zen
 		battlelist = 'images/Zena/Attack/ZenaIdle'
 		attacklist = 'images/Zena/Attack/ZenaAttack'
+		dielist = ( 'images/Zena/Death/ZenaDeath', ( 0.5, 0.1, 0.1, 0.5 ) )
 		playerS = pygame.image.load( 'images/Zena/ZenaStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Zena/ZenaHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 390, 240 ) # from 306
+		battlePos = ( 360, 230 )
 		namePos = ( 40, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', namePos )
@@ -325,10 +332,11 @@ class Game:
 		# initialize cha
 		battlelist = 'images/Charles/Attack/CharlesIdle'
 		attacklist = 'images/Charles/Attack/CharlesAttack'
+		dielist = ( 'images/Charles/Death/CharlesDeath', ( 0.5, 0.5, 0.2, 0.2, 0.5 ) )
 		playerS = pygame.image.load( 'images/Charles/CharlesStatPic.png' ).convert_alpha()
 		playerC = pygame.image.load( "images/Charles/CharlesHead.png" ).convert_alpha()
 		otherlist = ( playerS, playerC )
-		battlePos = ( 290, 304 ) # changed from 404
+		battlePos = ( 260, 289 )
 		namePos = ( 20, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', namePos )
@@ -1031,6 +1039,7 @@ class Game:
 			self.enterDialogue() # enter convo 3
 		elif self.charlesBattle and not self.gotCharles: # if leaving battle with Charles, unlock him
 			self.gotCharles = True
+			self.allPlayers.append( self.cha )
 			self.enterDialogue() # convo 6
 		elif self.stage == self.macLabStage and self.stage.battlesCompleted == 1 and self.convoNum == 8: # after first Mac lab battle
 			self.enterDialogue() # convo 8
@@ -1301,7 +1310,10 @@ class Game:
 	def enemyTurn( self ):
 		# randomly select a livePlayer and attack
 		target = random.choice( self.livePlayers )
-		self.battleParticipants[self.currentBattleTurn].attack( target, 50 )
+		#self.battleParticipants[self.currentBattleTurn].attack( target, 50 ) # TEMP CHANGE
+		
+		#target = self.mel
+		self.battleParticipants[self.currentBattleTurn].attack( target, 200 )
 		
 		# play attack sound
 		self.sound.play('zong')
@@ -1318,11 +1330,13 @@ class Game:
 			self.livePlayers.remove( target )
 			
 			# erase killed target
-			eraseRect = target.getRect()
+			eraseRect = target.battleRect
 			eraseRect.width += 12
 			eraseRect.height += 12
 			self.stage.fillBattleBG( self.screen, eraseRect )
 			self.refresh.append( eraseRect )
+			
+			target.die() # start target's death animation
 			
 			# if indices are now off (which happens when the attacker is the last in the participant list)
 			if self.currentBattleTurn == len( self.battleParticipants ):
@@ -1537,12 +1551,12 @@ class Game:
 				self.refresh.append( edna.getRect() )
 			
 			# updating players requires two loops, otherwise erasures mess up characters already drawn
-			for priya in self.livePlayers: # erase previous frame of animation
+			for priya in self.allPlayers: # erase previous frame of animation
 				if not self.inBossBattle:
 					self.stage.fillBattleBG( self.screen, priya.battleRect )
 				else:
 					self.fillBossBattleBG( priya.battleRect )
-			for priya in self.livePlayers: # draw new frame
+			for priya in self.allPlayers: # draw new frame
 				priya.draw( self.screen )
 				self.refresh.append( priya.battleRect )
 			

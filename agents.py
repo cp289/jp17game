@@ -418,10 +418,16 @@ class PlayableCharacter( Character ):
 			attackList.append( ( attackFile + '4.png', 1.0 ) )
 			self.battleAttacking = pyganim.PygAnimation( attackList, loop = False )
 		
+		# dying list contains base filename and a list of frame durations in order
 		dying = imglist[4]
 		if dying != None:
-			pass
-			'''make pyganim'''
+			dyingFile = dying[0]
+			dyingTimes = dying[1]
+			
+			dyingList = []
+			for i in range( len( dyingTimes ) ):
+				dyingList.append( ( dyingFile + str( i ) + '.png', dyingTimes[i] ) )
+			self.battleDying = pyganim.PygAnimation( dyingList, loop = False )
 		
 		# variables to determine which battle animation should be playing
 		self.takingDamage = 0 # means not taking damage
@@ -860,10 +866,14 @@ class PlayableCharacter( Character ):
 				self.availableAttacks.append(attack)
 			if attack.name == "Flee" and self.canFlee == True:
 				self.availableAttacks.append(attack)
-
+	
 	# takes the character out of battle mode
 	def leaveBattle( self ):
 		self.showHP = False
+		self.takingDamage = 0
+		self.attacking = 0
+		self.dying = False
+		
 		self.fillHP()
 		self.fillTime()
 		self.setPosition( self.explorePos[0], self.explorePos[1] )
@@ -871,7 +881,13 @@ class PlayableCharacter( Character ):
 		# stop animations
 		self.battleIdle.stop()
 		self.battleDmg.stop()
-		'''REMEMBER TO STOP ATTACKING AND DYING ANIMATION HERE TOO'''
+	
+	# starts this character's death animation
+	def die( self ):
+		self.takingDamage = 0
+		self.dying = True
+		self.battleAnim = self.battleDying
+		self.battleDying.play()
 	
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar
@@ -894,7 +910,9 @@ class PlayableCharacter( Character ):
 				Character.draw( self, screen )
 		else: # draw in battle mode
 			self.battleAnim.blit( screen, self.battlePos )
-			self.drawHP( screen )
+			
+			if not self.dying:
+				self.drawHP( screen )
 			
 			# stop showing animation for taking damage after some time
 			if self.takingDamage > 0:
