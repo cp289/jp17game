@@ -1,0 +1,247 @@
+Convo 0: (Opening Scene) (Possibly in hallway, near couches)
+
+Student_1: Hey guys, I didn't get any errors this time!
+\I think it might actually work now!
+Student_2: Sweeeeet! Run it, man.
+Student_1: And...run!
+Student_2: Oh my God.
+Student_1: No no no no no, this wasn't supposed to happen!
+\Get away from me, you...thing! No...NOOOOOOOOO!
+[END]
+
+Convo 1: (Melody's Room)
+
+Zena: Uggh! My code is taking so long to compile!
+\Why can't it just work?!
+Melody: What's wrong with it?
+Zena: I don't know, it's just taking a really long time.
+\I think there might be a bug in my code. Or a badly-placed
+\while loop...
+Fatimah: Ughhh! I have a bug too that I haven't figured
+\out yet. I think I'll email Bruce to ask about it.
+Zena: Why does the project have to be due tonight?!
+Fatimah: Why can't we just eat the exception...
+Melody: Do you want me to take a look at your code...?
+Fatimah: Hey, guys! Bruce sent us an email!
+\Maybe it's an extension!
+Bruce: Hi all,
+Bruce: Error Alert! Error Alert! There was a power surge
+\while a group of students was creating a program to debug
+\their projects. Instead, they brought everyone's bugs to life!
+\We need a team of Exception Eaters to help save Davis from
+\the bug invasion. Install this program, the Error Scrambler 2.0,
+\on your laptops to help you along the way.
+Bruce: Best, Bruce
+Zena: Whoa! I can't believe this!
+Melody: I know! Oh, the CS children...when will they learn...?
+Zena: This is our chance to be heroes! We'll be like the characters
+\who save the world from certain doom, like in CyberRace and those
+\other awesome cartoons!
+Fatimah: We can fix everyone's bugs!
+Melody: I can finally watch Stewart Galaxy and go to bed!
+\Let's do it!
+[END]
+
+Convo 2: (Entering Davis)
+
+Melody: It's so eerie and quiet...
+Fatimah: Wait, did you guys just hear something??
+Zena: Who was that? Hello...?
+Melody: Hmmm...Whatever it was, it didn't sound human.
+Fatimah: ...
+Zena: ...
+Melody: ...?!
+Zena: Whoa, they found us! It's the bugs!!
+Fatimah: Melody, Zena, your laptops! Let's use our Error Scramblers!!
+Melody: But I haven't read the documentation yet!
+Zena: We can review real quick.
+[END]
+
+Convo 3: (Hallway)
+
+Melody: There we go.
+Zena: We did it! Nice job, you two.
+Fatimah: Now that the bad guys are gone, what do we do next?
+Melody: Well, we could try the doors. Bruce isn't in his office
+\from what I can tell, so maybe he's in one of the labs.
+\Let's check the robotics lab. 
+[END]
+
+Convo 4: (Robotics Lab) (Before first battle)
+
+Zena: Whoa, they were waiting for us...
+Fatimah: Pfft, we can take these guys out with our algo-rhythm!
+Zena: ...Algo-rhythm?
+Fatimah: Yeah, with our funky coding skills and groovy dance moves.
+Zena: We can't fight bugs with dance moves!!
+Melody: Um, guys...
+Melody: Let's get to work.
+Fatimah: Okie.
+Zena: ...By the way, how many bugs do you think we'll have to fight?
+Fatimah: I don't know, but let's make sure to take a break after we think we've fought enough.
+Melody: We can go to the hallway when we're ready for a break.
+[END]
+
+Convo 5: (Robotics Lab) (After fighting required number of battles)
+
+Charles?: GAH!
+Fatimah: Is that...Charles?
+Melody: Well, we'll have to save him, then!
+Zena: Are you guys ready?
+Fatimah: Hahaha, no.
+Melody: Sure we are.
+Zena: Charles, we're here to help!
+Charles?: Help?! I don't need help!
+Zena: But your bugs--
+Charles?: THEY'RE NOT BUGS! THEY'RE FEATURES!
+Melody: Um...are you okay, Charles?
+Charles?: There's nothing wrong with me! I've never felt so great before!
+\All of my code finally makes sense!
+Fatimah: Look at his eyes - I think the bugs might be controlling him.
+Zena: Haha, so the bugs "programmed" Charles. ...Hehe.
+Charles?: You think you can laugh at me?! I'll show you!
+\Brethren, attaaaaaack!
+Melody: Here we go!
+[END]
+
+Convo 6: (Robotics Lab) (Post-Saving Charles)
+
+Melody: Mission accomplished.
+Charles: Ugh...my head...Thanks so much, you guys!  My bugs took me captive and gave
+\me massive codeblock. Sorry about yelling, I couldn't control it.
+Melody: The bugs are giving everyone codeblock, but it looks like they're
+\choosing to take control over some people too.
+Zena: Hey, look! I just found a piece of paper with some random letters and
+\numbers on it. 
+Fatimah: Hmm, I wonder what that's for.
+Melody: Oh, Bruce just emailed us something.
+Bruce: Hi all--
+Bruce: The bugs have stolen Randy's secret codes so that they can hack into
+\his computer. The other code is still out there somewhere. Try to find it
+\as you defeat the bugs.
+Bruce: Best, Bruce
+Zena: Well, that answers our questions.
+Charles: Hey, can I join you guys? I'd like to help, too!
+Melody: Sure, we could always use another person.
+Charles: Cool, thanks! So what should we do now?
+Fatimah: Well, we are the only ones awake and equipped to take out the baddies.
+Melody: So that means we have some debugging to do.
+Fatimah: And some keys to collect!
+Zena: It looks like this room is pretty clear for now. We should head to the Mac lab.
+Charles: Alright, let's go!
+[END]
+
+Convo 7: (Mac/CS151 Lab) (Pre-first battle)
+
+Melody: CS Children, we're here to save you from your bugs!
+CS_Child: I don't need saving! Bug minions, take them out!
+Zena: Byte me!
+[END]
+
+Convo 8: (Mac/CS151 Lab) (Post-Battle)
+
+Charles: Take that, exception scum.
+CS_Child: Thanks so much!
+Fatimah: No problem! Now get some sleep!
+CS_Child: ...I'll try.
+Melody: Okay, let's move onward and debug as much
+\as we can.
+Zena: Yeah.
+[END]
+
+Convo 9: (Mac/CS151 Lab) (Post-required number of battles)
+
+Fatimah: I see the paper!!
+Melody: But there's a bug in front of it!
+[END]
+
+Convo 10: (Mac/CS151 Lab) (Post-Chuck Norris bug battle)
+
+Fatimah: Haha! Look at that! They didn't stand a chance, faced with our awesomeness.
+Melody: Well, it was just a matter of searching Hack Overfull and--
+Zena: Okay, let's get that code.
+Charles: Now we just have to give them back to Bruce.
+[END]
+
+Convo 11: Entrance/Hallway (Post-Battles, Pre-Boss)
+
+Melody: Bruce! We found both of the codes.
+Zena: Here you go!
+Bruce?: Excellent...Excellent...
+Melody: Bruce...?
+Bruce?: Hahahahahaha, you miserable humans are as dense as your stupid
+\little faces convey...
+Fatimah: Wait...his eyes...
+Bruce?: Ah yes, for some reason the changing of the eye color
+\can't be avoided when executing cerebral overrides...
+Zena: Who are you?! Let Bruce go!!
+Bruce?: I am the NULL POINTER EXCEPTION!! Thank you for handing me the keys to the kingdom, by the way--
+\my success would have been impossible without contributions from viewers like you. Bwahahahaha! Farewell!
+Melody: Come back here!
+Zena: ...damn it.
+Fatimah: Yeah...well...you might have an army, but WE have a MELODY!!!
+Charles: Are you okay, Bruce?
+Bruce: Yes, sorry about that.
+Zena: What was that?
+Bruce: That was the leader of the bugs who invaded, the Null Pointer Exception.
+\It surprise-attacked me while I was helping the other students defeat their
+\bugs. But that's not at the front of the priority queue right now. The Null Pointer
+\Exception is heading to Randy's computer system - now that it has the codes,
+\it can take over all of the computers on Colby's network.
+Fatimah: No...There has to be something that we can do to stop him!
+Bruce: Well, there is one way. I can send you into the CyberSystem to defeat him before
+\he takes over Randy's system. Are you sure you want to do that?
+Zena: I don't think there's any other way. We can't hesitate after coming this far.
+Fatimah: Agreed.
+Bruce: Okay, then I'll send you guys there now.
+Charles: Sounds like a plan.
+Melody: Well then, let's do this.
+[END]
+
+Convo 12: Final Battle Arena (Neg. Version of Entrance/Hallway or Mel's Room)
+
+Fatimah: There it is! The Null Pointer Exception!
+NPE: Ugh, I can't believe you insignificant specks have
+\bothered to pursue me. Do you really think that you stand a chance against me?
+Charles: Ha, we eat exceptions like you for breakfast!
+NPE: Oh? You may change your mind once I have control over all
+\of Colby's computer systems!
+Zena: We're not gonna let that happen!
+NPE: Oh please, you don't stand a chance against me! Not when you have
+\your own bugs living inside of your own code. Not when you have bugs living
+\inside of you. Little flaws in your very own source code that breed your
+\habits of laziness, sloth, greed, envy. You can't defeat me when the members
+\of your insignificant little "human race" can't even fix themselves!
+Zena: That's...
+Zena: ...
+Fatimah: We'll never be perfect, but we'll never stop fighting for good either.
+Charles: You may think our source code is flawed-
+Melody: but although we have flaws, we have the potential to improve ourselves,
+\unlike you bugs.
+Zena: ...You sound like a generic anime protagonist.
+Zena: But count me in!!!
+Charles: Together, we have the power and skills to defeat you!
+Fatimah: You're gonna get_rect()!
+NPE: Aww, look, the children think they stand a chance...
+NPE: Prepare to die!
+Charles: Here we go!
+Zena: Haaaa!!!
+Fatimah: Yaaaaah!!!
+Melody: Get your Error Scramblers out! We're starting!
+[END]
+
+Convo 13: Final Battle Arena [Neg. Entrance/Hallway or Melody's Room (Post-Boss)]
+
+NPE: NOOOOOOOOOOOOOO!!! MY KINGDOM!!! MY MINIONS!!! AAAHHHHHH.... 
+NPE: ...aahhhh...
+NPE: ...
+Fatimah: It's gone! We did it! We won!!
+Melody: I knew we could do it. Now peace will reign over Davis once more.
+Charles: ...Well, relatively.
+Bruce: Congratulations! You saved Davis, Colby, and possibly the world! Well done,
+\my students!
+Zena: Hmmm...that's nice and all, but how are we gonna finish our projects in time now?!
+\I still haven't fixed my bugs and it's already this late...
+Bruce: Don't worry, you all get extensions! You get an extension, you get an extension,
+\everyone gets an extension! I'd better send out an e-mail!
+[END]
