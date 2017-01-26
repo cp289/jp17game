@@ -1031,8 +1031,8 @@ class Game:
 		# play win music
 		if win:
 			self.sound.play("win")
-			while self.sound.busy():
-				pass
+# 			while self.sound.busy():
+# 				pass
 		
 		# return to exploration music
 		self.sound.play('explora', -1)
@@ -1637,7 +1637,7 @@ class Game:
 			if not playerTurn:
 				loss = self.enemyTurn()
 				if loss: # if the enemy turn resulted in a loss, hold battle screen while animations finish
-					self.holdBattle = 1
+					self.holdBattle = True
 		
 		# if holding battle, check to see if animations have finished
 		else:

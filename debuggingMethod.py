@@ -254,7 +254,7 @@ class LookTime(DebuggingMethod):
 			print "ACTUAL DAMAGE: %s" % actualDamage
 			self.enemyDamage(e, actualDamage*(float(c.atk)/e.dfn))
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed", 0.5)
 
 # Level 6
 class UseInternet(DebuggingMethod):
@@ -271,7 +271,7 @@ class UseInternet(DebuggingMethod):
 			if random.random() < 0.4:
 				self.characterDamage(c, self.damage)
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed", 0.5)
 		
 # Level 7
 class CommentLines(DebuggingMethod):
@@ -287,9 +287,9 @@ class CommentLines(DebuggingMethod):
 			#critical hit chance; attacks again
 			if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 				self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
-				print "CRITICAL HIT!"
+				self.game.messages.send("CRITICAL HIT!", 0.5)
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed", 0.5)
 
 def main():
 	attack=AskBruce() 

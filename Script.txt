@@ -24,16 +24,18 @@ Fatimah: Why can't we just eat the exception...
 Melody: Do you want me to take a look at your code...?
 Fatimah: Hey, guys! Bruce sent us an email!
 \Maybe it's an extension!
+Bruce: Hi all,
 Bruce: Error Alert! Error Alert! There was a power surge
 \while a group of students was creating a program to debug
 \their projects. Instead, they brought everyone's bugs to life!
 \We need a team of Exception Eaters to help save Davis from
 \the bug invasion. Install this program, the Error Scrambler 2.0,
 \on your laptops to help you along the way.
+Bruce: Best, Bruce
 Zena: Whoa! I can't believe this!
 Melody: I know! Oh, the CS children...when will they learn...?
 Zena: This is our chance to be heroes! We'll be like the characters
-\who save the world from certain doom, like in Cyberrace and those
+\who save the world from certain doom, like in CyberRace and those
 \other awesome cartoons!
 Fatimah: We can fix everyone's bugs!
 Melody: I can finally watch Stewart Galaxy and go to bed!
@@ -75,6 +77,9 @@ Zena: We can't fight bugs with dance moves!!
 Melody: Um, guys...
 Melody: Let's get to work.
 Fatimah: Okie.
+Zena: ...By the way, how many bugs do you think we'll have to fight?
+Fatimah: I don't know, but let's make sure to take a break after we think we've fought enough.
+Melody: We can go to the hallway when we're ready for a break.
 [END]
 
 Convo 5: (Robotics Lab) (After fighting required number of battles)
@@ -114,7 +119,7 @@ Bruce: Hi all--
 Bruce: The bugs have stolen Randy's secret codes so that they can hack into
 \his computer. The other code is still out there somewhere. Try to find it
 \as you defeat the bugs.
-Bruce: Best,
+Bruce: Best, Bruce
 Zena: Well, that answers our questions.
 Charles: Hey, can I join you guys? I'd like to help, too!
 Melody: Sure, we could always use another person.
@@ -152,7 +157,7 @@ Melody: But there's a bug in front of it!
 
 Convo 10: (Mac/CS151 Lab) (Post-Chuck Norris bug battle)
 
-Fatimah: Haha! Look at that! It didn't stand a chance, faced with our awesomeness.
+Fatimah: Haha! Look at that! They didn't stand a chance, faced with our awesomeness.
 Melody: Well, it was just a matter of searching Hack Overfull and--
 Zena: Okay, let's get that code.
 Charles: Now we just have to give them back to Bruce.
