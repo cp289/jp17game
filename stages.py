@@ -302,7 +302,7 @@ class Game:
 		namePos = ( 25, -1 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', self, namePos )
-		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 7 ) )
+		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 14 ) )
 		# total HP, ATK, DFN, SPD, ACC, time
 		self.mel.setAllGR( ( 0.8, 0.9, 0.85, 0.75, 0.7 ) )
 		# HP, ATK, DFN, SPD, ACC
@@ -321,7 +321,7 @@ class Game:
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', self, namePos)
-		self.fa.setAllStats( ( 400, 44, 54, 51, 50, 6 ) )
+		self.fa.setAllStats( ( 400, 44, 54, 51, 50, 12 ) )
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
 		# initialize zen
@@ -335,7 +335,7 @@ class Game:
 		namePos = ( 40, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', self, namePos )
-		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 9 ) )
+		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 18 ) )
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
 		# initialize cha
@@ -349,7 +349,7 @@ class Game:
 		namePos = ( 20, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', self, namePos )
-		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 7 ) )
+		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 14 ) )
 		self.cha.setAllGR( ( 0.75, 0.7, 0.8, 0.9, 0.85 ) )
 		
 		"""
@@ -416,7 +416,7 @@ class Game:
 		textbox = pygame.transform.scale(textbox, (textboxWidth, textboxHeight))
 
 		cursor = pygame.image.load( "images/cursor.png" ).convert_alpha()
-
+		
 		# list of all people who will need textboxes
 		# these are PlayableCharacter objects
 		talkingCharList = [self.mel, self.fa, self.zen, self.cha, self.chaEvil, self.bru, self.bruEvil, self.NPE, self.stu1, self.stu2, self.CSC ]
@@ -641,7 +641,7 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1001.png' ).convert_alpha()
 						]
 		
-		self.roboLabStage = Stage( 'robotics lab', 3, scale, bg, battleBG, bugImgs )
+		self.roboLabStage = Stage( 'robotics lab', 4, scale, bg, battleBG, bugImgs )
 		
 		# create door
 		
@@ -774,7 +774,7 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1101.png' ).convert_alpha()
 						]
 
-		self.macLabStage = Stage( 'mac lab', 3, scale, bg, battleBG, bugImgs )
+		self.macLabStage = Stage( 'mac lab', 5, scale, bg, battleBG, bugImgs )
 
 		#def __init__( self, pos, dim, room ):
 		doorToHallway = agents.Door( (  235 * scale, 800 * scale ), \

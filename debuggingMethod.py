@@ -94,15 +94,15 @@ class TakeBreak(DebuggingMethod):
 class ReadProject(DebuggingMethod):
 	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Read Over Project", 2, 0)
-		self.desc = "Boosts ACC and ATK for 2 turns."
+		self.desc = "Honesty and confidence up 2 turns."
 		self.game = game
 		
 	def actions(self, e, c):
 		# boosts ACC and ATK for 2 turns
 		if c.ATKBoostTurnsLeft == 0:
 			c.ATKBoostTurnsLeft = 3
-			c.addTempStat( 'acc', 100 )
-			c.addTempStat( 'atk', 100 )
+			c.addTempStat( 'acc', 40 )
+			c.addTempStat( 'atk', 40 )
 			self.game.messages.send("Stats Raised",0.5)
 
 
@@ -154,7 +154,7 @@ class ReferNotes(DebuggingMethod):
 class ReadCode(DebuggingMethod):
 	def __init__(self,game):
 		DebuggingMethod.__init__(self,"Read Code", 2, 0)
-		self.desc = "Boosts SPD and DEF for 2 turns."
+		self.desc = "Concentration and passivity up 2 turns."
 		self.game = game
 		
 	def actions(self, e, c):
@@ -162,8 +162,8 @@ class ReadCode(DebuggingMethod):
 		if c.DFNBoostTurnsLeft == 0:
 			#keep different from 3 turns for acc/atk
 			c.DFNBoostTurnsLeft = 2 
-			c.addTempStat( 'spd', 100 )
-			c.addTempStat( 'dfn', 100 )
+			c.addTempStat( 'spd', 40 )
+			c.addTempStat( 'dfn', 40 )
 			self.game.messages.send("Stats Raised", 0.5)
 			
 # Level 4
