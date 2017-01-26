@@ -1033,7 +1033,7 @@ class Game:
 			self.sound.play("win")
 			while self.sound.busy():
 				pass
-			
+		
 		# return to exploration music
 		self.sound.play('explora', -1)
 		
@@ -1045,7 +1045,6 @@ class Game:
 		for player in players:
 			player.leaveBattleStatsReset()
 			player.fillTime()
-			self.messages.send("Reset Time to Full!",0.5)
 		
 		self.inBattle = False
 		self.holdBattle = False
