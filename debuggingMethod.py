@@ -111,6 +111,7 @@ class Flee(DebuggingMethod):
 	def __init__(self,game):
 		DebuggingMethod.__init__(self, "Flee", 0, 0)
 		self.desc = "Change your major."
+		self.game = game
 	def actions(self, e, c):
 		#chance to flee
 		if random.random() < 0.6:

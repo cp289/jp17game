@@ -1572,7 +1572,7 @@ class Game:
 					print 'you win the battle!'
 				
 					self.battlesWon += 1
-					self.leaveBattle( charles = self.gotCharles )
+					self.leaveBattle( True, charles = self.gotCharles )
 					print 'battles won:', self.battlesWon
 				
 					if self.inBossBattle: # won the boss battle! go to end screen
