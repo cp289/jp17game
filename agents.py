@@ -960,6 +960,10 @@ class PlayableCharacter( Character ):
 		self.battleAnim = self.battleDying
 		self.battleDying.play()
 	
+	# returns whether the character's death animation has finished
+	def finishedDeath( self ):
+		return self.battleDying.state == 'stopped'
+	
 	# draws the character at its current position on the given Surface
 	# if it is in battle mode, it has a health bar
 	def draw( self, screen ):
