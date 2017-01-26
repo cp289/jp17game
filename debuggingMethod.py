@@ -56,26 +56,27 @@ class DebuggingMethod:
 # level 1 attacks
 class AskSomeone(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Ask Someone", 4, 500) # affects all bugs?? No. Why would we select a single one?
+		DebuggingMethod.__init__(self,"Ask Someone", 4, 300) # affects all bugs?? No. Why would we select a single one?
 		self.desc = "Ask for help to damage a bug."
 		self.game = game
 
 	def actions(self, e, c):
-# 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-# 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
-# 		else:
-# 			self.game.messages.send("Attack Missed", 0.5 )
-		self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+		prob = 0.7
+		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
+			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
+		else:
+			self.game.messages.send("Attack Missed", 0.5 )
 			
 class PrintStatements(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Use Print Statements", 3, 300)
+		DebuggingMethod.__init__(self,"Use Print Statements", 3, 100)
 		self.desc = "May do decent damage to one bug."
 		self.game = game
 		
 	def actions(self, e, c):
-		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+		prob = 0.7
+		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
+			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
 		else:
 			self.game.messages.send("Attack Missed", 0.5 )
 		
@@ -143,15 +144,16 @@ class ReferNotes(DebuggingMethod):
 		self.game = game
 		
 	def actions(self, e, c):
-		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+		prob = 0.7
+		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
+			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
 		else:
 			self.game.messages.send("Attack Missed", 0.5 )
 
 # Level 3
 class ReadCode(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Read Code", 2, 0) # damage???
+		DebuggingMethod.__init__(self,"Read Code", 2, 0)
 		self.desc = "Boosts SPD and DEF for 2 turns."
 		self.game = game
 		
@@ -167,7 +169,7 @@ class ReadCode(DebuggingMethod):
 # Level 4
 class ShareCode(DebuggingMethod):
 	def __init__(self, game):
-		DebuggingMethod.__init__(self, "Share Code", 3, 0) # damage?? 
+		DebuggingMethod.__init__(self, "Share Code", 3, 0)
 		self.game = game
 		self.desc = "Restores chosen partner's HP by 40%."
 		
@@ -248,13 +250,14 @@ class LookTime(DebuggingMethod):
 		
 	def actions(self, e, c):
 		# has chance of damaging character...
-		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
+		prob = 0.7
+		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			#make damage lower for lower time
 			actualDamage = self.damage + self.damage*(c.time/c.maxTime)
 			print "ACTUAL DAMAGE: %s" % actualDamage
-			self.enemyDamage(e, actualDamage*(float(c.atk)/e.dfn))
+			self.enemyDamage(e, actualDamage + actualDamage*(0.5*c.atk - 0.5*e.dfn)/1000)
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed.",0.5)
 
 # Level 6
 class UseInternet(DebuggingMethod):
@@ -264,14 +267,15 @@ class UseInternet(DebuggingMethod):
 		self.game = game
 		
 	def actions(self, e, c):
-		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+		prob = 0.7
+		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
+			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
 
 			# has chance of damaging character in addition to enemy
 			if random.random() < 0.4:
 				self.characterDamage(c, self.damage)
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed.",0.5)
 		
 # Level 7
 class CommentLines(DebuggingMethod):
@@ -282,14 +286,15 @@ class CommentLines(DebuggingMethod):
 		
 	def actions(self, e, c):
 		# high chance of critical hit... What is a critical hit??
-		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
+		prob = 0.7
+		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
+			self.enemyDamage(e, self.damage + (0.5*c.atk - 0.5*e.dfn)/1000)
 			#critical hit chance; attacks again
 			if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
-				self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
-				print "CRITICAL HIT!"
+				self.enemyDamage(e, self.damage + (0.5*c.atk - 0.5*e.dfn)/1000)
+				self.game.messages.send("Critical Hit!",0.5)
 		else:
-			print "Attack Missed."
+			self.game.messages.send("Attack Missed.",0.5)
 
 def main():
 	attack=AskBruce() 

@@ -173,7 +173,9 @@ class Character( Thing ):
 	
 	# attacks the given Character target and does the given amount of damage
 	def attack( self, target, dmg ):
-		target.takeDamage(dmg)
+		prob = 0.9
+		if random.random() < prob+((1-prob)*self.acc-prob*target.spd)/(1000):
+			target.takeDamage((100+random.random()*200)+30*(0.5*self.atk+0.5*target.dfn)/1000)
 	
 	# draws the Character with a health bar at its current position on the given Surface
 	def draw( self, screen ):
