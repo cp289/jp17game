@@ -1189,6 +1189,10 @@ class Game:
 		# parse keyboard/mouse input events
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN: # for initial key presses
+###########################################################################
+# 				if event.key == pygame.K_j:
+# 					self.gameComplete = True
+###########################################################################
 				if event.key == pygame.K_c:
 					self.onStatScreen = True
 					print 'show stat screen'
@@ -1832,6 +1836,57 @@ class Game:
 		self.storedPoints = 0
 		
 		self.refresh.append( self.screen.get_rect() )
+
+	# reports the wins, losses, escapes, and
+	# each characters kill and death counts,
+	# as well as if all moves were unlocked
+	def reportRecords( self ):
+
+		allMovesUnlocked = False
+		players = [self.mel, self.fa, self.zen, self.cha]
+		melInfo = ['Melody:']
+		faInfo = ['Fatimah:']
+		zenInfo = ['Zena:']
+		chaInfo = ['Charles:']
+
+		# get individual player records
+		for player in players:
+			rightList = None
+			if player.name == 'Melody':
+				rightList = melInfo
+			elif player.name == 'Fatimah':
+				rightList = faInfo
+			elif player.name == 'Zena':
+				rightList = zenInfo
+			elif player.name == 'Charles':
+				rightList = chaInfo
+			rightList.append('Killed ' + str(player.killCount) + ' enemies')
+			rightList.append('Died ' + str(player.timesKilled) + ' times')
+
+			# assign back to original list
+			if player.name == 'Melody':
+				melInfo = rightList
+			elif player.name == 'Fatimah':
+				faInfo = rightList
+			elif player.name == 'Zena':
+				zenInfo = rightList
+			elif player.name == 'Charles':
+				chaInfo = rightList	
+
+			if player.numMovesUnlocked == 5:
+				allMovesUnlocked = True
+
+		# get general game records
+		victoryList = ['Game Records: ']
+		victoryList.append(  'Battles Won: ' + str( self.battlesWon ) )
+		victoryList.append( 'Battles Lost: ' + str( self.battlesLost ) )
+		victoryList.append( 'Times Fled: ' + str( self.timesFled ) )
+		if allMovesUnlocked == True:
+			victorylist.append('All moves were unlocked! Nice!')
+
+		returnList = [victoryList, melInfo, faInfo, zenInfo, chaInfo]
+
+		return returnList
 
 
 

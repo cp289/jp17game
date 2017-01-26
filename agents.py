@@ -344,6 +344,7 @@ class PlayableCharacter( Character ):
 				Flee(game),
 				RestoreTime(game)
 			]
+		self.numMovesUnlocked = 0
 		
 		#records currently boosted stats and 
 		#the turns left for the boost,
@@ -841,6 +842,7 @@ class PlayableCharacter( Character ):
 	# add a given DebuggingMethod to this character's repertoire of attacks
 	def addAttack( self, aaa ):
 		self.attacks.append( aaa )
+		self.numMovesUnlocked += 1
 	
 	# level up the character, using growth rates to determine which stats
 	# will be leveled up

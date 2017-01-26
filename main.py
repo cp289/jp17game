@@ -67,8 +67,52 @@ def showInstructionScreen( screen ):
 	pygame.display.update()
 
 # draws game end screen
-def showEndScreen( screen ):
-	screen.fill( white )
+def showEndScreen( screen, game ):
+	screen.fill( green )
+
+	font = game.bigFont
+ 
+	# organize info
+	records = game.reportRecords() 
+	genInfo = records[0] #5 things
+	melInfo = records[1] #3 things
+	faInfo = records[2]
+	zenInfo = records[3]
+	chaInfo = records[4]
+
+	screenWidth = game.screenSize[0]
+	screenHeight = game.screenSize[1]
+	midTop = ((screenWidth/2)-150, 0)
+	midLeft = ( 30, screenHeight - 350)
+	midRight = (screenWidth-400, screenHeight - 350)
+	lineSkip = 50
+
+	# blit info
+	offset = 30 # space between characters' records
+	lineNum = 0
+	for info in genInfo:
+		infoSurf = font.render(info, True, (0,0,0))
+		screen.blit(infoSurf, (midTop[0], midTop[1]+ (lineSkip*lineNum)))
+		lineNum += 1
+	lineNum = 0
+	for record in melInfo:
+		recordSurf = font.render(record, True, (0,0,0))
+		screen.blit( recordSurf, (midLeft[0], midLeft[1] + (lineSkip * lineNum)) )
+		lineNum += 1
+	for record in faInfo:
+		recordSurf = font.render(record, True, (0,0,0))
+		screen.blit( recordSurf, (midLeft[0], midLeft[1] + (lineSkip * lineNum)+offset) )
+		lineNum += 1	
+	lineNum = 0	
+	for record in zenInfo:
+		recordSurf = font.render(record, True, (0,0,0))
+		screen.blit( recordSurf, (midRight[0], midRight[1] + (lineSkip * lineNum)) )
+		lineNum += 1
+	for record in chaInfo:
+		recordSurf = font.render(record, True, (0,0,0))
+		screen.blit( recordSurf, (midRight[0], midRight[1] + (lineSkip * lineNum)+offset) )
+		lineNum += 1
+
 	pygame.display.update()
 
 def exitGame():
@@ -168,7 +212,7 @@ def main():
 	while not game.gameComplete:
 		game.update()
 	
-	showEndScreen( screen )
+	showEndScreen( screen, game )
 	
 	# after game end, keep screen until user closes window
 	while 2:
