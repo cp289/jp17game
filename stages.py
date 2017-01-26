@@ -1072,6 +1072,7 @@ class Game:
 			self.enterDialogue() # enter convo 3
 		elif self.charlesBattle and not self.gotCharles: # if leaving battle with Charles, unlock him
 			self.gotCharles = True
+			self.levelCharles()
 			self.allPlayers.append( self.cha )
 			self.enterDialogue() # convo 6
 		elif self.stage == self.macLabStage and self.stage.battlesCompleted == 1 and self.convoNum == 8: # after first Mac lab battle
@@ -1081,6 +1082,15 @@ class Game:
 			self.enterDialogue() # convo 10
 		
 		print 'leave battle'
+	
+	# Make Charles the same level as the average party level
+	def levelCharles( self ):
+		levelList = [ self.mel.level, self.fa.level, self.zen.level ]
+		avg = sum( levelList ) / len( levelList )
+		if avg != 1:
+			for i in range( avg - 1 ):
+				self.cha.levelUp( self )
+				self.cha.increaseXP( 100 )
 	
 	# displays the given PlayableCharacter's stats at the given position on the stat screen
 	def showCharaStats( self, chara, pos ):
