@@ -64,7 +64,7 @@ class AskSomeone(DebuggingMethod):
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 		else:
-			self.game.messages.send("Attack Missed", 5 )
+			self.game.messages.send("Attack Missed", 0.5 )
 			
 class PrintStatements(DebuggingMethod):
 	def __init__(self,game):
@@ -76,7 +76,7 @@ class PrintStatements(DebuggingMethod):
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 		else:
-			self.game.messages.send("Attack Missed", 5 )
+			self.game.messages.send("Attack Missed", 0.5 )
 		
 class TakeBreak(DebuggingMethod):
 	def __init__(self,game):
@@ -87,7 +87,7 @@ class TakeBreak(DebuggingMethod):
 	def actions(self, e, c):
 		# Restore 40% max health.
 		c.raiseHP(0.4)
-		self.game.messages.send("HP Raised",5)
+		self.game.messages.send("HP Raised",0.5)
 	
 class ReadProject(DebuggingMethod):
 	def __init__(self,game):
@@ -101,7 +101,7 @@ class ReadProject(DebuggingMethod):
 			c.ATKBoostTurnsLeft = 3
 			c.addTempStat( 'acc', 100 )
 			c.addTempStat( 'atk', 100 )
-			self.game.messages.send("Stats Raised",5)
+			self.game.messages.send("Stats Raised",0.5)
 
 
 # Not debugging methods, but always present battle actions
@@ -116,7 +116,7 @@ class Flee(DebuggingMethod):
 		if random.random() < 0.6:
 			c.escaped = True
 		else:
-			self.game.messages.send("Couldn't Escape!",5)
+			self.game.messages.send("Couldn't Escape!",0.5)
 
 # Restores all of the player's time
 class RestoreTime(DebuggingMethod):
@@ -126,7 +126,7 @@ class RestoreTime(DebuggingMethod):
 		self.game = game
 	def actions(self, e, c):
 		c.fillTime()
-		self.game.messages.send("Time Restored.",5)
+		self.game.messages.send("Time Restored.",0.5)
 
 # / other battle actions
 
@@ -144,7 +144,7 @@ class ReferNotes(DebuggingMethod):
 		if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 		else:
-			self.game.messages.send("Attack Missed", 5 )
+			self.game.messages.send("Attack Missed", 0.5 )
 
 # Level 3
 class ReadCode(DebuggingMethod):
@@ -160,7 +160,7 @@ class ReadCode(DebuggingMethod):
 			c.DFNBoostTurnsLeft = 2 
 			c.addTempStat( 'spd', 100 )
 			c.addTempStat( 'dfn', 100 )
-			self.game.messages.send("Stats Raised", 5)
+			self.game.messages.send("Stats Raised", 0.5)
 			
 # Level 4
 class ShareCode(DebuggingMethod):
