@@ -68,10 +68,13 @@ class AttackChooser:
 		
 		self.atkTimeText = self.descFont.render("(Time Cost: "+str(self.attack().timeNeeded)+")", True, (255,255,255))
 		
-		print('config time: ')
-
 		self.atkRect = pygame.Rect(
 				self.atkPos,
+				(self.atkText.get_rect().w,self.atkText.get_rect().h)
+			)
+			
+		self.atkRectR = pygame.Rect(
+				(0,0),
 				(self.atkText.get_rect().w,self.atkText.get_rect().h)
 			)
 
@@ -80,20 +83,45 @@ class AttackChooser:
 				(self.descText.get_rect().w, self.descText.get_rect().h)
 			)
 			
+		self.descRectR = pygame.Rect(
+				(0,0),
+				(self.descText.get_rect().w, self.descText.get_rect().h)
+			)
+			
+		self.nameRect = pygame.Rect(
+				self.namePos,
+				(self.nameText.get_rect().w, self.nameText.get_rect().h)
+			)
+		
+		self.nameRectR = pygame.Rect(
+				(0,0),
+				(self.nameText.get_rect().w, self.nameText.get_rect().h)
+			)
+			
 		self.charTimeRect = pygame.Rect(
 				self.charTimePos,
 				(self.charTimeText.get_rect().w, self.charTimeText.get_rect().h)
 			)
 		
+		self.charTimeRectR = pygame.Rect(
+				(0,0),
+				(self.charTimeText.get_rect().w, self.charTimeText.get_rect().h)
+			)
+			
 		self.atkTimeRect = pygame.Rect(
 				self.atkTimePos,
+				(self.atkTimeText.get_rect().w, self.atkTimeText.get_rect().h)
+			)
+			
+		self.atkTimeRectR = pygame.Rect(
+				(0,0),
 				(self.atkTimeText.get_rect().w, self.atkTimeText.get_rect().h)
 			)
 		self.draw()
 	
 	def updateTime(self): # No erasing yet...
 		# erase old time
-		self.parSurface.blit(self.surface, self.pos, self.charTimeRect)
+		self.parSurface.blit(self.surface, self.charTimeRect, self.charTimeRect)
 		oldCharTimeRect = self.charTimeRect
 		
 		# update time value
@@ -101,6 +129,11 @@ class AttackChooser:
 		
 		self.charTimeRect = pygame.Rect(
 				self.charTimePos,
+				(self.charTimeText.get_rect().w, self.charTimeText.get_rect().h)
+			)
+		
+		self.charTimeRectR = pygame.Rect(
+				(0,0),
 				(self.charTimeText.get_rect().w, self.charTimeText.get_rect().h)
 			)
 		
@@ -113,19 +146,19 @@ class AttackChooser:
 		self.parSurface.blit(self.surface, self.pos )
 		
 		# draw attack text
-		self.parSurface.blit(self.atkText, self.atkRect)
+		self.parSurface.blit(self.atkText, self.atkRect, self.atkRectR)
 
 		# draw atk description text
-		self.parSurface.blit(self.descText, self.descRect)
+		self.parSurface.blit(self.descText, self.descRect, self.descRectR)
 		
 		# draw name
-		self.parSurface.blit(self.nameText, self.namePos)
+		self.parSurface.blit(self.nameText, self.nameRect, self.nameRectR)
 		
 		# draw charTime
-		self.parSurface.blit(self.charTimeText, self.charTimePos)
+		self.parSurface.blit(self.charTimeText, self.charTimeRect, self.charTimeRectR)
 		
 		# draw atkTime
-		self.parSurface.blit(self.atkTimeText, self.atkTimePos)
+		self.parSurface.blit(self.atkTimeText, self.atkTimeRect, self.atkTimeRectR)
 		
 		pygame.display.update(self.rect)
 		
@@ -138,9 +171,9 @@ class AttackChooser:
 		self.atkIndex = (self.atkIndex + num) % len(self.attacks)
 		
 		# erase old attack and description text
-		self.parSurface.blit(self.surface, self.atkRect, self.atkRect)
-		self.parSurface.blit(self.surface, self.atkTimeRect, self.atkTimeRect)
-		self.parSurface.blit(self.surface, self.descRect, self.descRect)
+		self.parSurface.blit(self.surface, self.atkRect, self.atkRectR)
+		self.parSurface.blit(self.surface, self.atkTimeRect, self.atkTimeRectR)
+		self.parSurface.blit(self.surface, self.descRect, self.descRectR)
 		oldAtkRect = self.atkRect
 		oldAtkTimeRect = self.atkTimeRect
 		oldDescRect = self.descRect
@@ -152,16 +185,31 @@ class AttackChooser:
 
 		self.atkRect = pygame.Rect(
 				self.atkPos,
-				(self.atkText.get_rect().w,
-				self.atkText.get_rect().h)
+				(self.atkText.get_rect().w,self.atkText.get_rect().h)
 			)
+			
+		self.atkRectR = pygame.Rect(
+				(0,0),
+				(self.atkText.get_rect().w,self.atkText.get_rect().h)
+			)
+
 		self.descRect = pygame.Rect(
 				self.descPos,
-				(self.descText.get_rect().w,
-				self.descText.get_rect().h)
+				(self.descText.get_rect().w, self.descText.get_rect().h)
 			)
+			
+		self.descRectR = pygame.Rect(
+				(0,0),
+				(self.descText.get_rect().w, self.descText.get_rect().h)
+			)
+			
 		self.atkTimeRect = pygame.Rect(
 				self.atkTimePos,
+				(self.atkTimeText.get_rect().w, self.atkTimeText.get_rect().h)
+			)
+			
+		self.atkTimeRectR = pygame.Rect(
+				(0,0),
 				(self.atkTimeText.get_rect().w, self.atkTimeText.get_rect().h)
 			)
 

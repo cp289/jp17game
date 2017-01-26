@@ -1488,10 +1488,8 @@ class Game:
 							self.enemies[self.selectedEnemyIDX].select()
 					elif event.key == pygame.K_LEFT:
 						self.dashboard.switchAtk(-1)
-						self.dashboard.draw()
 					elif event.key == pygame.K_RIGHT:
 						self.dashboard.switchAtk(1)
-						self.dashboard.draw()
 					
 					
 					# attack currently selected enemy
@@ -1726,7 +1724,6 @@ class Game:
 		# create dashboard
 		self.dashboard = AttackChooser(self.screen)
 		self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
-		self.dashboard.draw()
 		
 		print 'enter battle'
 		
