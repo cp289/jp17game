@@ -177,21 +177,7 @@ class Character( Thing ):
 		
 		# if HP bar should be displayed
 		if self.showHP:
-			# draw health bar background (in black)
-			pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
-			#print 'drawing', self.name, 'hp bar at', self.hpbarBG
-			
-			# draw health bar foreground based on current HP left (if there is any)
-			if self.hp != 0:
-				fraction = float( self.hp ) / self.totalHP
-				newWidth = int( ( self.hpbarWidth - 2 ) * self.hp / self.totalHP )
-				self.hpbarFG.width = newWidth
-				#pygame.draw.rect( screen, green, self.hpbarFG )
-			
-				if fraction > 0.3:
-					pygame.draw.rect( screen, green, self.hpbarFG )
-				else:
-					pygame.draw.rect( screen, red, self.hpbarFG )
+			self.drawHP( screen )
 		
 		# draw pointer if selected
 		if self.selected:
@@ -211,6 +197,24 @@ class Character( Thing ):
 			innerPoints = [ innerPos, innerBottom, innerRight ]
 			
 			pygame.draw.polygon( screen, bluegreen, innerPoints )
+	
+	# draws this character's HP bar on the given screen
+	def drawHP( self, screen ):
+		# draw health bar background (in black)
+		pygame.draw.rect( screen, ( 0, 0, 0 ), self.hpbarBG )
+		#print 'drawing', self.name, 'hp bar at', self.hpbarBG
+		
+		# draw health bar foreground based on current HP left (if there is any)
+		if self.hp != 0:
+			fraction = float( self.hp ) / self.totalHP
+			newWidth = int( ( self.hpbarWidth - 2 ) * self.hp / self.totalHP )
+			self.hpbarFG.width = newWidth
+			#pygame.draw.rect( screen, green, self.hpbarFG )
+	
+			if fraction > 0.3:
+				pygame.draw.rect( screen, green, self.hpbarFG )
+			else:
+				pygame.draw.rect( screen, red, self.hpbarFG )
 	
 	# returns a string reporting the name and current HP of the Character
 	def toString( self ):
@@ -403,10 +407,16 @@ class PlayableCharacter( Character ):
 			self.battleRect = pygame.Rect( ( battlePos[0], battlePos[1] ), ( 270, 200 ) )
 			self.adjustHPbar()
 		
-		attacking = imglist[3]
-		if attacking != None:
-			pass
-			'''make pyganim'''
+		# attack list contains base filename
+		attackFile = imglist[3]
+		if attackFile != None:
+			attackList = []
+			attackList.append( ( attackFile + '0.png', 0.1 ) )
+			attackList.append( ( attackFile + '1.png', 0.1 ) )
+			attackList.append( ( attackFile + '2.png', 0.5 ) )
+			attackList.append( ( attackFile + '3.png', 0.5 ) )
+			attackList.append( ( attackFile + '4.png', 1.0 ) )
+			self.battleAttacking = pyganim.PygAnimation( attackList, loop = False )
 		
 		dying = imglist[4]
 		if dying != None:
@@ -415,7 +425,7 @@ class PlayableCharacter( Character ):
 		
 		# variables to determine which battle animation should be playing
 		self.takingDamage = 0 # means not taking damage
-		self.attacking = False
+		self.attacking = 0 # 0 for not started, 1 for in progress, 2 for finished
 		self.dying = False
 		
 		other = imglist[5]
@@ -640,6 +650,13 @@ class PlayableCharacter( Character ):
 				return False
 	
 	
+	# attacks the given Character target and does the given amount of damage
+	def startAttack( self ):
+		print '----ATTACKING AAAAAAA----'
+		
+		self.attacking = 1 # animation is now in progress
+		self.battleAnim = self.battleAttacking
+		self.battleAttacking.play()
 	
 	# reduces the PlayableCharacter's HP by the given amount
 	def takeDamage( self, amt ):
@@ -877,6 +894,7 @@ class PlayableCharacter( Character ):
 				Character.draw( self, screen )
 		else: # draw in battle mode
 			self.battleAnim.blit( screen, self.battlePos )
+			self.drawHP( screen )
 			
 			# stop showing animation for taking damage after some time
 			if self.takingDamage > 0:
@@ -884,11 +902,14 @@ class PlayableCharacter( Character ):
 				
 				if self.takingDamage == 0:
 					self.battleAnim = self.battleIdle
-			#Character.draw( self, screen )
+			if self.attacking == 1: # if attacking is in progress, check to see whether it has finished
+				#print '----SHOULD BE SHOWING ATTACK ANIMATION----'
+				if self.battleAttacking.elapsed >= 2.0:
+					self.attacking = 2
+					self.battleAnim = self.battleIdle
+					print '----LEFT ATTACK ANIMATION----'
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
-		
-		#Character.draw( self, screen )
 	
 	# returns a string reporting all attacks the character has
 	def listAttacks( self ):
