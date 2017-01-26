@@ -61,7 +61,7 @@ class AskSomeone(DebuggingMethod):
 		self.game = game
 
 	def actions(self, e, c):
-		prob = 0.7
+		prob = 0.8
 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
 		else:
@@ -74,7 +74,7 @@ class PrintStatements(DebuggingMethod):
 		self.game = game
 		
 	def actions(self, e, c):
-		prob = 0.7
+		prob = 0.8
 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
 		else:
@@ -144,7 +144,7 @@ class ReferNotes(DebuggingMethod):
 		self.game = game
 		
 	def actions(self, e, c):
-		prob = 0.7
+		prob = 0.8
 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
 		else:
@@ -250,7 +250,7 @@ class LookTime(DebuggingMethod):
 		
 	def actions(self, e, c):
 		# has chance of damaging character...
-		prob = 0.7
+		prob = 0.8
 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			#make damage lower for lower time
 			actualDamage = self.damage + self.damage*(c.time/c.maxTime)
@@ -267,7 +267,7 @@ class UseInternet(DebuggingMethod):
 		self.game = game
 		
 	def actions(self, e, c):
-		prob = 0.7
+		prob = 0.8
 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
 
@@ -286,7 +286,7 @@ class CommentLines(DebuggingMethod):
 		
 	def actions(self, e, c):
 		# high chance of critical hit... What is a critical hit??
-		prob = 0.7
+		prob = 0.8
 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			self.enemyDamage(e, self.damage + (0.5*c.atk - 0.5*e.dfn)/1000)
 			#critical hit chance; attacks again
