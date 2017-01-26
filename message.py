@@ -8,11 +8,11 @@ class Message:
 	def __init__(self, body, sec):
 		self.time = time.time() + sec
 		self.body = body
-		self.font = pygame.font.SysFont('Helvetica', 30)
+		self.font = pygame.font.SysFont('Helvetica', 25)
 		self.text = self.font.render(body, True, (0,0,0))
 		self.surface = pygame.Surface((self.text.get_rect().w+50,self.text.get_rect().h+50))
 		self.surface.fill((200,200,200))
-		self.pos = (400 - self.text.get_rect().w/2, 0)
+		self.pos = (390 - self.text.get_rect().w/2, 0)
 		self.rect = self.surface.get_rect().move(self.pos)
 	
 	# draw the message
