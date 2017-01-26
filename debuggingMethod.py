@@ -121,7 +121,7 @@ class Flee(DebuggingMethod):
 class RestoreTime(DebuggingMethod):
 	def __init__(self,game):
 		DebuggingMethod.__init__(self, "Cancel Plans", 0, 0)
-		self.desc = "Rework your schedule. Restores your character's time fully."
+		self.desc = "Rework your schedule. Restores character's time fully."
 	def actions(self, e, c):
 		c.fillTime()
 
