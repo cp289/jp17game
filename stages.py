@@ -1363,7 +1363,7 @@ class Game:
 			self.livePlayers.remove( target )
 			
 			# erase killed target
-			eraseRect = target.battleRect
+			eraseRect = target.battleRect.copy()
 			eraseRect.width += 12
 			eraseRect.height += 12
 			self.stage.fillBattleBG( self.screen, eraseRect )

@@ -65,6 +65,7 @@ class AskSomeone(DebuggingMethod):
 			self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 		else:
 			self.game.messages.send("Attack Missed", 0.5 )
+# 		self.enemyDamage(e, self.damage*(float(c.atk)/e.dfn))
 			
 class PrintStatements(DebuggingMethod):
 	def __init__(self,game):
