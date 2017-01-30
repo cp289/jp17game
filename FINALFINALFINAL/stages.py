@@ -1808,7 +1808,7 @@ class Game:
 		
 		# play battle music
 		self.sound.stop('explora')
-		self.sound.play("battleMusic", -1 )
+		self.sound.play("enemy", -1 )
 		
 		self.inBattle = True
 		self.player.enterBattle( False ) # no one is allowed to flree
@@ -1841,7 +1841,10 @@ class Game:
 	# each characters kill and death counts,
 	# as well as if all moves were unlocked
 	def reportRecords( self ):
-
+		
+		# play end music
+		self.sound.play("end")
+		
 		allMovesUnlocked = False
 		players = [self.mel, self.fa, self.zen, self.cha]
 		melInfo = ['Melody:']
