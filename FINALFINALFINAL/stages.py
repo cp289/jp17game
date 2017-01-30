@@ -1191,8 +1191,8 @@ class Game:
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN: # for initial key presses
 ###########################################################################
- 				if event.key == pygame.K_j:
- 					self.gameComplete = True
+#				if event.key == pygame.K_j:
+#					self.gameComplete = True
 ###########################################################################
 				if event.key == pygame.K_c:
 					self.onStatScreen = True
@@ -1544,20 +1544,21 @@ class Game:
 								self.dashboard.switchAtk(-1)
 							elif event.key == pygame.K_RIGHT:
 								self.dashboard.switchAtk(1)
-							elif event.key == pygame.K_e: # temp battle win key
-								self.awardXP()
-								done = True
-								print 'you win the battle!'
-						
-								self.battlesWon += 1
-								self.leaveBattle( True, charles = self.gotCharles )
-								print 'battles won:', self.battlesWon
-						
-								if self.inBossBattle: # won the boss battle! go to end screen
-									self.enterDialogue() # trigger final congratulatory conversation
-									return
-						
-								self.stage.addBattle()
+
+#							elif event.key == pygame.K_e: # temp battle win key
+#								self.awardXP()
+#								done = True
+#								print 'you win the battle!'
+#						
+#								self.battlesWon += 1
+#								self.leaveBattle( True, charles = self.gotCharles )
+#								print 'battles won:', self.battlesWon
+#						
+#								if self.inBossBattle: # won the boss battle! go to end screen
+#									self.enterDialogue() # trigger final congratulatory conversation
+#									return
+#						
+#								self.stage.addBattle()
 					
 					
 							# attack currently selected enemy
