@@ -984,7 +984,10 @@ class Game:
 		self.refresh.append( self.screen.get_rect() )
 		
 		# config messages
-		self.messages.setBackground(self.stage.battleBG)
+		if not self.inBossBattle:
+			self.messages.setBackground(self.stage.battleBG)
+		else:
+			self.messages.setBackground( self.bossBattleBG )
 		
 		# play battle music
 		self.sound.stop('explora')
