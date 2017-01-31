@@ -56,7 +56,7 @@ class DebuggingMethod:
 # level 1 attacks
 class AskSomeone(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Ask Someone", 4, 300) # affects all bugs?? No. Why would we select a single one?
+		DebuggingMethod.__init__(self,"Ask Someone", 5, 300) 
 		self.desc = "Ask for help to damage a bug."
 		self.game = game
 
@@ -93,7 +93,7 @@ class TakeBreak(DebuggingMethod):
 	
 class ReadProject(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Read Over Project", 2, 0)
+		DebuggingMethod.__init__(self,"Read Over Project", 3, 0)
 		self.desc = "Honesty and confidence up 2 turns."
 		self.game = game
 		
@@ -153,7 +153,7 @@ class ReferNotes(DebuggingMethod):
 # Level 3
 class ReadCode(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Read Code", 2, 0)
+		DebuggingMethod.__init__(self,"Read Code", 3, 0)
 		self.desc = "Concentration and passivity up 2 turns."
 		self.game = game
 		
@@ -166,85 +166,10 @@ class ReadCode(DebuggingMethod):
 			c.addTempStat( 'dfn', 40 )
 			self.game.messages.send("Stats Raised", 0.5)
 			
-# Level 4
-class ShareCode(DebuggingMethod):
-	def __init__(self, game):
-		DebuggingMethod.__init__(self, "Share Code", 3, 0)
-		self.game = game
-		self.desc = "Restores chosen partner's HP by 40%."
-		
-	def actions(self, e, c):
-		# boosts chosen partner's hp by 40%
-		e.raiseHP(0.4)
-		self.oldCursor()
-		
-	def newCursor(self):
-		self.oldArray = self.game.enemies
-		self.newArray = self.game.livePlayers
-		
-		self.game.enemies = self.newArray
-
-		prev = self.game.enemies[self.game.selectedEnemyIDX]
-		rad = 10
-		prev.deselect()
-
-		# erase selection cursor
-		eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-								   ( 2 * rad + 2, 2 * rad + 2 ) )
-		self.game.stage.fillBattleBG( self.game.screen, eraseRect )
-		
-	def oldCursor(self,game):
-		prev = self.game.enemies[self.game.selectedEnemyIDX]
-		rad = 10
-		prev.deselect()
-
-		# erase selection cursor
-		eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-								   ( 2 * rad + 2, 2 * rad + 2 ) )
-		self.game.stage.fillBattleBG( self.game.screen, eraseRect )
-		self.game.enemies = self.oldArray
-		self.game.selectedEnemyIDX = 0
-
-# keeping just in case
-# class ShareCode(DebuggingMethod):
-# 	def __init__(self, game):
-# 		DebuggingMethod.__init__(self, "Share Code", 3, 0)
-# 		self.game = game
-# 		self.desc = "Restores chosen partner's HP by 40%."
-# 		self.oldArray = self.game.enemies
-# 		self.newArray = self.game.livePlayers
-# 		
-# 	def actions(self, e, c):
-# 		# boosts chosen partner's hp by 40%
-# 		e.raiseHP(0.4)
-# 		
-# 	def newCursor(self):
-# 		self.game.enemies = self.newArray
-# 
-# 		prev = self.game.enemies[self.game.selectedEnemyIDX]
-# 		rad = 10
-# 		prev.deselect()
-# 
-# 		# erase selection cursor
-# 		eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-# 								   ( 2 * rad + 2, 2 * rad + 2 ) )
-# 		self.game.stage.fillBattleBG( self.game.screen, eraseRect )
-# 		
-# 	def oldCursor(self):
-# 		prev = self.game.enemies[self.game.selectedEnemyIDX]
-# 		rad = 10
-# 		prev.deselect()
-# 
-# 		# erase selection cursor
-# 		eraseRect = pygame.Rect( ( prev.rightEdge - rad, prev.bottomEdge - rad ),
-# 								   ( 2 * rad + 2, 2 * rad + 2 ) )
-# 		self.game.stage.fillBattleBG( self.game.screen, eraseRect )
-# 		self.game.enemies = self.oldArray
-		
 # Level 5
 class LookTime(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Look at the Clock", 3, 600)
+		DebuggingMethod.__init__(self,"Look at the Clock", 3, 500)
 		self.desc = "Does more damage the more time you have."
 		self.game = game
 		
@@ -262,7 +187,7 @@ class LookTime(DebuggingMethod):
 # Level 6
 class UseInternet(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Use the Internet", 5, 200)
+		DebuggingMethod.__init__(self,"Use the Internet", 5, 150)
 		self.desc = "Damage bug, but take damage if you get distracted."
 		self.game = game
 		

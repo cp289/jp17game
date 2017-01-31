@@ -173,9 +173,11 @@ class Character( Thing ):
 	
 	# attacks the given Character target and does the given amount of damage
 	def attack( self, target, dmg ):
-		prob = 0.9
+		prob = 0.8
 		if random.random() < prob+((1-prob)*self.acc-prob*target.spd)/(1000):
-			target.takeDamage((100+random.random()*200)+30*(0.5*self.atk+0.5*target.dfn)/1000)
+			target.takeDamage((100+random.random()*100)+30*(0.5*self.atk+0.5*target.dfn)/1000)
+		else:
+			print "ENEMY MISSED!"
 	
 	# draws the Character with a health bar at its current position on the given Surface
 	def draw( self, screen ):
@@ -874,8 +876,6 @@ class PlayableCharacter( Character ):
 			newatk = ReferNotes( game )
 		elif self.level == 4:
 			newatk = ReadCode( game )
-		elif self.level == 5:
-			newatk = ShareCode( game )
 		elif self.level == 6:
 			newatk = LookTime( game )
 		elif self.level == 8:

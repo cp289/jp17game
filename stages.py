@@ -302,7 +302,7 @@ class Game:
 		namePos = ( 25, -1 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.mel = agents.PlayableCharacter( initpos, battlePos, imglist, 'Melody', self, namePos )
-		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 14 ) )
+		self.mel.setAllStats( ( 500, 54, 44, 43, 50, 12 ) )
 		# total HP, ATK, DFN, SPD, ACC, time
 		self.mel.setAllGR( ( 0.8, 0.9, 0.85, 0.75, 0.7 ) )
 		# HP, ATK, DFN, SPD, ACC
@@ -321,7 +321,7 @@ class Game:
 		namePos = ( 15, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.fa = agents.PlayableCharacter( initpos, battlePos, imglist, 'Fatimah', self, namePos)
-		self.fa.setAllStats( ( 400, 44, 54, 51, 50, 12 ) )
+		self.fa.setAllStats( ( 425, 46, 54, 51, 50, 11 ) )
 		self.fa.setAllGR( ( 0.85, 0.9, 0.8, 0.7, 0.75 ) )
 		
 		# initialize zen
@@ -335,7 +335,7 @@ class Game:
 		namePos = ( 40, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.zen = agents.PlayableCharacter( initpos, battlePos, imglist, 'Zena', self, namePos )
-		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 18 ) )
+		self.zen.setAllStats( ( 450, 49, 48, 54, 45, 14 ) )
 		self.zen.setAllGR( ( 0.8, 0.75, 0.85, 0.9, 0.7 ) )
 		
 		# initialize cha
@@ -349,7 +349,7 @@ class Game:
 		namePos = ( 20, 0 )
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.cha = agents.PlayableCharacter( initpos, battlePos, imglist, 'Charles', self, namePos )
-		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 14 ) )
+		self.cha.setAllStats( ( 500, 44, 49, 44, 54, 12 ) )
 		self.cha.setAllGR( ( 0.75, 0.7, 0.8, 0.9, 0.85 ) )
 		
 		"""
@@ -1027,6 +1027,7 @@ class Game:
 	def leaveBattle( self, win, charles = False ):
 		# stop battle music
 		self.sound.stop("battleMusic")
+		self.sound.stop("enemy")
 		
 		# play win music
 		if win:
@@ -1190,8 +1191,8 @@ class Game:
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN: # for initial key presses
 ###########################################################################
-# 				if event.key == pygame.K_j:
-# 					self.gameComplete = True
+#				if event.key == pygame.K_j:
+#					self.gameComplete = True
 ###########################################################################
 				if event.key == pygame.K_c:
 					self.onStatScreen = True
@@ -1459,7 +1460,7 @@ class Game:
 			#check if we can and should flee
 			for player in self.livePlayers:
 				if player.escaped == True:
-					self.messages.send("You Escaped!",0.5)
+					#self.messages.send("You Escaped!",0.5) causes erasing error
 					player.escaped = False
 					done = True
 					self.leaveBattle(False, self.gotCharles)
@@ -1543,6 +1544,21 @@ class Game:
 								self.dashboard.switchAtk(-1)
 							elif event.key == pygame.K_RIGHT:
 								self.dashboard.switchAtk(1)
+
+#							elif event.key == pygame.K_e: # temp battle win key
+#								self.awardXP()
+#								done = True
+#								print 'you win the battle!'
+#						
+#								self.battlesWon += 1
+#								self.leaveBattle( True, charles = self.gotCharles )
+#								print 'battles won:', self.battlesWon
+#						
+#								if self.inBossBattle: # won the boss battle! go to end screen
+#									self.enterDialogue() # trigger final congratulatory conversation
+#									return
+#						
+#								self.stage.addBattle()
 					
 					
 							# attack currently selected enemy
@@ -1808,7 +1824,7 @@ class Game:
 		
 		# play battle music
 		self.sound.stop('explora')
-		self.sound.play("battleMusic", -1 )
+		self.sound.play("enemy", -1 )
 		
 		self.inBattle = True
 		self.player.enterBattle( False ) # no one is allowed to flree
@@ -1841,7 +1857,13 @@ class Game:
 	# each characters kill and death counts,
 	# as well as if all moves were unlocked
 	def reportRecords( self ):
-
+		
+		# play end music
+		self.sound.stop( "explora" )
+		self.sound.stop( "battleMusic" )
+		self.sound.stop( "enemy" )
+		self.sound.play("end")
+		
 		allMovesUnlocked = False
 		players = [self.mel, self.fa, self.zen, self.cha]
 		melInfo = ['Melody:']
