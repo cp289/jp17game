@@ -216,8 +216,8 @@ class Game:
 		
 		# load specific screen backgrounds
 		statBGorig = pygame.image.load( 'images/backgrounds/statScreenBG.png' ).convert_alpha()
-		self.statBG = pygame.transform.scale( statBGorig, self.screenSize ) # force it to be square for now
-		self.statBGRect = pygame.Rect( ( 20, 20 ), ( self.screenSize[0] - 40, self.screenSize[1] - 40 ) )
+		self.statBG = pygame.transform.scale( statBGorig, self.screenSize )
+		self.statBGRect = pygame.Rect( ( 0, 0 ), ( self.screenSize[0], self.screenSize[1] ) )
 		
 		scale = 0.5
 		bgOrig = pygame.image.load( 'images/backgrounds/Davis Hallway.png' ).convert_alpha()
@@ -237,10 +237,10 @@ class Game:
 		offset = 20
 		boxWidth = ( self.statBGRect.width - 3 * offset ) / 2
 		boxHeight = ( self.statBGRect.height - 3 * offset ) / 2
-		self.melBox = pygame.Rect( ( 2 * offset, 2 * offset ), ( boxWidth, boxHeight ) )
-		self.faBox = pygame.Rect( ( 2 * offset, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
-		self.zenBox = pygame.Rect( ( 3 * offset + boxWidth, 2 * offset ), ( boxWidth, boxHeight ) )
-		self.chaBox = pygame.Rect( ( 3 * offset + boxWidth, 3 * offset + boxHeight ), ( boxWidth, boxHeight ) )
+		self.melBox = pygame.Rect( ( offset, offset ), ( boxWidth, boxHeight ) )
+		self.faBox = pygame.Rect( ( offset, 2 * offset + boxHeight ), ( boxWidth, boxHeight ) )
+		self.zenBox = pygame.Rect( ( 2 * offset + boxWidth, offset ), ( boxWidth, boxHeight ) )
+		self.chaBox = pygame.Rect( ( 2 * offset + boxWidth, 2 * offset + boxHeight ), ( boxWidth, boxHeight ) )
 		
 		# create fonts
 		self.bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
@@ -1113,13 +1113,13 @@ class Game:
 			linePos = ( pos[0], pos[1] + idx * lineHeight )
 			self.screen.blit( lineText, linePos )
 		
-		lineWidth = 170
+		lineWidth = 200
 		self.screen.blit( chara.getStatusIMG(), ( pos[0] + lineWidth, pos[1] ) )
 	
 	# draws the current stat screen on the game window
 	def showStatScreen( self, charles = False ):
 		self.onStatScreen = True
-		self.screen.blit( self.statBG, ( 20, 20 ), self.statBGRect )
+		self.screen.blit( self.statBG, ( 0, 0 ), self.statBGRect )
 		
 		# draw in boxes
 		pygame.draw.rect( self.screen, green, self.melBox )
