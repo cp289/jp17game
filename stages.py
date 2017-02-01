@@ -641,8 +641,7 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1001.png' ).convert_alpha()
 						]
 		
-		#self.roboLabStage = Stage( 'robotics lab', 4, scale, bg, battleBG, bugImgs )
-		self.roboLabStage = Stage( 'robotics lab', 1, scale, bg, battleBG, bugImgs )
+		self.roboLabStage = Stage( 'robotics lab', 4, scale, bg, battleBG, bugImgs )
 		
 		# create door
 		
@@ -775,8 +774,7 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1101.png' ).convert_alpha()
 						]
 
-		#self.macLabStage = Stage( 'mac lab', 5, scale, bg, battleBG, bugImgs )
-		self.macLabStage = Stage( 'mac lab', 1, scale, bg, battleBG, bugImgs )
+		self.macLabStage = Stage( 'mac lab', 5, scale, bg, battleBG, bugImgs )
 
 		#def __init__( self, pos, dim, room ):
 		doorToHallway = agents.Door( (  235 * scale, 800 * scale ), \
@@ -986,10 +984,7 @@ class Game:
 		self.refresh.append( self.screen.get_rect() )
 		
 		# config messages
-		if not self.inBossBattle:
-			self.messages.setBackground(self.stage.battleBG)
-		else:
-			self.messages.setBackground( self.bossBattleBG )
+		self.messages.setBackground(self.stage.battleBG)
 		
 		# play battle music
 		self.sound.stop('explora')
@@ -1225,14 +1220,6 @@ class Game:
 					moved = True
 					keydown = True
 					break
-				
-# 				elif event.key == pygame.K_b: # temporary easy trigger for battle
-# 					self.enterBattle()
-# 					keydown = True
-# 					break
-# 				elif event.key == pygame.K_c: # temporary easy trigger for dialogue
-# 					self.enterDialogue()
-# 					return
 			
 			if event.type == pygame.QUIT:
 				exitGame()
@@ -1481,11 +1468,6 @@ class Game:
 			# parse keyboard/mouse input events
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN: # for initial key presses
-# 					if event.key == pygame.K_s: # show stat screen
-# 						self.onStatScreen = True
-# 						print 'show stat screen'
-# 						self.showStatScreen( charles = self.gotCharles)
-# 						return # so that characters aren't still drawn over stat screen
 				
 					# if it's the player's turn, check for other input
 					if playerTurn:
@@ -1549,22 +1531,22 @@ class Game:
 								self.dashboard.switchAtk(-1)
 							elif event.key == pygame.K_RIGHT:
 								self.dashboard.switchAtk(1)
-
-#							elif event.key == pygame.K_e: # temp battle win key
-#								self.awardXP()
-#								done = True
-#								print 'you win the battle!'
-#						
-#								self.battlesWon += 1
-#								self.leaveBattle( True, charles = self.gotCharles )
-#								print 'battles won:', self.battlesWon
-#						
-#								if self.inBossBattle: # won the boss battle! go to end screen
-#									self.enterDialogue() # trigger final congratulatory conversation
-#									return
-#						
-#								self.stage.addBattle()
-					
+#################################################################################
+							elif event.key == pygame.K_e: # temp battle win key
+								self.awardXP()
+								done = True
+								print 'you win the battle!'
+						
+								self.battlesWon += 1
+								self.leaveBattle( True, charles = self.gotCharles )
+								print 'battles won:', self.battlesWon
+						
+								if self.inBossBattle: # won the boss battle! go to end screen
+									self.enterDialogue() # trigger final congratulatory conversation
+									return
+						
+								self.stage.addBattle()
+#################################################################################
 					
 							# attack currently selected enemy
 							elif event.key == pygame.K_v:
@@ -1827,6 +1809,9 @@ class Game:
 	def enterBossBattle( self ):
 		print 'ENTER BOSS BATTLE'
 		
+		# config messages
+		self.messages.setBackground( self.bossBattleBG )
+		
 		# play battle music
 		self.sound.stop('explora')
 		self.sound.play("enemy", -1 )
@@ -1851,7 +1836,7 @@ class Game:
 		self.dashboard = AttackChooser(self.screen)
 		self.dashboard.config(self.battleParticipants[self.currentBattleTurn])
 		
-		print 'enter battle'
+		#print 'enter battle'
 		
 		# reset stored points for new battle
 		self.storedPoints = 0

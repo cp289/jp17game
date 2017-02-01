@@ -61,12 +61,11 @@ class AskSomeone(DebuggingMethod):
 		self.game = game
 
 	def actions(self, e, c):
-# 		prob = 0.8
-# 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
-# 			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
-# 		else:
-# 			self.game.messages.send("Attack Missed", 0.5 )
-		self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
+		prob = 0.8
+		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
+			self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
+		else:
+			self.game.messages.send("Attack Missed", 0.5 )
 			
 class PrintStatements(DebuggingMethod):
 	def __init__(self,game):
