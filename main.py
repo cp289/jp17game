@@ -43,6 +43,20 @@ class Button:
 		else:
 			screen.blit( self.image, self.pos )
 
+# loads everything needed to run the game
+def gameLoad(screen,sound):
+	showLoadingScreen()
+	game = stages.Game( screen, sound )
+	game.loadHallwayStage() # possibly do this in Game constructor later
+	game.loadRoboLabStage()
+	game.loadMacLabStage()
+	
+	return game
+
+# draws loading screen
+def showLoadingScreen():
+	pass
+
 # draws game start screen
 def showStartScreen( screen, buttons ):
 	startScreen = pygame.image.load( 'images/start/Debug Davis Start Screen.png' ).convert_alpha()
@@ -138,10 +152,18 @@ def main():
 		exitGame()
 	
 	pygame.display.set_caption( 'debugDavis()' )
-	print 'init screen'
+	print 'Loading...'
+	
+	# show loading screen
+	showLoadingScreen()
+	
+	# initialize sounds
+	sound = Sound()
+	
+	# load game
+	game = gameLoad(screen,sound)
 	
 	# make start screen buttons
-	
 	startImg = pygame.image.load( 'images/start/startUnselected.png' ).convert_alpha()
 	startImgSel = pygame.image.load( 'images/start/startSelected.png' ).convert_alpha()
 	startButton = Button( ( 200, 300 ), startImg, startImgSel, 'start' )
@@ -154,9 +176,6 @@ def main():
 	selectedButton = 0
 	buttons = [ startButton, instrButton ]
 	showStartScreen( screen, buttons )
-	
-	# initialize sounds
-	sound = Sound()
 	
 	# play start screen music
 	sound.play("start",-1)
@@ -190,11 +209,6 @@ def main():
 			startButton.draw( screen )
 			instrButton.draw( screen )
 			pygame.display.update()
-	
-	game = stages.Game( screen, sound )
-	game.loadHallwayStage() # possibly do this in Game constructor later
-	game.loadRoboLabStage()
-	game.loadMacLabStage()
 	
 	# stop start screen music
 	sound.stop("start")

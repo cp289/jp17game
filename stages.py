@@ -1459,6 +1459,7 @@ class Game:
 					player.escaped = False
 					done = True
 					self.leaveBattle(False, self.gotCharles)
+					self.timesFled += 1
 					return
 		
 			attacker = self.battleParticipants[self.currentBattleTurn]
