@@ -641,7 +641,8 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1001.png' ).convert_alpha()
 						]
 		
-		self.roboLabStage = Stage( 'robotics lab', 4, scale, bg, battleBG, bugImgs )
+		#self.roboLabStage = Stage( 'robotics lab', 4, scale, bg, battleBG, bugImgs )
+		self.roboLabStage = Stage( 'robotics lab', 1, scale, bg, battleBG, bugImgs )
 		
 		# create door
 		
@@ -774,7 +775,8 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1101.png' ).convert_alpha()
 						]
 
-		self.macLabStage = Stage( 'mac lab', 5, scale, bg, battleBG, bugImgs )
+		#self.macLabStage = Stage( 'mac lab', 5, scale, bg, battleBG, bugImgs )
+		self.macLabStage = Stage( 'mac lab', 1, scale, bg, battleBG, bugImgs )
 
 		#def __init__( self, pos, dim, room ):
 		doorToHallway = agents.Door( (  235 * scale, 800 * scale ), \

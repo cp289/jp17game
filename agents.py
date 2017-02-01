@@ -248,6 +248,7 @@ class Enemy( Character ):
 		# to it based on the Enemy's level
 		factor = level - 1 # how levels to increase stats by
 		self.hp = 400 + int( random.random() * 50 * factor )
+		self.totalHP = self.hp
 		self.atk = 50 + int( random.random() * 5 * factor )
 		self.dfn = 50 + int( random.random() * 5 * factor )
 		self.spd = 50 + int( random.random() * 5 * factor )
