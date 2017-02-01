@@ -31,7 +31,7 @@ class Stage:
 	
 	# creates a new Stage with the given number of battles to win and background image
 	# optional to give starting player Position on stage and starting camera position (upper left corner)
-	def __init__( self, name, numBattles, scale, bg, battleBG, bugs ):
+	def __init__( self, name, numBattles, scale, bg, battleBG, bugs, enemyLevel = 1 ):
 		self.name = name
 		self.numBattles = numBattles
 		self.battlesCompleted = 0
@@ -42,6 +42,7 @@ class Stage:
 		self.contents = pygame.sprite.Group()
 		self.doors = []
 		self.bugImgs = bugs
+		self.enemyLevel = enemyLevel # level of all enemies generated in this stage
 		
 		# variables for dimensions of stage
 		self.height = bg.get_rect().height
@@ -641,7 +642,7 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1001.png' ).convert_alpha()
 						]
 		
-		self.roboLabStage = Stage( 'robotics lab', 4, scale, bg, battleBG, bugImgs )
+		self.roboLabStage = Stage( 'robotics lab', 4, scale, bg, battleBG, bugImgs, 2 )
 		
 		# create door
 		
@@ -774,7 +775,7 @@ class Game:
 						 pygame.image.load( 'images/bugs/Bug 1101.png' ).convert_alpha()
 						]
 
-		self.macLabStage = Stage( 'mac lab', 5, scale, bg, battleBG, bugImgs )
+		self.macLabStage = Stage( 'mac lab', 5, scale, bg, battleBG, bugImgs, 4 )
 
 		#def __init__( self, pos, dim, room ):
 		doorToHallway = agents.Door( (  235 * scale, 800 * scale ), \
@@ -976,6 +977,8 @@ class Game:
 			
 			self.enemies.append( e )
 			self.battleParticipants.append( e )
+			
+			print 'created', name, 'at level', level
 	
 	# changes game state to battle mode
 	def enterBattle( self, charles = False, canFlee = True ):
@@ -1007,7 +1010,7 @@ class Game:
 			self.battleParticipants.append( self.cha )
 			self.livePlayers.append( self.cha )
 		
-		self.spawnEnemies( 3, 1 ) # number, level
+		self.spawnEnemies( 3, self.stage.enemyLevel ) # number, level
 		self.enemies[0].select()
 		self.selectedEnemyIDX = 0
 		
@@ -1822,8 +1825,8 @@ class Game:
 		self.zen.enterBattle( False )
 		self.cha.enterBattle( False )
 		
-		#bossBug = agents.Enemy( ( 10, 100 ), self.bossBugIMG, 'final boss', 7 )
-		bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 2 ) # just to make testing easier
+		bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 7 )
+		#bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 2 ) # just to make testing easier
 		
 		# build list of battle participants
 		self.battleParticipants= [ self.mel, self.fa, self.zen, self.cha, bossBug ]
