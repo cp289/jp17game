@@ -159,7 +159,7 @@ def main():
 	sound = Sound()
 	
 	# play start screen music
-	sound.play("start")
+	sound.play("start",-1)
 	print 'start screen'
 	
 	# run a loop for start screen
