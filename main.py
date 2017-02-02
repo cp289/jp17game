@@ -45,7 +45,6 @@ class Button:
 
 # loads everything needed to run the game
 def gameLoad(screen,sound):
-	showLoadingScreen()
 	game = stages.Game( screen, sound )
 	game.loadHallwayStage() # possibly do this in Game constructor later
 	game.loadRoboLabStage()
@@ -54,18 +53,21 @@ def gameLoad(screen,sound):
 	return game
 
 # draws loading screen
-def showLoadingScreen():
-	pass
+def showLoadingScreen( screen ):
+	loading = pygame.image.load( 'images/start/loading.png' ).convert_alpha()
+	screen.blit( loading, ( 0, 0 ) )
+	pygame.display.update()
 
 # draws game start screen
 def showStartScreen( screen, buttons ):
 	startScreen = pygame.image.load( 'images/start/Debug Davis Start Screen.png' ).convert_alpha()
-	#bigFont = pygame.font.SysFont( 'Helvetica', 44, bold=True )
-	#startText = bigFont.render( 'press s to start', True, white )
-
+	logoOrig = pygame.image.load( 'images/start/debugDavis.png' ).convert_alpha()
+	logo = pygame.transform.scale( logoOrig, ( 700, 156 ) )
+	
 	screen.blit( startScreen, ( 0, 0 ) )
-	pygame.draw.rect( screen, black, pygame.Rect( ( 100, 250 ), ( 600, 300 ) ) )
-	#screen.blit( startText, ( screen.get_width() / 3, screen.get_height() / 2 ) )
+	pygame.draw.rect( screen, black, pygame.Rect( ( 50, 250 ), ( 700, 300 ) ) )
+	
+	screen.blit( logo, ( 50, 50 ) )
 	
 	for button in buttons:
 		button.draw( screen )
@@ -155,23 +157,23 @@ def main():
 	print 'Loading...'
 	
 	# show loading screen
-	showLoadingScreen()
+	showLoadingScreen( screen )
 	
 	# initialize sounds
 	sound = Sound()
 	
 	# load game
-	game = gameLoad(screen,sound)
+	game = gameLoad( screen, sound )
 	
 	# make start screen buttons
 	startImg = pygame.image.load( 'images/start/startUnselected.png' ).convert_alpha()
 	startImgSel = pygame.image.load( 'images/start/startSelected.png' ).convert_alpha()
-	startButton = Button( ( 200, 300 ), startImg, startImgSel, 'start' )
+	startButton = Button( ( 200, 340 ), startImg, startImgSel, 'start' )
 	startButton.select()
 	
 	instrImg = pygame.image.load( 'images/start/instrUnselected.png' ).convert_alpha()
 	instrImgSel = pygame.image.load( 'images/start/instrSelected.png' ).convert_alpha()
-	instrButton = Button( ( 200, 375 ), instrImg, instrImgSel, 'instructions' )
+	instrButton = Button( ( 200, 415 ), instrImg, instrImgSel, 'instructions' )
 	
 	selectedButton = 0
 	buttons = [ startButton, instrButton ]
