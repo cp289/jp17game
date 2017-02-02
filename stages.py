@@ -404,8 +404,7 @@ class Game:
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.CSC = agents.SpeakingCharacter( initpos, playerC, 'CS_Child', namePos )
 		
-		print 'initialized playable characters'
-	
+		
 	#loads textbox images and makes a Conversation object
 	def initConvo(self):
 		textboxWidth = self.screenSize[0]
@@ -426,8 +425,7 @@ class Game:
 
 		self.gameConvo = conversation.Conversation(textbox, textboxCoord, cursor, self.screen, talkingCharList, self.convoFont, self.nameFont, dialogueFile)
 
-		print "initialized convo system"
-	
+		
 	# sets the player's onscreen position so that it matches its stage position,
 	# based on the current camera view
 	# returns previous player rect for erasure
@@ -563,8 +561,7 @@ class Game:
 		smallLab = agents.Thing( sLabPos, sLab )
 		self.hallwayStage.addThing( smallLab )
 		
-		print 'loaded hallway stage'
-	
+		
 	# changes current stage to hallway and places player and camera at starting positions
 	def enterHallwayStageRight( self ):
 		self.stage = self.hallwayStage
@@ -584,8 +581,7 @@ class Game:
 		
 		self.sound.play( 'explora', -1 )
 		
-		print 'enter hallway from right'
-	
+		
 	# changes current stage to hallway and places player and camera at starting positions
 	def enterHallwayStageLeft( self ):
 		self.stage = self.hallwayStage
@@ -603,8 +599,7 @@ class Game:
 		self.player.draw( self.screen )
 		pygame.display.update()
 		
-		print 'enter hallway from left'
-	
+		
 	# changes current stage to hallway and places player and camera at starting positions
 	def enterHallwayStageBottom( self ):
 		self.stage = self.hallwayStage
@@ -622,8 +617,7 @@ class Game:
 		self.player.draw( self.screen )
 		pygame.display.update()
 		
-		print 'enter hallway from bottom'
-	
+		
 	# loads images for robotics lab stage and creates the furniture objects
 	def loadRoboLabStage( self ):
 		scale = 0.4
@@ -733,8 +727,7 @@ class Game:
 		rightCouch = agents.Thing( rCouchPos, rCouch )
 		self.roboLabStage.addThing( rightCouch )
 		
-		print 'loaded robotics lab stage'
-	
+		
 	# changes current stage to robotics lab and places player and camera at starting positions
 	def enterRoboLabStage( self ):
 		self.stage = self.roboLabStage
@@ -756,8 +749,7 @@ class Game:
 		self.player.draw( self.screen )
 		pygame.display.update()
 		
-		print 'enter robotics lab'
-	
+		
 	# loads images for Mac lab stage and creates the furniture objects
 	def loadMacLabStage( self ):
 		scale = 0.5
@@ -894,8 +886,7 @@ class Game:
 		blackBox = agents.Thing( blackBoxPos, blackBoxSur )
 		self.macLabStage.addThing( blackBox )
 
-		print 'loaded mac lab stage'
-	
+		
 	# changes current stage to Mac lab and places player and camera at starting positions
 	def enterMacLabStage( self ):
 		self.stage = self.macLabStage
@@ -917,8 +908,7 @@ class Game:
 		self.player.draw( self.screen )
 		pygame.display.update()
 		
-		print 'enter mac lab'
-	
+		
 	# fills the given rectangle (or the entire screen) with the current intro background
 	def fillIntroBG( self, rect = None ):
 		if rect == None:
@@ -936,8 +926,7 @@ class Game:
 		
 		pygame.display.update()
 		
-		print 'start intro'
-	
+		
 	# updates intro, returns whether intro is complete
 	def updateIntro( self ):
 		if not self.inDialogue:
@@ -978,8 +967,7 @@ class Game:
 			self.enemies.append( e )
 			self.battleParticipants.append( e )
 			
-			print 'created', name, 'at level', level
-	
+			
 	# changes game state to battle mode
 	def enterBattle( self, charles = False, canFlee = True ):
 		# update display for background
@@ -1018,8 +1006,6 @@ class Game:
 		# create dashboard
 		self.dashboard = AttackChooser(self.screen)
 		self.dashboard.config(self.livePlayers[self.currentBattleTurn])
-		
-		print 'enter battle'
 		
 		# reset stored points for new battle
 		self.storedPoints = 0
@@ -1085,8 +1071,7 @@ class Game:
 			self.gotKey2 = True
 			self.enterDialogue() # convo 10
 		
-		print 'leave battle'
-	
+		
 	# Make Charles the same level as the average party level
 	def levelCharles( self ):
 		levelList = [ self.mel.level, self.fa.level, self.zen.level ]
@@ -1161,8 +1146,7 @@ class Game:
 			self.player.draw( self.screen )
 		
 		self.gameConvo.displayText( self.convoNum )
-		print "ENTERED DIALOGUE"
-	
+		
 	# updates the game for one time-step (when the player is playing through a stage)
 	def update( self ):
 		if self.onStatScreen:
@@ -1199,7 +1183,6 @@ class Game:
 ###########################################################################
 				if event.key == pygame.K_c:
 					self.onStatScreen = True
-					print 'show stat screen'
 					self.showStatScreen( charles = self.gotCharles)
 					return # so that characters aren't still drawn over stat screens
 				
@@ -1257,7 +1240,6 @@ class Game:
 			elif door.room == 'hallway': # if entering the hallway, determine from which room
 				if self.stage == self.roboLabStage and self.player.movement[0] == right:
 					if self.stage.completed() and not self.charlesBattle:
-						print 'story event: Charles!'
 						self.enterDialogue() # convo with Charles
 						return # so that characters aren't still drawn over convo
 					else:
@@ -1333,7 +1315,6 @@ class Game:
 					self.enterDialogue() # convo 7 upon entering Mac lab for the first time
 					return # so that characters aren't still drawn over convo
 				elif self.stage.completed() and not self.key2Battle:
-					print 'story event: battle for key 2!'
 					self.enterDialogue() # convo 9 after completing Mac lab stage
 					return # so that characters aren't still drawn over convo
 				else:
@@ -1389,7 +1370,6 @@ class Game:
 					self.dashboard.config(p)
 		
 		if len( self.livePlayers ) == 0:
-			print 'you lose the battle!'
 			return True
 		else:
 			return False
@@ -1539,12 +1519,10 @@ class Game:
 							elif event.key == pygame.K_e: # temp battle win key
 								self.awardXP()
 								done = True
-								print 'you win the battle!'
-						
+								
 								self.battlesWon += 1
 								self.leaveBattle( True, charles = self.gotCharles )
-								print 'battles won:', self.battlesWon
-						
+								
 								if self.inBossBattle: # won the boss battle! go to end screen
 									self.enterDialogue() # trigger final congratulatory conversation
 									return
@@ -1591,8 +1569,6 @@ class Game:
 				target = self.enemies[self.selectedEnemyIDX]
 				self.dashboard.attack().attack(target, self.battleParticipants[self.currentBattleTurn])
 			
-				print '----ENDING ATTACK----'
-			
 				self.passOnTurn()
 				attacker.attacking = 0 # reset attacker's state
 		
@@ -1602,8 +1578,7 @@ class Game:
 				# if attack killed target
 				target = self.enemies[self.selectedEnemyIDX]
 				if target.isDead():
-					print '--died: ' + target.name
-				
+					
 					attacker.killCount += 1
 				
 					toRemove = self.enemies.pop( self.selectedEnemyIDX )
@@ -1625,18 +1600,15 @@ class Game:
 					else: # if all enemies are gone
 						self.awardXP()
 						done = True
-						print 'you win the battle!'
-				
+						
 						self.battlesWon += 1
 						self.leaveBattle( True, charles = self.gotCharles )
-						print 'battles won:', self.battlesWon
-				
+						
 						if self.inBossBattle: # won the boss battle! go to end screen
 							self.enterDialogue() # trigger final congratulatory conversation
 							return
 				
 						self.stage.addBattle()
-						print 'for', self.stage.name, 'battle', self.stage.battlesCompleted, 'out of', self.stage.numBattles
 						if self.stage.completed():
 							print 'stage', self.stage.name, 'has been completed'
 		
@@ -1687,7 +1659,6 @@ class Game:
 			if event.type == pygame.KEYDOWN: # for initial key presses
 				if event.key == pygame.K_c:
 					self.onStatScreen = False
-					print 'leave stat screen'
 					
 					if self.inBattle: # redraw battle screen
 						self.stage.fillBattleBG( self.screen, self.statBGRect )
@@ -1736,7 +1707,6 @@ class Game:
 				self.convoNum += 1
 				self.enterCyberSystem()
 			elif self.convoNum == 12:
-				print 'SHOULD GET HERE'
 				self.enterBossBattle()
 				self.inStoryBattle = True
 			elif self.convoNum == 13:
@@ -1799,11 +1769,8 @@ class Game:
 	def enterCyberSystem( self ):
 		self.screen.blit( self.bossBattleBG, ( 0, 0 ) )
 		self.inBossBattle = True
-		print 'story event: into the CyberSystem!'
 		
 		pygame.display.update()
-		
-		print 'convo should be 12, is', self.convoNum
 		
 		self.enterDialogue() # convo 12 with NPE
 		
@@ -1811,7 +1778,6 @@ class Game:
 	
 	# sends everyone into battle mode and creates final boss
 	def enterBossBattle( self ):
-		print 'ENTER BOSS BATTLE'
 		
 		# config messages
 		self.messages.setBackground( self.bossBattleBG )

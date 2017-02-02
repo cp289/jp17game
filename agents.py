@@ -491,29 +491,25 @@ class PlayableCharacter( Character ):
 			self.origACC = self.acc
 			self.acc += boostValue
 			self.boostedStats.append("acc")
-			print "newACC%s " %self.acc
-
+			
 		elif stat == 'atk':
 			#remember character's actual stat value
 			self.origATK = self.atk
 			self.atk += boostValue
 			self.boostedStats.append("atk")
-			print "newATK%s " %self.atk
-
+			
 		elif stat == 'spd':
 			#remember character's actual stat value
 			self.origSPD = self.spd
 			self.spd += boostValue
 			self.boostedStats.append("spd")
-			print "newSPD%s " %self.spd
-
+			
 		elif stat == 'dfn':
 			#remember character's actual stat value
 			self.origDFN = self.dfn
 			self.dfn += boostValue
 			self.boostedStats.append("dfn")
-			print "newDFN%s " %self.dfn
-	
+			
 	# returns the current position onstage of the character
 	def getStagePos( self ):
 		return self.stagePos[:]
@@ -616,25 +612,20 @@ class PlayableCharacter( Character ):
 		if len(self.boostedStats) != 0:
 			for stat in self.boostedStats:
 				if stat == 'acc':
-					print "UPDATING STAT!"
 					self.ATKBoostTurnsLeft -= 1
 					if self.ATKBoostTurnsLeft == 0:
-						print "0 TURNS LEFT!"
 						self.boostedStats.remove("atk")
 						self.boostedStats.remove("acc") 
 						self.atk = self.origATK
 						self.acc = self.origACC 
-					print "TURNS LEFT: %s" % self.ATKBoostTurnsLeft
+					
 				elif stat == 'spd':
-					print "UPDATING STAT!"
 					self.DFNBoostTurnsLeft -= 1
 					if self.DFNBoostTurnsLeft == 0:
-						print "0 TURNS LEFT!"
 						self.boostedStats.remove("dfn")
 						self.boostedStats.remove("spd") 
 						self.dfn = self.origDFN
 						self.spd = self.origSPD
-					print "TURNS LEFT: %s" % self.DFNBoostTurnsLeft
 	
 	# 
 	def leaveBattleStatsReset( self ):
@@ -727,8 +718,6 @@ class PlayableCharacter( Character ):
 	
 	# attacks the given Character target and does the given amount of damage
 	def startAttack( self ):
-		print '----ATTACKING AAAAAAA----'
-		
 		self.attacking = 1 # animation is now in progress
 		self.battleAnim = self.battleAttacking
 		self.battleAttacking.play()
@@ -1010,7 +999,6 @@ class PlayableCharacter( Character ):
 				if self.battleAttacking.elapsed >= 2.0:
 					self.attacking = 2
 					self.battleAnim = self.battleIdle
-					print '----LEFT ATTACK ANIMATION----'
 		
 		#pygame.draw.rect( screen, (215, 200, 255), self.ghost ) # for seeing where the ghost is
 	

@@ -26,7 +26,7 @@ class DebuggingMethod:
 		# perform desired attack actions
 		self.actions(enemy, character)
 		
-		self.report(character)
+		#self.report(character)
 		
 		# decrease time
 		character.takeTime(self.timeNeeded)
@@ -179,7 +179,6 @@ class LookTime(DebuggingMethod):
 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			#make damage lower for lower time
 			actualDamage = self.damage + self.damage*(c.time/c.maxTime)
-			print "ACTUAL DAMAGE: %s" % actualDamage
 			self.enemyDamage(e, actualDamage + actualDamage*(0.5*c.atk - 0.5*e.dfn)/1000)
 		else:
 			self.game.messages.send("Attack Missed",0.5)

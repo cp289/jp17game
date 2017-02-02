@@ -132,7 +132,6 @@ def showEndScreen( screen, game ):
 	pygame.display.update()
 
 def exitGame():
-	print('cleaning up...')
 	d = os.path.dirname(os.path.realpath(__file__))
 	files = [ file for file in os.listdir(d) if file.endswith(".pyc") ]
 	for file in files:
@@ -150,11 +149,10 @@ def main():
 	try:
 		pygame.font.init()
 	except:
-		print "Fonts unavailable"
+		print "Error: fonts unavailable"
 		exitGame()
 	
 	pygame.display.set_caption( 'debugDavis()' )
-	print 'Loading...'
 	
 	# show loading screen
 	showLoadingScreen( screen )
@@ -181,7 +179,6 @@ def main():
 	
 	# play start screen music
 	sound.play("start",-1)
-	print 'start screen'
 	
 	# run a loop for start screen
 	moveOn = False

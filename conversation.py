@@ -49,7 +49,6 @@ class Conversation():
 		# no more convo to display, meaning last box is being 
 		# displayed right now
 		if len(self.allConvos[convoNum])<(self.currentBoxIdx*2)+1:
-		 	print "END OF CONVO"
 		 	self.convoOver = True
 		 	self.currentBoxIdx = 0
 		else:
@@ -85,8 +84,6 @@ class Conversation():
 			# blit textbox
 			self.window.blit(self.textboxImg,(self.boxX,self.boxY))
 
-			if nameSurf == None:
-				print "NO NAMESURF FSR"
 			self.window.blit(nameSurf, (nameCoords[0], nameCoords[1]+50))
 
 
