@@ -1799,6 +1799,7 @@ class Game:
 	def enterCyberSystem( self ):
 		self.screen.blit( self.bossBattleBG, ( 0, 0 ) )
 		self.inBossBattle = True
+		self.inStoryBattle = True
 		print 'story event: into the CyberSystem!'
 		
 		pygame.display.update()
@@ -1826,7 +1827,10 @@ class Game:
 		self.zen.enterBattle( False )
 		self.cha.enterBattle( False )
 		
-		bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 7 )
+		bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 18 )
+		print 'at level', bossBug.level, 'boss bug has', bossBug.totalHP, 'HP'
+		bossBug.totalHP = 8000
+		bossBug.hp = 8000
 		#bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 2 ) # just to make testing easier
 		
 		# build list of battle participants
