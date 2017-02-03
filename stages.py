@@ -389,14 +389,16 @@ class Game:
 		#initialize stu1
 		otherlist = ( playerS, playerC )
 		namePos = [ 1, 0 ]
+		stu1sprite = pygame.image.load( 'images/OtherSprites/Student1Sprite.png' ).convert_alpha()
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.stu1 = agents.SpeakingCharacter( initpos, playerC, 'Student_1', namePos )
+		self.stu1 = agents.SpeakingCharacter( initpos, playerC, 'Student_1', namePos, stu1sprite )
 		
 		#initialize stu2
 		otherlist = ( playerS, playerC )
 		namePos = [ 1, 0 ]
+		stu2sprite = pygame.image.load( 'images/OtherSprites/Student2Sprite.png' ).convert_alpha()
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
-		self.stu2 = agents.SpeakingCharacter( initpos, playerC, 'Student_2', namePos )
+		self.stu2 = agents.SpeakingCharacter( initpos, playerC, 'Student_2', namePos, stu2sprite )
 		
 		#initialize CSC
 		otherlist = ( playerS, playerC )
@@ -939,6 +941,10 @@ class Game:
 				return True
 		else:
 			self.updateDialogue()
+			
+			if self.convoNum == 0: # during the first convo, draw the two CS children
+				self.stu1.drawSprite( self.screen, ( 400, 200 ) )
+				self.stu2.drawSprite( self.screen, ( 500, 200 ) )
 		
 		pygame.display.update( self.refresh )
 		

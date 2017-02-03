@@ -176,8 +176,8 @@ class Character( Thing ):
 		prob = 0.8
 		if random.random() < prob+((1-prob)*self.acc-prob*target.spd)/(1000):
 			target.takeDamage((100+random.random()*100)+30*(0.5*self.atk+0.5*target.dfn)/1000)
-		else:
-			print "ENEMY MISSED!"
+# 		else:
+# 			print "ENEMY MISSED!"
 	
 	# draws the Character with a health bar at its current position on the given Surface
 	def draw( self, screen ):
@@ -270,7 +270,7 @@ This class represents a non-playable character who only takes part in conversati
 class SpeakingCharacter( Character ):
 	
 	# creates a new SpeakingCharacter with the given position, image, and name
-	def __init__( self, pos, img, name, namePos ):
+	def __init__( self, pos, img, name, namePos, sprite = None ):
 		if img == None: # eh
 			img = pygame.Surface( ( 100, 100 ) )
 			self.hasimgConvo = False
@@ -280,10 +280,16 @@ class SpeakingCharacter( Character ):
 		
 		self.namePos = namePos
 		self.imgConvo = img
+		self.imgSprite = sprite
 	
 	# returns the dialogue image for this character
 	def getConvoIMG( self ):
 		return self.imgConvo
+	
+	# draws the character's sprite at the given coordinates on the given screen
+	# (assumes that the character has a sprite image in the first place)
+	def drawSprite( self, screen, pos ):
+		screen.blit( self.imgSprite, pos )
 
 '''
 This class represents a character that the player can control throughout the game.
