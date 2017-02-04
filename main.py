@@ -143,6 +143,7 @@ def main():
 	# initialize pygame
 	pygame.init()
 	screenSize = ( 800, 600 )
+	pygame.display.set_caption( 'debugDavis()' )
 	screen = pygame.display.set_mode( screenSize )
 
 	# initialize the fonts
@@ -151,8 +152,6 @@ def main():
 	except:
 		print "Error: fonts unavailable"
 		exitGame()
-	
-	pygame.display.set_caption( 'debugDavis()' )
 	
 	# show loading screen
 	showLoadingScreen( screen )

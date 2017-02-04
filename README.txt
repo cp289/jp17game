@@ -5,11 +5,13 @@ This game is played entirely through the keyboard. Please note that battles are 
 
 To start the game, cd to the top-level game directory and run:
 python main.py
+Then, after the game has loaded, press enter on the start screen option you want.
+Note that if the sounds don't work, open up sounds.py and change all the sound file extensions from ".wav" to ".ogg"
 
 This game was created by:
 Zena Abulhab - Producer/Designer
 Melody Mao - Lead Programmer
-Charles Parham - Lead Sound Artist
+Charles Parham - Lead Sound Artist, Programmer
 Kimberly Ha - Lead Visual Artist
 Fatimah Ali - Lead Quality Assurance Tester
 

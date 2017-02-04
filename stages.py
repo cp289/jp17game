@@ -249,9 +249,6 @@ class Game:
 		self.nameFont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 		self.convoFont = pygame.font.SysFont( "Helvetica", 28, bold=True )
 		
-		# load sound object
-		self.sound = sound
-		
 		# init Conversation object
 		self.initConvo()
 		self.convoNum = 0
@@ -396,7 +393,7 @@ class Game:
 		#initialize stu2
 		otherlist = ( playerS, playerC )
 		namePos = [ 1, 0 ]
-		stu2sprite = pygame.image.load( 'images/OtherSprites/Student2Sprite.png' ).convert_alpha()
+		stu2sprite = pygame.image.load( 'images/OtherSprites/Student3Sprite.png' ).convert_alpha()
 		imglist = [ standlist, walklist, battlelist, attacklist, dielist, otherlist ]
 		self.stu2 = agents.SpeakingCharacter( initpos, playerC, 'Student_2', namePos, stu2sprite )
 		
@@ -1032,7 +1029,8 @@ class Game:
 # 				pass
 		
 		# return to exploration music
-		self.sound.play('explora', -1)
+		if not self.inBossBattle:
+			self.sound.play('explora', -1)
 		
 		players = [self.mel, self.fa, self.zen]
 		if charles == True:
@@ -1189,6 +1187,7 @@ class Game:
 #					self.gameComplete = True
 ###########################################################################
 				if event.key == pygame.K_c:
+					self.sound.play("pop")
 					self.onStatScreen = True
 					self.showStatScreen( charles = self.gotCharles)
 					return # so that characters aren't still drawn over stat screens
@@ -1526,8 +1525,10 @@ class Game:
 									self.selectedEnemyIDX = 0
 									self.enemies[self.selectedEnemyIDX].select()
 							elif event.key == pygame.K_LEFT:
+								self.sound.play("pop")
 								self.dashboard.switchAtk(-1)
 							elif event.key == pygame.K_RIGHT:
+								self.sound.play("pop")
 								self.dashboard.switchAtk(1)
 #################################################################################
 							elif event.key == pygame.K_e: # temp battle win key
@@ -1572,6 +1573,7 @@ class Game:
 									if attacker.time == attacker.maxTime:
 										self.messages.send("Time Is Already Full!",0.5)
 										return
+								self.sound.play("smack")
 						
 								attacker.startAttack() # starts attack animation
 			
@@ -1619,6 +1621,7 @@ class Game:
 						self.leaveBattle( True, charles = self.gotCharles )
 						
 						if self.inBossBattle: # won the boss battle! go to end screen
+							self.sound.play("end")
 							self.enterDialogue() # trigger final congratulatory conversation
 							return
 				
@@ -1672,6 +1675,7 @@ class Game:
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN: # for initial key presses
 				if event.key == pygame.K_c:
+					self.sound.play("pop")
 					self.onStatScreen = False
 					
 					if self.inBattle: # redraw battle screen
@@ -1733,6 +1737,7 @@ class Game:
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_v:
 						#print "UPDATING DIALOGUE"
+						self.sound.play("pop")
 						if self.gameConvo.convoOver != True:
 							#print "STILL MORE TEXT"
 							#draw BG again first
@@ -1781,6 +1786,7 @@ class Game:
 	
 	# sends game into CyberSystem location, triggers dialogue that leads into final boss battle
 	def enterCyberSystem( self ):
+		self.sound.stop( "explora" )
 		self.screen.blit( self.bossBattleBG, ( 0, 0 ) )
 		self.inBossBattle = True
 		self.inStoryBattle = True
@@ -1793,14 +1799,14 @@ class Game:
 	
 	# sends everyone into battle mode and creates final boss
 	def enterBossBattle( self ):
-		self.screen.blit( self.bossBattleBG, ( 0, 0 ) )
+		self.screen.blit( self.bossBattleBG, ( 0, 0 ) )	
+
+		self.sound.stop('explora')
+		# play battle music
+		self.sound.play( "enemy", -1 )
 		
 		# config messages
 		self.messages.setBackground( self.bossBattleBG )
-		
-		# play battle music
-		self.sound.stop('explora')
-		self.sound.play("enemy", -1 )
 		
 		self.inBattle = True
 		self.player.enterBattle( False ) # no one is allowed to flee
@@ -1811,7 +1817,7 @@ class Game:
 		bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 25 )
 		bossBug.totalHP = 9001
 		bossBug.hp = 9001
-		bossBug.atk = 300
+		bossBug.atk = 350
 		#bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 2 ) # just to make testing easier
 		
 		# build list of battle participants
@@ -1841,7 +1847,6 @@ class Game:
 		self.sound.stop( "explora" )
 		self.sound.stop( "battleMusic" )
 		self.sound.stop( "enemy" )
-		self.sound.play("end")
 		
 		allMovesUnlocked = False
 		players = [self.mel, self.fa, self.zen, self.cha]
@@ -1884,14 +1889,9 @@ class Game:
 		victoryList.append( 'Times Fled: ' + str( self.timesFled ) )
 		if allMovesUnlocked == True:
 			victoryList.append('All moves were unlocked! Nice!')
+		else:
+			victoryList.append('Not all moves were unlocked...')
 
 		returnList = [victoryList, melInfo, faInfo, zenInfo, chaInfo]
 
 		return returnList
-
-
-
-
-
-
-

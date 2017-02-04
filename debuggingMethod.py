@@ -169,7 +169,7 @@ class ReadCode(DebuggingMethod):
 # Level 5
 class LookTime(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Look at the Clock", 3, 500)
+		DebuggingMethod.__init__(self,"Look at the Clock", 3, 400)
 		self.desc = "Does more damage the more time you have."
 		self.game = game
 		
@@ -186,7 +186,7 @@ class LookTime(DebuggingMethod):
 # Level 6
 class UseInternet(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Use the Internet", 5, 150)
+		DebuggingMethod.__init__(self,"Use the Internet", 4, 300)
 		self.desc = "Damage bug, but take damage if you get distracted."
 		self.game = game
 		
@@ -204,7 +204,7 @@ class UseInternet(DebuggingMethod):
 # Level 7
 class CommentLines(DebuggingMethod):
 	def __init__(self,game):
-		DebuggingMethod.__init__(self,"Comment Out Lines", 6, 700)
+		DebuggingMethod.__init__(self,"Comment Out Lines", 6, 500)
 		self.desc = "Does high damage and has high critical hit chance."
 		self.game = game
 		

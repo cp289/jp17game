@@ -20,15 +20,17 @@ class Sound:
 		
 		# Load a list of sound files in the sounds/ directory
 		self.battle=self.load([
-			"battleMusic.ogg",
-			"enemy.ogg",
+			"battleMusic.wav",
+			"enemy.wav",
 			"explora.wav",
-			"bonk.ogg",
-			"zong.ogg",
-			"pew.ogg",
-			"start.ogg",
-			"win.ogg",
-			"end.ogg"
+			"bonk.wav",
+			"zong.wav",
+			"pew.wav",
+			"start.wav",
+			"win.wav",
+			"end.wav",
+			"pop.wav",
+			"smack.wav"
 		])
 	
 	# Loads list of music files in the sounds/ directory
