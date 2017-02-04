@@ -214,7 +214,7 @@ class CommentLines(DebuggingMethod):
 		if random.random() < prob+((1-prob)*c.acc-prob*e.spd)/(1000):
 			self.enemyDamage(e, self.damage + (0.5*c.atk - 0.5*e.dfn)/1000)
 			#critical hit chance; attacks again
-			if random.random() < 0.5+(c.acc-e.spd)/(2*1000):
+			if random.random() < 0.4:
 				self.enemyDamage(e, self.damage + self.damage*(0.5*c.atk - 0.5*e.dfn)/1000)
 				self.game.messages.send("Critical Hit!",0.5)
 		else:

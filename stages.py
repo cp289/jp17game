@@ -777,12 +777,12 @@ class Game:
 		self.macLabStage.addDoor( doorToHallway )
 		
 		# create walls
-		lWall = pygame.Surface( ( 5, self.macLabStage.height ) )
+		lWall = pygame.Surface( ( 10, self.macLabStage.height ) )
 		lWall.set_alpha( 0 ) # set image transparency
 		leftWall = agents.Thing( ( -5, 0 ), lWall )
 		self.macLabStage.addThing( leftWall )
 		
-		rWall = pygame.Surface( ( 5, self.macLabStage.height ) )
+		rWall = pygame.Surface( ( 10, self.macLabStage.height ) )
 		rWall.set_alpha( 0 ) # set image transparency
 		rightWall = agents.Thing( ( self.macLabStage.width - 5, 0 ), rWall )
 		self.macLabStage.addThing( rightWall )
@@ -875,15 +875,15 @@ class Game:
 		self.macLabStage.addThing( bottomHalfTable2 )
 
 		# mac monitor that sticks out in bottom row of tables
-		macMonDim = ( 180 * scale, 400 * scale )
+		macMonDim = ( 280 * scale, 400 * scale )
 		macMonPos = ( 2400 * scale, 3050 * scale )
 		macMonSur = pygame.Surface( macMonDim )
 		macMonitor = agents.Thing( macMonPos, macMonSur )
 		self.macLabStage.addThing( macMonitor )
 
 		# black box in left corner
-		blackBoxDim = ( 340 * scale, 520 * scale )
-		blackBoxPos = ( 0 * scale, 3130 * scale )
+		blackBoxDim = ( 380 * scale, 360 * scale )
+		blackBoxPos = ( 0 * scale, 3140 * scale )
 		blackBoxSur = pygame.Surface( blackBoxDim )
 		blackBox = agents.Thing( blackBoxPos, blackBoxSur )
 		self.macLabStage.addThing( blackBox )
@@ -898,7 +898,8 @@ class Game:
 		#self.camera.topleft = 2450 * self.stage.scale, 2850 * self.stage.scale # for scale 0.5
 		#initPos = ( 3900 * self.stage.scale, 3672 * self.stage.scale )
 		
-		self.camera.topleft = 50 * self.stage.scale, 100 * self.stage.scale # for scale 0.4
+		#self.camera.topleft = 50 * self.stage.scale, 100 * self.stage.scale # for scale 0.4
+		self.camera.topleft = 0, 0
 		initPos = ( 275 * self.stage.scale, 500 * self.stage.scale )
 			
 		self.player.setStagePos( initPos[0], initPos[1] )
@@ -1363,7 +1364,10 @@ class Game:
 			eraseRect = target.battleRect.copy()
 			eraseRect.width += 12
 			eraseRect.height += 12
-			self.stage.fillBattleBG( self.screen, eraseRect )
+			if not self.inBossBattle:
+				self.stage.fillBattleBG( self.screen, eraseRect )
+			else:
+				self.fillBossBattleBG( eraseRect )
 			self.refresh.append( eraseRect )
 			
 			target.die() # start target's death animation
@@ -1401,10 +1405,10 @@ class Game:
 	def showReplayScreen( self ):
 		self.screen.fill( blue )
 		
-		text = self.bigFont.render( 'YOU LOST.', True, white )
-		text2 = self.bigFont.render( 'PRESS V TO REPLAY.', True, white )
-		self.screen.blit( text, ( 200, 200 ) )
-		self.screen.blit( text2, ( 200, 300 ) )
+		text = self.smallFont.render( 'YOU LOST.', True, white )
+		text2 = self.smallFont.render( 'PRESS V TO REPLAY.', True, white )
+		self.screen.blit( text, ( 100, 100 ) )
+		self.screen.blit( text2, ( 100, 120 ) )
 		
 		pygame.display.update()
 	
@@ -1416,7 +1420,11 @@ class Game:
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_v:
 						replay = True
-						self.enterBattle( False, self.gotCharles )
+						
+						if self.inBossBattle:
+							self.enterBossBattle()
+						else:
+							self.enterBattle( self.gotCharles, False )
 				if event.type == pygame.QUIT:
 					exitGame()
 	
@@ -1429,7 +1437,7 @@ class Game:
 				# check for leveling up
 				if chara.xp >= chara.level * 100:
 					chara.levelUp(self)
-					print 'leveled up', chara.name, 'to level', chara.level
+					#print 'leveled up', chara.name, 'to level', chara.level
 
 	
 	# parses keyboard input for battle mode and updates screen contents
@@ -1615,8 +1623,8 @@ class Game:
 							return
 				
 						self.stage.addBattle()
-						if self.stage.completed():
-							print 'stage', self.stage.name, 'has been completed'
+# 						if self.stage.completed():
+# 							print 'stage', self.stage.name, 'has been completed'
 		
 			# if it's an enemy's turn, have it attack
 			if not playerTurn:
@@ -1785,6 +1793,7 @@ class Game:
 	
 	# sends everyone into battle mode and creates final boss
 	def enterBossBattle( self ):
+		self.screen.blit( self.bossBattleBG, ( 0, 0 ) )
 		
 		# config messages
 		self.messages.setBackground( self.bossBattleBG )
@@ -1794,7 +1803,7 @@ class Game:
 		self.sound.play("enemy", -1 )
 		
 		self.inBattle = True
-		self.player.enterBattle( False ) # no one is allowed to flree
+		self.player.enterBattle( False ) # no one is allowed to flee
 		self.fa.enterBattle( False )
 		self.zen.enterBattle( False )
 		self.cha.enterBattle( False )
@@ -1802,6 +1811,7 @@ class Game:
 		bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 25 )
 		bossBug.totalHP = 9001
 		bossBug.hp = 9001
+		bossBug.atk = 300
 		#bossBug = agents.Enemy( ( 10, 10 ), self.bossBugIMG, 'final boss', 2 ) # just to make testing easier
 		
 		# build list of battle participants
@@ -1873,7 +1883,7 @@ class Game:
 		victoryList.append( 'Battles Lost: ' + str( self.battlesLost ) )
 		victoryList.append( 'Times Fled: ' + str( self.timesFled ) )
 		if allMovesUnlocked == True:
-			victorylist.append('All moves were unlocked! Nice!')
+			victoryList.append('All moves were unlocked! Nice!')
 
 		returnList = [victoryList, melInfo, faInfo, zenInfo, chaInfo]
 

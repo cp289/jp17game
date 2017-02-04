@@ -86,7 +86,7 @@ def showInstructionScreen( screen ):
 def showEndScreen( screen, game ):
 	screen.fill( green )
 
-	font = game.bigFont
+	font = game.nameFont
  
 	# organize info
 	records = game.reportRecords() 

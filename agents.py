@@ -382,6 +382,10 @@ class PlayableCharacter( Character ):
 		self.resetGhost()
 		
 		# sprite images
+		self.imgFront = None
+		self.imgBack = None
+		self.imgLeft = None
+		self.imgRight = None
 		standing = imglist[0]
 		if standing != None:
 			self.imgFront = standing[0]
@@ -729,11 +733,8 @@ class PlayableCharacter( Character ):
 		self.battleAttacking.play()
 	
 	# reduces the PlayableCharacter's HP by the given amount
-	def takeDamage( self, amt ):
-		self.hp -= amt
-		
-		if self.hp < 0: # if the damage would make the HP negative, just make it 0
-			self.hp = 0
+	def takeDamage( self, amt, cannotDie = False ):
+		Character.takeDamage( self, amt, cannotDie )
 		
 		self.takingDamage = 5
 		self.battleAnim = self.battleDmg
@@ -978,6 +979,9 @@ class PlayableCharacter( Character ):
 				self.walkingAnim.blit( screen, self.pos )
 			
 			else: # otherwise show standing image
+				if self.imgFront == None: # do not draw non-walkable characters if outside battle
+					return
+				
 				if self.orientation == front:
 					self.image = self.imgFront
 				elif self.orientation == back:
